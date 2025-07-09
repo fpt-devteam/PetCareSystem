@@ -1,7 +1,23 @@
+using VetClinic.Repository;
+using VetClinic.Service;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddRazorPages();
+
+// Add session support
+builder.Services.AddDistributedMemoryCache();
+builder.Services.AddSession(options =>
+{
+    options.IdleTimeout = TimeSpan.FromMinutes(30);
+    options.Cookie.HttpOnly = true;
+    options.Cookie.IsEssential = true;
+});
+
+// Add 3-layer architecture services
+builder.Services.AddRepository(builder.Configuration);
+builder.Services.AddServices();
 
 var app = builder.Build();
 
@@ -18,6 +34,7 @@ app.UseStaticFiles();
 
 app.UseRouting();
 
+app.UseSession();
 app.UseAuthorization();
 
 app.MapRazorPages();

@@ -215,7 +215,7 @@ FodyWeavers.xsd
 *.sln.iml
 
 # Entity Framework Core
-Migrations/
+
 
 # Environment files
 .env
