@@ -1,0 +1,208 @@
+@page
+@model IndexModel
+@{
+    ViewData["Title"] = "My Profile";
+}
+
+<div class="container">
+    <div class="row">
+        <div class="col-12">
+            <h2><i class="fas fa-user-circle text-primary me-2"></i>My Profile</h2>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="/">Dashboard</a></li>
+                    <li class="breadcrumb-item active">My Profile</li>
+                </ol>
+            </nav>
+        </div>
+    </div>
+
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <!-- Profile Overview Card -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <div class="d-flex align-items-center">
+                        <div class="me-3">
+                            <div class="avatar-circle">
+                                <i class="fas fa-user fa-2x text-primary"></i>
+                            </div>
+                        </div>
+                        <div>
+                            <h5 class="mb-0">@Model.UserProfile.FullName</h5>
+                            <small class="text-muted">
+                                <i class="fas fa-id-badge me-1"></i>@Model.UserProfile.Role
+                            </small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Profile Edit Form -->
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="fas fa-edit me-2"></i>Edit Profile Information</h5>
+                </div>
+                <div class="card-body">
+                    <form method="post">
+                        <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
+
+                        <!-- Personal Information -->
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <h6 class="text-muted mb-3">
+                                    <i class="fas fa-user me-1"></i>Personal Information
+                                </h6>
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-12">
+                                <label asp-for="UserProfile.FullName" class="form-label">Full Name</label>
+                                <input asp-for="UserProfile.FullName" class="form-control" />
+                                <span asp-validation-for="UserProfile.FullName" class="text-danger small"></span>
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label asp-for="UserProfile.Email" class="form-label">Email Address</label>
+                                <input asp-for="UserProfile.Email" type="email" class="form-control" />
+                                <span asp-validation-for="UserProfile.Email" class="text-danger small"></span>
+                            </div>
+                            <div class="col-md-6">
+                                <label asp-for="UserProfile.PhoneNumber" class="form-label">Phone Number</label>
+                                <input asp-for="UserProfile.PhoneNumber" type="tel" class="form-control" 
+                                       placeholder="(123) 456-7890" />
+                                <span asp-validation-for="UserProfile.PhoneNumber" class="text-danger small"></span>
+                            </div>
+                        </div>
+
+                        <!-- Address Information -->
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <h6 class="text-muted mb-3 mt-4">
+                                    <i class="fas fa-map-marker-alt me-1"></i>Address Information
+                                </h6>
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-12">
+                                <label asp-for="UserProfile.Address" class="form-label">Address</label>
+                                <textarea asp-for="UserProfile.Address" class="form-control" rows="3" 
+                                          placeholder="Enter your full address..."></textarea>
+                                <span asp-validation-for="UserProfile.Address" class="text-danger small"></span>
+                            </div>
+                        </div>
+
+                        <!-- Account Information (Read-only) -->
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <h6 class="text-muted mb-3 mt-4">
+                                    <i class="fas fa-shield-alt me-1"></i>Account Information
+                                </h6>
+                            </div>
+                        </div>
+
+                        <div class="row mb-4">
+                            <div class="col-md-6">
+                                <label class="form-label">Role</label>
+                                <input value="@Model.UserProfile.Role" class="form-control" readonly />
+                                <div class="form-text">
+                                    <i class="fas fa-info-circle me-1"></i>
+                                    Contact an administrator to change your role.
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Action Buttons -->
+                        <div class="row">
+                            <div class="col-12">
+                                <div class="d-flex justify-content-between">
+                                    <a href="/" class="btn btn-outline-secondary">
+                                        <i class="fas fa-arrow-left me-1"></i>Back to Dashboard
+                                    </a>
+                                    <div>
+                                        <button type="button" class="btn btn-outline-warning me-2" onclick="resetForm()">
+                                            <i class="fas fa-undo me-1"></i>Reset
+                                        </button>
+                                        <button type="submit" class="btn btn-primary">
+                                            <i class="fas fa-save me-1"></i>Save Changes
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Security Card -->
+            <div class="card mt-4">
+                <div class="card-header">
+                    <h6 class="mb-0"><i class="fas fa-lock me-2"></i>Security & Privacy</h6>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6><i class="fas fa-key me-1"></i>Password</h6>
+                            <p class="text-muted small mb-2">Keep your account secure with a strong password.</p>
+                            <a href="/Account/ChangePassword" class="btn btn-outline-warning btn-sm">
+                                <i class="fas fa-edit me-1"></i>Change Password
+                            </a>
+                        </div>
+                        <div class="col-md-6">
+                            <h6><i class="fas fa-user-shield me-1"></i>Account Status</h6>
+                            <p class="text-muted small mb-2">Your account is active and verified.</p>
+                            <span class="badge bg-success">
+                                <i class="fas fa-check me-1"></i>Active
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    
+    <script>
+        function resetForm() {
+            if (confirm('Are you sure you want to reset all changes?')) {
+                location.reload();
+            }
+        }
+
+        // Format phone number as user types
+        document.addEventListener('DOMContentLoaded', function() {
+            const phoneInput = document.querySelector('input[name="UserProfile.PhoneNumber"]');
+            if (phoneInput) {
+                phoneInput.addEventListener('input', function(e) {
+                    let value = e.target.value.replace(/\D/g, '');
+                    if (value.length >= 6) {
+                        value = value.replace(/(\d{3})(\d{3})(\d{4})/, '($1) $2-$3');
+                    } else if (value.length >= 3) {
+                        value = value.replace(/(\d{3})(\d{0,3})/, '($1) $2');
+                    }
+                    e.target.value = value;
+                });
+            }
+        });
+    </script>
+}
+
+<style>
+    .avatar-circle {
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+    }
+</style> 

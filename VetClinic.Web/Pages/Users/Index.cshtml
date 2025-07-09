@@ -1,0 +1,339 @@
+@page
+@model VetClinic.Web.Pages.Users.IndexModel
+@{
+    ViewData["Title"] = "Users";
+}
+
+<div class="container-fluid">
+    <!-- Success/Error Messages -->
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="fas fa-check-circle"></i> @TempData["SuccessMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="fas fa-exclamation-triangle"></i> @TempData["ErrorMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    <!-- Page Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <h2><i class="fas fa-users text-primary me-2"></i>Users Management</h2>
+                @if (ViewSessionHelper.IsInAnyRole(ViewContext.HttpContext.Session, "Admin", "Manager"))
+                {
+                    <a href="/Users/Create" class="btn btn-primary">
+                        <i class="fas fa-user-plus me-1"></i>Add New User
+                    </a>
+                }
+            </div>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="/">Dashboard</a></li>
+                    <li class="breadcrumb-item active">Users</li>
+                </ol>
+            </nav>
+        </div>
+    </div>
+
+    <!-- User Statistics -->
+    @if (ViewSessionHelper.IsInAnyRole(ViewContext.HttpContext.Session, "Admin", "Manager"))
+    {
+        <div class="row mb-4">
+            <div class="col-md-3">
+                <div class="card text-center">
+                    <div class="card-body">
+                        <i class="fas fa-users fa-2x text-primary mb-2"></i>
+                        <h4>@Model.Users.Count()</h4>
+                        <small class="text-muted">Total Users</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card text-center">
+                    <div class="card-body">
+                        <i class="fas fa-user-friends fa-2x text-success mb-2"></i>
+                        <h4>@Model.Users.Count(u => u.Role == "Customer")</h4>
+                        <small class="text-muted">Customers</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card text-center">
+                    <div class="card-body">
+                        <i class="fas fa-user-md fa-2x text-info mb-2"></i>
+                        <h4>@Model.Users.Count(u => u.Role == "Doctor")</h4>
+                        <small class="text-muted">Doctors</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card text-center">
+                    <div class="card-body">
+                        <i class="fas fa-user-shield fa-2x text-warning mb-2"></i>
+                        <h4>@Model.Users.Count(u => u.Role == "Admin" || u.Role == "Manager" || u.Role == "Staff")</h4>
+                        <small class="text-muted">Staff</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+
+    <!-- Search and Filters -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body">
+                    <form method="get" class="row g-3">
+                        <div class="col-md-4">
+                            <label for="searchTerm" class="form-label">
+                                <i class="fas fa-search me-1"></i>Search Users
+                            </label>
+                            <input asp-for="SearchTerm" class="form-control" 
+                                   placeholder="Search by name or email..." />
+                        </div>
+                        <div class="col-md-3">
+                            <label for="roleFilter" class="form-label">
+                                <i class="fas fa-filter me-1"></i>Filter by Role
+                            </label>
+                            <select asp-for="RoleFilter" class="form-select">
+                                <option value="">All Roles</option>
+                                <option value="Customer">Customers</option>
+                                <option value="Doctor">Doctors</option>
+                                <option value="Manager">Managers</option>
+                                <option value="Admin">Admins</option>
+                                <option value="Staff">Staff</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label for="statusFilter" class="form-label">
+                                <i class="fas fa-toggle-on me-1"></i>Status
+                            </label>
+                            <select asp-for="StatusFilter" class="form-select">
+                                <option value="">All Status</option>
+                                <option value="true">Active</option>
+                                <option value="false">Inactive</option>
+                            </select>
+                        </div>
+                        <div class="col-md-2">
+                            <label class="form-label">&nbsp;</label>
+                            <div class="d-flex gap-2">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-search"></i>
+                                </button>
+                                <a href="/Users" class="btn btn-outline-secondary">
+                                    <i class="fas fa-times"></i>
+                                </a>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Users Table -->
+    <div class="row">
+        <div class="col-12">
+            @if (Model.Users.Any())
+            {
+                <div class="card">
+                    <div class="card-body p-0">
+                        <div class="table-responsive">
+                            <table class="table table-hover mb-0">
+                                <thead class="table-dark">
+                                    <tr>
+                                        <th><i class="fas fa-user me-1"></i>User</th>
+                                        <th><i class="fas fa-envelope me-1"></i>Contact</th>
+                                        <th><i class="fas fa-id-badge me-1"></i>Role</th>
+                                        <th><i class="fas fa-calendar me-1"></i>Joined</th>
+                                        <th><i class="fas fa-clock me-1"></i>Last Login</th>
+                                        <th><i class="fas fa-toggle-on me-1"></i>Status</th>
+                                        @if (ViewSessionHelper.IsInAnyRole(ViewContext.HttpContext.Session, "Admin", "Manager"))
+                                        {
+                                            <th><i class="fas fa-cogs me-1"></i>Actions</th>
+                                        }
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var user in Model.Users)
+                                    {
+                                        <tr>
+                                            <td>
+                                                <div class="d-flex align-items-center">
+                                                    <div class="avatar-sm me-3">
+                                                        <i class="fas fa-user fa-lg"></i>
+                                                    </div>
+                                                    <div>
+                                                        <span class="fw-bold">@user.FullName</span><br />
+                                                        <small class="text-muted">ID: @user.Id</small>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <div>
+                                                    <span class="fw-bold">@user.Email</span><br />
+                                                    @if (!string.IsNullOrEmpty(user.PhoneNumber))
+                                                    {
+                                                        <small class="text-muted">
+                                                            <i class="fas fa-phone me-1"></i>@user.PhoneNumber
+                                                        </small>
+                                                    }
+                                                </div>
+                                            </td>
+                                            <td>
+                                                @{
+                                                    var badgeClass = user.Role switch
+                                                    {
+                                                        "Admin" => "bg-danger",
+                                                        "Manager" => "bg-warning",
+                                                        "Doctor" => "bg-success",
+                                                        "Staff" => "bg-info",
+                                                        _ => "bg-primary"
+                                                    };
+                                                }
+                                                <span class="badge @badgeClass">
+                                                    <i class="fas fa-user-tag me-1"></i>@user.Role
+                                                </span>
+                                            </td>
+                                            <td>
+                                                <span class="fw-bold">@user.CreatedDate.ToString("MMM dd, yyyy")</span><br />
+                                                <small class="text-muted">@user.CreatedDate.ToString("hh:mm tt")</small>
+                                            </td>
+                                            <td>
+                                                @if (user.LastLoginDate.HasValue)
+                                                {
+                                                    <span class="fw-bold">@user.LastLoginDate.Value.ToString("MMM dd, yyyy")</span><br />
+                                                    <small class="text-muted">@user.LastLoginDate.Value.ToString("hh:mm tt")</small>
+                                                }
+                                                else
+                                                {
+                                                    <span class="text-muted">Never</span>
+                                                }
+                                            </td>
+                                            <td>
+                                                @if (user.IsActive)
+                                                {
+                                                    <span class="badge bg-success">
+                                                        <i class="fas fa-check me-1"></i>Active
+                                                    </span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="badge bg-secondary">
+                                                        <i class="fas fa-times me-1"></i>Inactive
+                                                    </span>
+                                                }
+                                            </td>
+                                            @if (ViewSessionHelper.IsInAnyRole(ViewContext.HttpContext.Session, "Admin", "Manager"))
+                                            {
+                                                <td>
+                                                    <div class="btn-group" role="group">
+                                                        <a href="/Users/Details/@user.Id" class="btn btn-sm btn-outline-primary" title="View Details">
+                                                            <i class="fas fa-eye"></i>
+                                                        </a>
+                                                        @if (user.Id != ViewSessionHelper.GetUserId(ViewContext.HttpContext.Session))
+                                                        {
+                                                            <a href="/Users/Edit/@user.Id" class="btn btn-sm btn-outline-warning" title="Edit User">
+                                                                <i class="fas fa-edit"></i>
+                                                            </a>
+                                                            <button type="button" class="btn btn-sm btn-outline-danger" 
+                                                                    onclick="deleteUser(@user.Id, '@user.FullName')" title="Delete User">
+                                                                <i class="fas fa-trash"></i>
+                                                            </button>
+                                                        }
+                                                        else
+                                                        {
+                                                            <span class="badge bg-info ms-1">You</span>
+                                                        }
+                                                    </div>
+                                                </td>
+                                            }
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            }
+            else
+            {
+                <div class="card">
+                    <div class="card-body text-center py-5">
+                        <i class="fas fa-users fa-3x text-muted mb-3"></i>
+                        <h5 class="text-muted">No Users Found</h5>
+                        <p class="text-muted">
+                            @if (!string.IsNullOrEmpty(Model.SearchTerm) || !string.IsNullOrEmpty(Model.RoleFilter))
+                            {
+                                <span>No users match your search criteria.</span>
+                            }
+                            else
+                            {
+                                <span>No users have been registered yet.</span>
+                            }
+                        </p>
+                        @if (ViewSessionHelper.IsInAnyRole(ViewContext.HttpContext.Session, "Admin", "Manager"))
+                        {
+                            <a href="/Users/Create" class="btn btn-primary">
+                                <i class="fas fa-user-plus me-1"></i>Add First User
+                            </a>
+                        }
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+@if (ViewSessionHelper.IsInAnyRole(ViewContext.HttpContext.Session, "Admin", "Manager"))
+{
+    <!-- Delete User Form -->
+    <form id="deleteForm" method="post" style="display: none;">
+        <input name="userId" id="deleteUserId" type="hidden" />
+        <input name="handler" value="Delete" type="hidden" />
+    </form>
+}
+
+@section Scripts {
+    <script>
+        function deleteUser(userId, userName) {
+            if (confirm(`Are you sure you want to delete user "${userName}"? This action cannot be undone.`)) {
+                document.getElementById('deleteUserId').value = userId;
+                document.getElementById('deleteForm').submit();
+            }
+        }
+
+        // Auto-submit search form on Enter key
+        document.addEventListener('DOMContentLoaded', function() {
+            const searchInput = document.querySelector('input[name="SearchTerm"]');
+            if (searchInput) {
+                searchInput.addEventListener('keypress', function(e) {
+                    if (e.key === 'Enter') {
+                        e.preventDefault();
+                        this.form.submit();
+                    }
+                });
+            }
+        });
+    </script>
+}
+
+<style>
+    .avatar-sm {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+    }
+</style> 

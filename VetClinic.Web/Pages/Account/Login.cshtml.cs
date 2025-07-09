@@ -49,15 +49,17 @@ namespace VetClinic.Web.Pages.Account
                 return Page();
             }
 
-            try
+                        try
             {
                 var user = await _authService.LoginAsync(Input.Email, Input.Password);
                 if (user != null)
                 {
-                    // Set session or authentication cookie
+                    // Set session variables for authentication
                     HttpContext.Session.SetInt32("UserId", user.Id);
                     HttpContext.Session.SetString("UserName", user.FullName);
+                    HttpContext.Session.SetString("UserEmail", user.Email);
                     HttpContext.Session.SetString("UserRole", user.Role);
+                    HttpContext.Session.SetString("IsAuthenticated", "true");
 
                     TempData["SuccessMessage"] = $"Welcome back, {user.FullName}!";
                     
@@ -72,7 +74,7 @@ namespace VetClinic.Web.Pages.Account
                     return Page();
                 }
             }
-            catch (Exception ex)
+            catch
             {
                 ModelState.AddModelError(string.Empty, "An error occurred during login. Please try again.");
                 return Page();

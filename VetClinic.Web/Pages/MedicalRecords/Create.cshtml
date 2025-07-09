@@ -1,0 +1,303 @@
+@page
+@model CreateModel
+@{
+    ViewData["Title"] = "Create Medical Record";
+}
+
+<div class="container">
+    <div class="row">
+        <div class="col-12">
+            <h2><i class="fas fa-file-medical-alt text-success me-2"></i>Create Medical Record</h2>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="/">Dashboard</a></li>
+                    <li class="breadcrumb-item"><a href="/MedicalRecords">Medical Records</a></li>
+                    <li class="breadcrumb-item active">Create Record</li>
+                </ol>
+            </nav>
+        </div>
+    </div>
+
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="fas fa-notes-medical me-2"></i>Medical Record Information</h5>
+                </div>
+                <div class="card-body">
+                    <form method="post">
+                        <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
+
+                        <!-- Basic Information -->
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <h6 class="text-muted mb-3">
+                                    <i class="fas fa-info-circle me-1"></i>Basic Information
+                                </h6>
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-4">
+                                <label asp-for="MedicalRecord.AppointmentId" class="form-label">
+                                    <i class="fas fa-calendar-check me-1"></i>Appointment
+                                </label>
+                                <select asp-for="MedicalRecord.AppointmentId" asp-items="Model.AppointmentSelectList" 
+                                        class="form-select" onchange="loadAppointmentDetails()">
+                                    <option value="">-- Select Appointment --</option>
+                                </select>
+                                <span asp-validation-for="MedicalRecord.AppointmentId" class="text-danger small"></span>
+                            </div>
+                            <div class="col-md-4">
+                                <label asp-for="MedicalRecord.PetId" class="form-label">
+                                    <i class="fas fa-paw me-1"></i>Pet
+                                </label>
+                                <select asp-for="MedicalRecord.PetId" asp-items="Model.PetSelectList" class="form-select">
+                                    <option value="">-- Select Pet --</option>
+                                </select>
+                                <span asp-validation-for="MedicalRecord.PetId" class="text-danger small"></span>
+                            </div>
+                            <div class="col-md-4">
+                                <label asp-for="MedicalRecord.DoctorId" class="form-label">
+                                    <i class="fas fa-user-md me-1"></i>Doctor
+                                </label>
+                                <select asp-for="MedicalRecord.DoctorId" asp-items="Model.DoctorSelectList" class="form-select">
+                                    <option value="">-- Select Doctor --</option>
+                                </select>
+                                <span asp-validation-for="MedicalRecord.DoctorId" class="text-danger small"></span>
+                            </div>
+                        </div>
+
+                        <div class="row mb-4">
+                            <div class="col-md-6">
+                                <label asp-for="MedicalRecord.VisitDate" class="form-label">
+                                    <i class="fas fa-calendar-alt me-1"></i>Visit Date & Time
+                                </label>
+                                <input asp-for="MedicalRecord.VisitDate" type="datetime-local" class="form-control" />
+                                <span asp-validation-for="MedicalRecord.VisitDate" class="text-danger small"></span>
+                            </div>
+                        </div>
+
+                        <!-- Medical Information -->
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <h6 class="text-muted mb-3 mt-4">
+                                    <i class="fas fa-stethoscope me-1"></i>Medical Information
+                                </h6>
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-12">
+                                <label asp-for="MedicalRecord.Diagnosis" class="form-label">
+                                    <i class="fas fa-diagnoses me-1"></i>Diagnosis
+                                </label>
+                                <textarea asp-for="MedicalRecord.Diagnosis" class="form-control" rows="3" 
+                                          placeholder="Enter the diagnosis based on examination and symptoms..."></textarea>
+                                <span asp-validation-for="MedicalRecord.Diagnosis" class="text-danger small"></span>
+                                <div class="form-text">
+                                    <i class="fas fa-info-circle me-1"></i>
+                                    Provide a clear and concise diagnosis
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-12">
+                                <label asp-for="MedicalRecord.TreatmentNotes" class="form-label">
+                                    <i class="fas fa-clipboard-list me-1"></i>Treatment Notes
+                                </label>
+                                <textarea asp-for="MedicalRecord.TreatmentNotes" class="form-control" rows="5" 
+                                          placeholder="Detailed treatment plan, procedures performed, observations, follow-up instructions..."></textarea>
+                                <span asp-validation-for="MedicalRecord.TreatmentNotes" class="text-danger small"></span>
+                                <div class="form-text">
+                                    <i class="fas fa-info-circle me-1"></i>
+                                    Include detailed treatment plan, procedures, and observations
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <label asp-for="MedicalRecord.Prescription" class="form-label">
+                                    <i class="fas fa-pills me-1"></i>Prescription (Optional)
+                                </label>
+                                <textarea asp-for="MedicalRecord.Prescription" class="form-control" rows="3" 
+                                          placeholder="Medications prescribed, dosage instructions, duration..."></textarea>
+                                <span asp-validation-for="MedicalRecord.Prescription" class="text-danger small"></span>
+                                <div class="form-text">
+                                    <i class="fas fa-info-circle me-1"></i>
+                                    Include medication names, dosages, frequency, and duration
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Quick Templates -->
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <h6 class="text-muted mb-3">
+                                    <i class="fas fa-magic me-1"></i>Quick Templates
+                                </h6>
+                                <div class="btn-group-vertical d-md-none w-100" role="group">
+                                    <button type="button" class="btn btn-outline-info btn-sm mb-1" onclick="loadTemplate('checkup')">
+                                        <i class="fas fa-stethoscope me-1"></i>Regular Checkup
+                                    </button>
+                                    <button type="button" class="btn btn-outline-success btn-sm mb-1" onclick="loadTemplate('vaccination')">
+                                        <i class="fas fa-syringe me-1"></i>Vaccination
+                                    </button>
+                                    <button type="button" class="btn btn-outline-warning btn-sm mb-1" onclick="loadTemplate('surgery')">
+                                        <i class="fas fa-cut me-1"></i>Surgery
+                                    </button>
+                                    <button type="button" class="btn btn-outline-danger btn-sm" onclick="loadTemplate('emergency')">
+                                        <i class="fas fa-ambulance me-1"></i>Emergency
+                                    </button>
+                                </div>
+                                <div class="btn-group d-none d-md-inline-flex" role="group">
+                                    <button type="button" class="btn btn-outline-info btn-sm" onclick="loadTemplate('checkup')">
+                                        <i class="fas fa-stethoscope me-1"></i>Regular Checkup
+                                    </button>
+                                    <button type="button" class="btn btn-outline-success btn-sm" onclick="loadTemplate('vaccination')">
+                                        <i class="fas fa-syringe me-1"></i>Vaccination
+                                    </button>
+                                    <button type="button" class="btn btn-outline-warning btn-sm" onclick="loadTemplate('surgery')">
+                                        <i class="fas fa-cut me-1"></i>Surgery
+                                    </button>
+                                    <button type="button" class="btn btn-outline-danger btn-sm" onclick="loadTemplate('emergency')">
+                                        <i class="fas fa-ambulance me-1"></i>Emergency
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Action Buttons -->
+                        <div class="row">
+                            <div class="col-12">
+                                <div class="d-flex justify-content-between">
+                                    <a href="/MedicalRecords" class="btn btn-outline-secondary">
+                                        <i class="fas fa-arrow-left me-1"></i>Back to Medical Records
+                                    </a>
+                                    <div>
+                                        <button type="button" class="btn btn-outline-warning me-2" onclick="resetForm()">
+                                            <i class="fas fa-undo me-1"></i>Reset
+                                        </button>
+                                        <button type="submit" class="btn btn-success">
+                                            <i class="fas fa-save me-1"></i>Create Medical Record
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Medical Guidelines Card -->
+            <div class="card mt-4">
+                <div class="card-header">
+                    <h6 class="mb-0"><i class="fas fa-graduation-cap me-2"></i>Medical Record Guidelines</h6>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6><i class="fas fa-check-circle me-1"></i>Best Practices</h6>
+                            <ul class="list-unstyled small">
+                                <li>• Be specific and accurate in diagnosis</li>
+                                <li>• Include all relevant symptoms and findings</li>
+                                <li>• Document treatment response</li>
+                                <li>• Note any adverse reactions</li>
+                            </ul>
+                        </div>
+                        <div class="col-md-6">
+                            <h6><i class="fas fa-pills me-1"></i>Prescription Guidelines</h6>
+                            <ul class="list-unstyled small">
+                                <li>• Include generic and brand names</li>
+                                <li>• Specify exact dosage and frequency</li>
+                                <li>• Include duration of treatment</li>
+                                <li>• Add special instructions</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    
+    <script>
+        // Template data
+        const templates = {
+            checkup: {
+                diagnosis: "Routine health examination - Normal findings",
+                treatment: "• General physical examination performed\n• Vital signs checked\n• Weight and temperature recorded\n• No abnormal findings observed\n• Recommend regular exercise and balanced diet\n• Schedule next checkup in 6 months",
+                prescription: ""
+            },
+            vaccination: {
+                diagnosis: "Routine vaccination",
+                treatment: "• Vaccination administered as scheduled\n• Patient tolerated procedure well\n• No immediate adverse reactions observed\n• Monitor for any reactions over next 24-48 hours\n• Record updated in vaccination history",
+                prescription: "Monitor for any allergic reactions. Contact clinic if unusual symptoms occur."
+            },
+            surgery: {
+                diagnosis: "Post-surgical follow-up",
+                treatment: "• Surgery completed successfully\n• Incision site clean and healing well\n• Patient recovering as expected\n• Post-operative care instructions provided\n• Follow-up appointment scheduled",
+                prescription: "Pain medication as prescribed. Antibiotics for infection prevention. Keep incision site clean and dry."
+            },
+            emergency: {
+                diagnosis: "Emergency treatment required",
+                treatment: "• Emergency treatment administered\n• Patient stabilized\n• Immediate intervention successful\n• Monitor closely for next 24 hours\n• Additional follow-up may be required",
+                prescription: "Emergency medications administered. Follow-up medications as prescribed."
+            }
+        };
+
+        function loadTemplate(type) {
+            const template = templates[type];
+            if (template) {
+                document.getElementById('MedicalRecord_Diagnosis').value = template.diagnosis;
+                document.getElementById('MedicalRecord_TreatmentNotes').value = template.treatment;
+                document.getElementById('MedicalRecord_Prescription').value = template.prescription;
+                
+                // Visual feedback
+                const buttons = document.querySelectorAll('.btn-group .btn, .btn-group-vertical .btn');
+                buttons.forEach(btn => btn.classList.remove('active'));
+                event.target.classList.add('active');
+            }
+        }
+
+        function resetForm() {
+            if (confirm('Are you sure you want to reset all fields?')) {
+                document.querySelector('form').reset();
+                
+                // Reset template buttons
+                const buttons = document.querySelectorAll('.btn-group .btn, .btn-group-vertical .btn');
+                buttons.forEach(btn => btn.classList.remove('active'));
+            }
+        }
+
+        function loadAppointmentDetails() {
+            // This would typically load appointment details via AJAX
+            // For now, just a placeholder for future enhancement
+            console.log('Loading appointment details...');
+        }
+
+        // Auto-format prescription text
+        document.addEventListener('DOMContentLoaded', function() {
+            const prescriptionTextarea = document.getElementById('MedicalRecord_Prescription');
+            if (prescriptionTextarea) {
+                prescriptionTextarea.addEventListener('input', function() {
+                    // Auto-format common abbreviations
+                    let text = this.value;
+                    text = text.replace(/\bmg\b/gi, 'mg');
+                    text = text.replace(/\bml\b/gi, 'mL');
+                    text = text.replace(/\btid\b/gi, 'TID (three times daily)');
+                    text = text.replace(/\bbid\b/gi, 'BID (twice daily)');
+                    text = text.replace(/\bqd\b/gi, 'QD (once daily)');
+                    if (text !== this.value) {
+                        this.value = text;
+                    }
+                });
+            }
+        });
+    </script>
+} 

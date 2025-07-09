@@ -1,0 +1,336 @@
+@page
+@model VetClinic.Web.Pages.Services.IndexModel
+@{
+    ViewData["Title"] = "Services";
+}
+
+<div class="container-fluid">
+    <!-- Success/Error Messages -->
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="fas fa-check-circle"></i> @TempData["SuccessMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="fas fa-exclamation-triangle"></i> @TempData["ErrorMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    <!-- Page Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <h2><i class="fas fa-briefcase-medical text-primary"></i> Services</h2>
+                @if (ViewSessionHelper.IsInAnyRole(ViewContext.HttpContext.Session, "Admin", "Manager"))
+                {
+                    <a asp-page="./Create" class="btn btn-primary">
+                        <i class="fas fa-plus"></i> Add New Service
+                    </a>
+                }
+            </div>
+        </div>
+    </div>
+
+    <!-- Filters -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h6 class="mb-0"><i class="fas fa-filter"></i> Filter Services</h6>
+                </div>
+                <div class="card-body">
+                    <form method="get" class="row g-3">
+                        <!-- Search -->
+                        <div class="col-md-4">
+                            <label for="searchTerm" class="form-label">Search</label>
+                            <input asp-for="SearchTerm" class="form-control" placeholder="Service name or description..." />
+                        </div>
+
+                        <!-- Price Range -->
+                        <div class="col-md-2">
+                            <label for="minPrice" class="form-label">Min Price</label>
+                            <input asp-for="MinPrice" type="number" step="0.01" class="form-control" placeholder="0.00" />
+                        </div>
+
+                        <div class="col-md-2">
+                            <label for="maxPrice" class="form-label">Max Price</label>
+                            <input asp-for="MaxPrice" type="number" step="0.01" class="form-control" placeholder="999.99" />
+                        </div>
+
+                        <!-- Active Status -->
+                        <div class="col-md-2">
+                            <label for="activeFilter" class="form-label">Status</label>
+                            <select asp-for="ActiveFilter" class="form-select">
+                                <option value="">All Services</option>
+                                <option value="true">Active Only</option>
+                                <option value="false">Inactive Only</option>
+                            </select>
+                        </div>
+
+                        <!-- Submit Button -->
+                        <div class="col-md-2 d-flex align-items-end">
+                            <button type="submit" class="btn btn-outline-primary w-100">
+                                <i class="fas fa-search"></i> Search
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Services Stats (for Admin/Manager) -->
+    @if (ViewSessionHelper.IsInAnyRole(ViewContext.HttpContext.Session, "Admin", "Manager"))
+    {
+        <div class="row mb-4">
+            <div class="col-md-3">
+                <div class="card bg-primary text-white">
+                    <div class="card-body text-center">
+                        <h4>@Model.ActiveServicesCount</h4>
+                        <p class="mb-0">Active Services</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card bg-success text-white">
+                    <div class="card-body text-center">
+                        <h4>$@Model.AveragePrice.ToString("F2")</h4>
+                        <p class="mb-0">Average Price</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card bg-info text-white">
+                    <div class="card-body text-center">
+                        <h4>@Model.AverageDuration min</h4>
+                        <p class="mb-0">Average Duration</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card bg-warning text-white">
+                    <div class="card-body text-center">
+                        <h4>@Model.TotalServices</h4>
+                        <p class="mb-0">Total Services</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+
+    <!-- Services Grid -->
+    <div class="row">
+        @if (Model.Services.Any())
+        {
+            @foreach (var service in Model.Services)
+            {
+                <div class="col-lg-4 col-md-6 mb-4">
+                    <div class="card h-100 @(service.IsActive ? "" : "border-secondary")">
+                        <div class="card-header d-flex justify-content-between align-items-center @(service.IsActive ? "bg-primary text-white" : "bg-secondary text-white")">
+                            <h6 class="mb-0">@service.Name</h6>
+                            @if (!service.IsActive)
+                            {
+                                <span class="badge bg-warning">Inactive</span>
+                            }
+                        </div>
+                        <div class="card-body d-flex flex-column">
+                            <!-- Description -->
+                            <p class="card-text text-muted flex-grow-1">
+                                @if (!string.IsNullOrEmpty(service.Description))
+                                {
+                                    @service.Description
+                                }
+                                else
+                                {
+                                    <em>No description available</em>
+                                }
+                            </p>
+
+                            <!-- Price and Duration -->
+                            <div class="row mb-3">
+                                <div class="col-6">
+                                    <small class="text-muted">Price</small>
+                                    <h5 class="text-success mb-0">$@service.Price.ToString("F2")</h5>
+                                </div>
+                                <div class="col-6">
+                                    <small class="text-muted">Duration</small>
+                                    <h6 class="mb-0">@service.DurationMinutes min</h6>
+                                </div>
+                            </div>
+
+                            <!-- Created Date -->
+                            <small class="text-muted mb-3">
+                                <i class="fas fa-calendar-plus"></i> Added @service.CreatedDate.ToString("MMM dd, yyyy")
+                            </small>
+
+                            <!-- Action Buttons -->
+                            <div class="d-flex justify-content-between align-items-center mt-auto">
+                                @if (ViewSessionHelper.IsInRole(ViewContext.HttpContext.Session, "Customer"))
+                                {
+                                    @if (service.IsActive)
+                                    {
+                                        <a asp-page="/Appointments/Book" asp-route-serviceId="@service.Id" class="btn btn-primary btn-sm">
+                                            <i class="fas fa-calendar-plus"></i> Book Now
+                                        </a>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted small">Service not available</span>
+                                    }
+                                }
+                                else
+                                {
+                                    <div class="btn-group btn-group-sm" role="group">
+                                        <!-- View Details -->
+                                        <a asp-page="./Details" asp-route-id="@service.Id" class="btn btn-outline-info" title="View Details">
+                                            <i class="fas fa-eye"></i>
+                                        </a>
+
+                                        @if (ViewSessionHelper.IsInAnyRole(ViewContext.HttpContext.Session, "Admin", "Manager"))
+                                        {
+                                            <!-- Edit -->
+                                            <a asp-page="./Edit" asp-route-id="@service.Id" class="btn btn-outline-warning" title="Edit">
+                                                <i class="fas fa-edit"></i>
+                                            </a>
+
+                                            <!-- Toggle Active Status -->
+                                            @if (service.IsActive)
+                                            {
+                                                <button type="button" class="btn btn-outline-secondary" onclick="toggleStatus(@service.Id, false)" title="Deactivate">
+                                                    <i class="fas fa-eye-slash"></i>
+                                                </button>
+                                            }
+                                            else
+                                            {
+                                                <button type="button" class="btn btn-outline-success" onclick="toggleStatus(@service.Id, true)" title="Activate">
+                                                    <i class="fas fa-eye"></i>
+                                                </button>
+                                            }
+
+                                            <!-- Delete -->
+                                            <button type="button" class="btn btn-outline-danger" onclick="deleteService(@service.Id, '@service.Name')" title="Delete">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        }
+                                    </div>
+                                }
+
+                                <!-- Price Badge -->
+                                <div>
+                                    @if (service.Price <= 50)
+                                    {
+                                        <span class="badge bg-success">Budget Friendly</span>
+                                    }
+                                    else if (service.Price <= 100)
+                                    {
+                                        <span class="badge bg-primary">Standard</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-warning">Premium</span>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        }
+        else
+        {
+            <div class="col-12">
+                <div class="text-center py-5">
+                    <i class="fas fa-briefcase-medical fa-3x text-muted mb-3"></i>
+                    <h5 class="text-muted">No services found</h5>
+                    <p class="text-muted">
+                        @if (ViewSessionHelper.IsInAnyRole(ViewContext.HttpContext.Session, "Admin", "Manager"))
+                        {
+                            <text>No services match your current filters or no services have been added yet.</text>
+                        }
+                        else
+                        {
+                            <text>No services are currently available or match your search criteria.</text>
+                        }
+                    </p>
+                    @if (ViewSessionHelper.IsInAnyRole(ViewContext.HttpContext.Session, "Admin", "Manager"))
+                    {
+                        <a asp-page="./Create" class="btn btn-primary">
+                            <i class="fas fa-plus"></i> Add First Service
+                        </a>
+                    }
+                </div>
+            </div>
+        }
+    </div>
+</div>
+
+<!-- Hidden Forms for Status Updates -->
+@if (ViewSessionHelper.IsInAnyRole(ViewContext.HttpContext.Session, "Admin", "Manager"))
+{
+    <!-- Toggle Status Form -->
+    <form id="toggleStatusForm" method="post" style="display: none;">
+        <input name="serviceId" id="toggleServiceId" type="hidden" />
+        <input name="isActive" id="toggleIsActive" type="hidden" />
+        <input name="handler" value="ToggleStatus" type="hidden" />
+    </form>
+
+    <!-- Delete Form -->
+    <form id="deleteForm" method="post" style="display: none;">
+        <input name="serviceId" id="deleteServiceId" type="hidden" />
+        <input name="handler" value="Delete" type="hidden" />
+    </form>
+}
+
+@section Scripts {
+    <script>
+        @if (ViewSessionHelper.IsInAnyRole(ViewContext.HttpContext.Session, "Admin", "Manager"))
+        {
+            <text>
+            function toggleStatus(serviceId, isActive) {
+                const action = isActive ? 'activate' : 'deactivate';
+                if (confirm(`Are you sure you want to ${action} this service?`)) {
+                    document.getElementById('toggleServiceId').value = serviceId;
+                    document.getElementById('toggleIsActive').value = isActive;
+                    document.getElementById('toggleStatusForm').submit();
+                }
+            }
+
+            function deleteService(serviceId, serviceName) {
+                if (confirm(`Are you sure you want to delete the service "${serviceName}"? This action cannot be undone and may affect existing appointments.`)) {
+                    document.getElementById('deleteServiceId').value = serviceId;
+                    document.getElementById('deleteForm').submit();
+                }
+            }
+            </text>
+        }
+
+        // Auto-dismiss alerts after 5 seconds
+        setTimeout(function() {
+            var alerts = document.querySelectorAll('.alert');
+            alerts.forEach(function(alert) {
+                var bsAlert = new bootstrap.Alert(alert);
+                bsAlert.close();
+            });
+        }, 5000);
+
+        // Price range validation
+        document.getElementById('MinPrice').addEventListener('change', function() {
+            const maxPriceInput = document.getElementById('MaxPrice');
+            if (this.value && maxPriceInput.value && parseFloat(this.value) > parseFloat(maxPriceInput.value)) {
+                maxPriceInput.value = this.value;
+            }
+        });
+
+        document.getElementById('MaxPrice').addEventListener('change', function() {
+            const minPriceInput = document.getElementById('MinPrice');
+            if (this.value && minPriceInput.value && parseFloat(this.value) < parseFloat(minPriceInput.value)) {
+                minPriceInput.value = this.value;
+            }
+        });
+    </script>
+} 

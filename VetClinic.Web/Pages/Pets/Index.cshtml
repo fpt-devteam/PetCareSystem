@@ -1,0 +1,213 @@
+@page
+@model VetClinic.Web.Pages.Pets.IndexModel
+@{
+    ViewData["Title"] = "My Pets";
+}
+
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1>
+            <i class="fas fa-paw me-2"></i>
+            @if (Model.UserRole == "Customer")
+            {
+                <span>My Pets</span>
+            }
+            else
+            {
+                <span>All Pets</span>
+            }
+        </h1>
+        @if (Model.UserRole == "Customer" || Model.UserRole == "Admin" || Model.UserRole == "Manager")
+        {
+            <a href="/Pets/Create" class="btn btn-success">
+                <i class="fas fa-plus me-1"></i>Add New Pet
+            </a>
+        }
+    </div>
+
+    @if (Model.UserRole != "Customer")
+    {
+        <div class="row mb-3">
+            <div class="col-md-6">
+                <form method="get" class="d-flex">
+                    <input type="text" name="searchTerm" value="@Model.SearchTerm" class="form-control me-2" placeholder="Search by pet name, owner, or species...">
+                    <button type="submit" class="btn btn-outline-primary">
+                        <i class="fas fa-search"></i>
+                    </button>
+                </form>
+            </div>
+            <div class="col-md-3">
+                <select name="speciesFilter" class="form-select" onchange="location = this.value;">
+                    <option value="/Pets">All Species</option>
+                    <option value="/Pets?speciesFilter=Dog" selected="@(Model.SpeciesFilter == "Dog")">Dogs</option>
+                    <option value="/Pets?speciesFilter=Cat" selected="@(Model.SpeciesFilter == "Cat")">Cats</option>
+                    <option value="/Pets?speciesFilter=Bird" selected="@(Model.SpeciesFilter == "Bird")">Birds</option>
+                    <option value="/Pets?speciesFilter=Other" selected="@(Model.SpeciesFilter == "Other")">Other</option>
+                </select>
+            </div>
+        </div>
+    }
+
+    @if (Model.Pets?.Any() == true)
+    {
+        <div class="row">
+            @foreach (var pet in Model.Pets)
+            {
+                <div class="col-md-6 col-lg-4 mb-4">
+                    <div class="card h-100">
+                        <div class="card-header d-flex justify-content-between align-items-center">
+                            <h5 class="mb-0">
+                                <i class="fas fa-paw me-2 text-primary"></i>@pet.Name
+                            </h5>
+                            <span class="badge bg-secondary">@pet.Species</span>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-6">
+                                    <small class="text-muted">Breed:</small>
+                                    <p class="mb-2">@(pet.Breed ?? "Not specified")</p>
+                                </div>
+                                <div class="col-6">
+                                    <small class="text-muted">Age:</small>
+                                    <p class="mb-2">
+                                        @if (pet.BirthDate.HasValue)
+                                        {
+                                            var age = DateTime.Now.Year - pet.BirthDate.Value.Year;
+                                            if (DateTime.Now.DayOfYear < pet.BirthDate.Value.DayOfYear) age--;
+                                            <span>@age years</span>
+                                        }
+                                        else
+                                        {
+                                            <span>Unknown</span>
+                                        }
+                                    </p>
+                                </div>
+                            </div>
+                            
+                            @if (Model.UserRole != "Customer")
+                            {
+                                <div class="row">
+                                    <div class="col-12">
+                                        <small class="text-muted">Owner:</small>
+                                        <p class="mb-2">@pet.Owner?.FullName</p>
+                                    </div>
+                                </div>
+                            }
+
+                            <div class="row">
+                                <div class="col-6">
+                                    <small class="text-muted">Weight:</small>
+                                    <p class="mb-2">@(pet.Weight?.ToString("F1") ?? "Not recorded") kg</p>
+                                </div>
+                                <div class="col-6">
+                                    <small class="text-muted">Birth Date:</small>
+                                    <p class="mb-2">@(pet.BirthDate?.ToString("MMM yyyy") ?? "Unknown")</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card-footer">
+                            <div class="btn-group w-100" role="group">
+                                <a href="/Pets/Details/@pet.Id" class="btn btn-outline-primary btn-sm">
+                                    <i class="fas fa-eye me-1"></i>View
+                                </a>
+                                @if (Model.UserRole == "Customer" || Model.UserRole == "Admin" || Model.UserRole == "Manager" || (Model.UserRole == "Doctor" || Model.UserRole == "Staff"))
+                                {
+                                    <a href="/Pets/Edit/@pet.Id" class="btn btn-outline-warning btn-sm">
+                                        <i class="fas fa-edit me-1"></i>Edit
+                                    </a>
+                                }
+                                @if (Model.UserRole == "Admin" || Model.UserRole == "Manager")
+                                {
+                                    <button type="button" class="btn btn-outline-danger btn-sm" onclick="confirmDelete(@pet.Id, '@pet.Name')">
+                                        <i class="fas fa-trash me-1"></i>Delete
+                                    </button>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+
+        @if (Model.TotalPages > 1)
+        {
+            <nav aria-label="Pet pagination">
+                <ul class="pagination justify-content-center">
+                    @if (Model.CurrentPage > 1)
+                    {
+                        <li class="page-item">
+                            <a class="page-link" href="/Pets?page=@(Model.CurrentPage - 1)&searchTerm=@Model.SearchTerm&speciesFilter=@Model.SpeciesFilter">Previous</a>
+                        </li>
+                    }
+                    
+                    @for (int i = Math.Max(1, Model.CurrentPage - 2); i <= Math.Min(Model.TotalPages, Model.CurrentPage + 2); i++)
+                    {
+                        <li class="page-item @(i == Model.CurrentPage ? "active" : "")">
+                            <a class="page-link" href="/Pets?page=@i&searchTerm=@Model.SearchTerm&speciesFilter=@Model.SpeciesFilter">@i</a>
+                        </li>
+                    }
+                    
+                    @if (Model.CurrentPage < Model.TotalPages)
+                    {
+                        <li class="page-item">
+                            <a class="page-link" href="/Pets?page=@(Model.CurrentPage + 1)&searchTerm=@Model.SearchTerm&speciesFilter=@Model.SpeciesFilter">Next</a>
+                        </li>
+                    }
+                </ul>
+            </nav>
+        }
+    }
+    else
+    {
+        <div class="text-center py-5">
+            <i class="fas fa-paw fa-4x text-muted mb-3"></i>
+            <h3 class="text-muted">No pets found</h3>
+            @if (Model.UserRole == "Customer")
+            {
+                <p class="text-muted">You haven't added any pets yet.</p>
+                <a href="/Pets/Create" class="btn btn-success mt-3">
+                    <i class="fas fa-plus me-1"></i>Add Your First Pet
+                </a>
+            }
+            else
+            {
+                <p class="text-muted">No pets match your search criteria.</p>
+            }
+        </div>
+    }
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div class="modal fade" id="deleteModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Confirm Delete</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure you want to delete <strong id="petNameToDelete"></strong>?</p>
+                <p class="text-danger">This action cannot be undone.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <form id="deleteForm" method="post" style="display: inline;">
+                    <input type="hidden" name="__RequestVerificationToken" value="@ViewData["RequestVerificationToken"]" />
+                    <button type="submit" class="btn btn-danger">Delete</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function confirmDelete(petId, petName) {
+            document.getElementById('petNameToDelete').textContent = petName;
+            document.getElementById('deleteForm').action = '/Pets/Delete/' + petId;
+            
+            var deleteModal = new bootstrap.Modal(document.getElementById('deleteModal'));
+            deleteModal.show();
+        }
+    </script>
+} 

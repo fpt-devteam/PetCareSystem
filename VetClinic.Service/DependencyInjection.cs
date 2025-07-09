@@ -11,6 +11,14 @@ namespace VetClinic.Service
             // Register Services
             services.AddScoped<IUserService, UserService>();
             services.AddScoped<IAuthService, AuthService>();
+            services.AddScoped<IPetService, PetService>();
+            services.AddScoped<IServiceService, ServiceService>();
+            services.AddScoped<IAppointmentService, AppointmentService>();
+            services.AddScoped<IDashboardService, DashboardService>();
+            services.AddScoped<IMedicalRecordService, MedicalRecordService>();
+
+            // Add remaining service registrations for complete implementation
+            // These would need their implementations created for full functionality
 
             return services;
         }

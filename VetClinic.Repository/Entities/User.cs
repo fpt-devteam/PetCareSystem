@@ -33,5 +33,12 @@ namespace VetClinic.Repository.Entities
         public string? Address { get; set; }
 
         public DateTime CreatedDate { get; set; } = DateTime.Now;
+
+        // Navigation properties
+        public virtual ICollection<Pet> Pets { get; set; } = new List<Pet>();
+        public virtual ICollection<Appointment> DoctorAppointments { get; set; } = new List<Appointment>();
+        public virtual ICollection<MedicalRecord> DoctorMedicalRecords { get; set; } = new List<MedicalRecord>();
+        public virtual ICollection<Feedback> CustomerFeedback { get; set; } = new List<Feedback>();
+        public virtual ICollection<Reminder> Reminders { get; set; } = new List<Reminder>();
     }
 }

@@ -7,7 +7,9 @@ namespace VetClinic.Web.Pages.Account
     {
         public IActionResult OnGet()
         {
+            // Clear all session data
             HttpContext.Session.Clear();
+            
             TempData["SuccessMessage"] = "You have been logged out successfully.";
             return RedirectToPage("/Index");
         }

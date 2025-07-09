@@ -13,5 +13,6 @@ namespace VetClinic.Service.Interfaces
         Task<bool> DeleteUserAsync(int id);
         Task<bool> UserExistsAsync(int id);
         Task<bool> IsEmailUniqueAsync(string email, int? excludeUserId = null);
+        Task<IEnumerable<User>> GetUsersByRoleAsync(string role);
     }
 }

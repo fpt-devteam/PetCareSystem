@@ -1,0 +1,155 @@
+@page
+@model BookModel
+@{
+    ViewData["Title"] = "Book Appointment";
+}
+
+<div class="container">
+    <div class="row">
+        <div class="col-12">
+            <h2><i class="fas fa-calendar-plus text-primary me-2"></i>Book Appointment</h2>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="/">Dashboard</a></li>
+                    <li class="breadcrumb-item"><a href="/Appointments">Appointments</a></li>
+                    <li class="breadcrumb-item active">Book Appointment</li>
+                </ol>
+            </nav>
+        </div>
+    </div>
+
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="fas fa-calendar-check me-2"></i>Appointment Details</h5>
+                </div>
+                <div class="card-body">
+                    <form method="post">
+                        <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
+
+                        <!-- Pet Selection -->
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label asp-for="Booking.PetId" class="form-label">
+                                    <i class="fas fa-paw me-1"></i>Select Pet
+                                </label>
+                                <select asp-for="Booking.PetId" asp-items="Model.PetSelectList" class="form-select">
+                                    <option value="">-- Choose a pet --</option>
+                                </select>
+                                <span asp-validation-for="Booking.PetId" class="text-danger small"></span>
+                            </div>
+
+                            <!-- Service Selection -->
+                            <div class="col-md-6">
+                                <label asp-for="Booking.ServiceId" class="form-label">
+                                    <i class="fas fa-stethoscope me-1"></i>Select Service
+                                </label>
+                                <select asp-for="Booking.ServiceId" asp-items="Model.ServiceSelectList" class="form-select">
+                                    <option value="">-- Choose a service --</option>
+                                </select>
+                                <span asp-validation-for="Booking.ServiceId" class="text-danger small"></span>
+                            </div>
+                        </div>
+
+                        <!-- Doctor Selection -->
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label asp-for="Booking.DoctorId" class="form-label">
+                                    <i class="fas fa-user-md me-1"></i>Select Doctor
+                                </label>
+                                <select asp-for="Booking.DoctorId" asp-items="Model.DoctorSelectList" class="form-select">
+                                    <option value="">-- Choose a doctor --</option>
+                                </select>
+                                <span asp-validation-for="Booking.DoctorId" class="text-danger small"></span>
+                            </div>
+
+                            <!-- Appointment Date & Time -->
+                            <div class="col-md-6">
+                                <label asp-for="Booking.AppointmentTime" class="form-label">
+                                    <i class="fas fa-calendar-alt me-1"></i>Appointment Date & Time
+                                </label>
+                                <input asp-for="Booking.AppointmentTime" type="datetime-local" class="form-control" />
+                                <span asp-validation-for="Booking.AppointmentTime" class="text-danger small"></span>
+                                <div class="form-text">
+                                    <i class="fas fa-info-circle me-1"></i>
+                                    Clinic hours: 8:00 AM - 6:00 PM, Monday to Saturday
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Notes -->
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <label asp-for="Booking.Notes" class="form-label">
+                                    <i class="fas fa-sticky-note me-1"></i>Additional Notes (Optional)
+                                </label>
+                                <textarea asp-for="Booking.Notes" class="form-control" rows="3" 
+                                    placeholder="Any specific concerns or information for the doctor..."></textarea>
+                                <span asp-validation-for="Booking.Notes" class="text-danger small"></span>
+                            </div>
+                        </div>
+
+                        <!-- Action Buttons -->
+                        <div class="row">
+                            <div class="col-12">
+                                <div class="d-flex justify-content-between">
+                                    <a href="/Appointments" class="btn btn-outline-secondary">
+                                        <i class="fas fa-arrow-left me-1"></i>Back to Appointments
+                                    </a>
+                                    <button type="submit" class="btn btn-primary">
+                                        <i class="fas fa-calendar-check me-1"></i>Book Appointment
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Helpful Information Card -->
+            <div class="card mt-4">
+                <div class="card-header">
+                    <h6 class="mb-0"><i class="fas fa-lightbulb me-2"></i>Booking Information</h6>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6><i class="fas fa-clock me-1"></i>Clinic Hours</h6>
+                            <ul class="list-unstyled small">
+                                <li>Monday - Friday: 8:00 AM - 6:00 PM</li>
+                                <li>Saturday: 9:00 AM - 4:00 PM</li>
+                                <li>Sunday: Closed</li>
+                            </ul>
+                        </div>
+                        <div class="col-md-6">
+                            <h6><i class="fas fa-exclamation-triangle me-1"></i>Important Notes</h6>
+                            <ul class="list-unstyled small">
+                                <li>• Please arrive 15 minutes early</li>
+                                <li>• Bring vaccination records if available</li>
+                                <li>• Cancellations require 24-hour notice</li>
+                                <li>• Emergency services available 24/7</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    
+    <script>
+        // Set minimum date to today
+        document.addEventListener('DOMContentLoaded', function() {
+            const appointmentInput = document.querySelector('input[type="datetime-local"]');
+            if (appointmentInput) {
+                const now = new Date();
+                now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+                appointmentInput.min = now.toISOString().slice(0, 16);
+            }
+        });
+    </script>
+} 

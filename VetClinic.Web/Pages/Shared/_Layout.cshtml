@@ -1,4 +1,5 @@
-﻿<!DOCTYPE html>
+﻿@using VetClinic.Web.Helpers
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="utf-8" />
@@ -7,12 +8,15 @@
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/VetClinic.Web.styles.css" asp-append-version="true" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
 </head>
 <body>
     <header>
         <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
             <div class="container">
-                <a class="navbar-brand" asp-area="" asp-page="/Index">VetClinic.Web</a>
+                <a class="navbar-brand" asp-area="" asp-page="/Index">
+                    <i class="fas fa-heart text-danger me-2"></i>VetClinic
+                </a>
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
                         aria-expanded="false" aria-label="Toggle navigation">
                     <span class="navbar-toggler-icon"></span>
@@ -20,23 +24,78 @@
                 <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
                     <ul class="navbar-nav flex-grow-1">
                         <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-page="/Index">Home</a>
+                            <a class="nav-link text-dark" asp-area="" asp-page="/Index">
+                                <i class="fas fa-tachometer-alt me-1"></i>Dashboard
+                            </a>
                         </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-page="/Users/Index">Users</a>
-                        </li>
+                        @if (SessionHelper.IsAuthenticated(ViewContext.HttpContext.Session))
+                        {
+                            var userRole = SessionHelper.GetUserRole(ViewContext.HttpContext.Session);
+                            @if (userRole == "Customer")
+                            {
+                                <li class="nav-item">
+                                    <a class="nav-link text-dark" asp-area="" asp-page="/Pets/Index">
+                                        <i class="fas fa-paw me-1"></i>My Pets
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link text-dark" asp-area="" asp-page="/Appointments/Book">
+                                        <i class="fas fa-calendar-plus me-1"></i>Book Appointment
+                                    </a>
+                                </li>
+                            }
+                            @if (userRole == "Doctor" || userRole == "Admin" || userRole == "Manager" || userRole == "Staff")
+                            {
+                                <li class="nav-item">
+                                    <a class="nav-link text-dark" asp-area="" asp-page="/Pets/Index">
+                                        <i class="fas fa-paw me-1"></i>All Pets
+                                    </a>
+                                </li>
+                            }
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-area="" asp-page="/Appointments/Index">
+                                    <i class="fas fa-calendar-alt me-1"></i>Appointments
+                                </a>
+                            </li>
+                            @if (userRole == "Doctor" || userRole == "Manager")
+                            {
+                                <li class="nav-item">
+                                    <a class="nav-link text-dark" asp-area="" asp-page="/MedicalRecords/Index">
+                                        <i class="fas fa-file-medical me-1"></i>Medical Records
+                                    </a>
+                                </li>
+                            }
+                            @if (userRole == "Admin" || userRole == "Manager")
+                            {
+                                <li class="nav-item dropdown">
+                                    <a class="nav-link dropdown-toggle text-dark" href="#" role="button" data-bs-toggle="dropdown">
+                                        <i class="fas fa-cogs me-1"></i>Management
+                                    </a>
+                                    <ul class="dropdown-menu">
+                                        <li><a class="dropdown-item" asp-page="/Users/Index"><i class="fas fa-users me-1"></i>Users</a></li>
+                                        <li><a class="dropdown-item" asp-page="/Services/Index"><i class="fas fa-concierge-bell me-1"></i>Services</a></li>
+                                        <li><hr class="dropdown-divider"></li>
+                                        <li><a class="dropdown-item" asp-page="/Reports/Index"><i class="fas fa-chart-bar me-1"></i>Reports</a></li>
+                                    </ul>
+                                </li>
+                            }
+                        }
                         <li class="nav-item">
                             <a class="nav-link text-dark" asp-area="" asp-page="/Privacy">Privacy</a>
                         </li>
                     </ul>
                     <ul class="navbar-nav">
-                        @if (ViewContext.HttpContext.Session.GetInt32("UserId") != null)
+                        @if (SessionHelper.IsAuthenticated(ViewContext.HttpContext.Session))
                         {
-                            <li class="nav-item">
-                                <span class="nav-link text-dark">Welcome, @ViewContext.HttpContext.Session.GetString("UserName")!</span>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link text-dark" asp-page="/Account/Logout">Logout</a>
+                            <li class="nav-item dropdown">
+                                <a class="nav-link dropdown-toggle text-dark" href="#" role="button" data-bs-toggle="dropdown">
+                                    <i class="fas fa-user-circle me-1"></i>@SessionHelper.GetUserName(ViewContext.HttpContext.Session)
+                                </a>
+                                <ul class="dropdown-menu dropdown-menu-end">
+                                    <li><a class="dropdown-item" asp-page="/Profile/Index"><i class="fas fa-user me-1"></i>My Profile</a></li>
+                                    <li><hr class="dropdown-divider"></li>
+                                    <li><a class="dropdown-item" asp-page="/Account/Logout"><i class="fas fa-sign-out-alt me-1"></i>Logout</a></li>
+                                </ul>
                             </li>
                         }
                         else

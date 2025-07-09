@@ -84,5 +84,11 @@ namespace VetClinic.Service.Services
 
             return excludeUserId.HasValue && existingUser.Id == excludeUserId.Value;
         }
+
+        public async Task<IEnumerable<User>> GetUsersByRoleAsync(string role)
+        {
+            var allUsers = await _userRepository.GetAllAsync();
+            return allUsers.Where(u => u.Role == role && u.IsActive);
+        }
     }
 }

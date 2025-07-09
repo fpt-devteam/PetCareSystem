@@ -17,9 +17,25 @@ namespace VetClinic.Repository
 
             // Register DAOs
             services.AddScoped<IUserDAO, UserDAO>();
+            services.AddScoped<IPetDAO, PetDAO>();
+            services.AddScoped<IServiceDAO, ServiceDAO>();
+            services.AddScoped<IAppointmentDAO, AppointmentDAO>();
+            services.AddScoped<IMedicalRecordDAO, MedicalRecordDAO>();
+            services.AddScoped<IVaccinationDAO, VaccinationDAO>();
+            services.AddScoped<IFeedbackDAO, FeedbackDAO>();
+            services.AddScoped<IInvoiceDAO, InvoiceDAO>();
+            services.AddScoped<IReminderDAO, ReminderDAO>();
 
             // Register Repositories
             services.AddScoped<IUserRepository, UserRepository>();
+            services.AddScoped<IPetRepository, PetRepository>();
+            services.AddScoped<IServiceRepository, ServiceRepository>();
+            services.AddScoped<IAppointmentRepository, AppointmentRepository>();
+            services.AddScoped<IMedicalRecordRepository, MedicalRecordRepository>();
+            services.AddScoped<IVaccinationRepository, VaccinationRepository>();
+            services.AddScoped<IFeedbackRepository, FeedbackRepository>();
+            services.AddScoped<IInvoiceRepository, InvoiceRepository>();
+            services.AddScoped<IReminderRepository, ReminderRepository>();
 
             return services;
         }

@@ -1,5 +1,6 @@
 using VetClinic.Repository;
 using VetClinic.Service;
+using VetClinic.Repository.Data;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -21,6 +22,16 @@ builder.Services.AddServices();
 
 var app = builder.Build();
 
+// Seed the database in development environment
+if (app.Environment.IsDevelopment())
+{
+    using (var scope = app.Services.CreateScope())
+    {
+        var context = scope.ServiceProvider.GetRequiredService<VetClinicDbContext>();
+        await DbSeeder.SeedAsync(context);
+    }
+}
+
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
 {
@@ -35,7 +46,6 @@ app.UseStaticFiles();
 app.UseRouting();
 
 app.UseSession();
-app.UseAuthorization();
 
 app.MapRazorPages();
 

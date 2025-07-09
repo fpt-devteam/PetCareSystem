@@ -1,0 +1,401 @@
+@page
+@model IndexModel
+@{
+    ViewData["Title"] = "Reports & Analytics";
+}
+
+<div class="container-fluid">
+    <!-- Success/Error Messages -->
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="fas fa-check-circle"></i> @TempData["SuccessMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="fas fa-exclamation-triangle"></i> @TempData["ErrorMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    <!-- Page Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <h2><i class="fas fa-chart-bar text-primary me-2"></i>Reports & Analytics</h2>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="/">Dashboard</a></li>
+                    <li class="breadcrumb-item active">Reports</li>
+                </ol>
+            </nav>
+        </div>
+    </div>
+
+    <!-- Date Range Filter -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body">
+                    <form method="get" class="row g-3 align-items-end">
+                        <div class="col-md-3">
+                            <label for="startDate" class="form-label">
+                                <i class="fas fa-calendar-alt me-1"></i>Start Date
+                            </label>
+                            <input asp-for="StartDate" type="date" class="form-control" />
+                        </div>
+                        <div class="col-md-3">
+                            <label for="endDate" class="form-label">
+                                <i class="fas fa-calendar-alt me-1"></i>End Date
+                            </label>
+                            <input asp-for="EndDate" type="date" class="form-control" />
+                        </div>
+                        <div class="col-md-3">
+                            <label for="reportType" class="form-label">
+                                <i class="fas fa-filter me-1"></i>Report Type
+                            </label>
+                            <select asp-for="ReportType" class="form-select">
+                                <option value="overview">Overview</option>
+                                <option value="financial">Financial</option>
+                                <option value="appointments">Appointments</option>
+                                <option value="pets">Pets & Services</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <button type="submit" class="btn btn-primary w-100">
+                                <i class="fas fa-chart-line me-1"></i>Generate Report
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Key Metrics Overview -->
+    <div class="row mb-4">
+        <div class="col-md-2">
+            <div class="card text-center bg-primary text-white">
+                <div class="card-body">
+                    <i class="fas fa-paw fa-2x mb-2"></i>
+                    <h4>@Model.TotalPets</h4>
+                    <small>Total Pets</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-2">
+            <div class="card text-center bg-success text-white">
+                <div class="card-body">
+                    <i class="fas fa-users fa-2x mb-2"></i>
+                    <h4>@Model.TotalCustomers</h4>
+                    <small>Customers</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-2">
+            <div class="card text-center bg-info text-white">
+                <div class="card-body">
+                    <i class="fas fa-user-md fa-2x mb-2"></i>
+                    <h4>@Model.TotalDoctors</h4>
+                    <small>Doctors</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-2">
+            <div class="card text-center bg-warning text-white">
+                <div class="card-body">
+                    <i class="fas fa-calendar-check fa-2x mb-2"></i>
+                    <h4>@Model.TotalAppointments</h4>
+                    <small>Appointments</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-2">
+            <div class="card text-center bg-secondary text-white">
+                <div class="card-body">
+                    <i class="fas fa-dollar-sign fa-2x mb-2"></i>
+                    <h4>$@Model.TotalRevenue.ToString("N0")</h4>
+                    <small>Revenue</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-2">
+            <div class="card text-center bg-dark text-white">
+                <div class="card-body">
+                    <i class="fas fa-star fa-2x mb-2"></i>
+                    <h4>@Model.AverageRating.ToString("F1")</h4>
+                    <small>Avg Rating</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Appointment Statistics -->
+    <div class="row mb-4">
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header">
+                    <h6 class="mb-0"><i class="fas fa-calendar-day me-2"></i>Today's Appointments</h6>
+                </div>
+                <div class="card-body text-center">
+                    <h3 class="text-primary">@Model.TodayAppointments</h3>
+                    <small class="text-muted">appointments scheduled</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header">
+                    <h6 class="mb-0"><i class="fas fa-calendar-week me-2"></i>This Week</h6>
+                </div>
+                <div class="card-body text-center">
+                    <h3 class="text-success">@Model.WeekAppointments</h3>
+                    <small class="text-muted">appointments this week</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header">
+                    <h6 class="mb-0"><i class="fas fa-calendar-alt me-2"></i>This Month</h6>
+                </div>
+                <div class="card-body text-center">
+                    <h3 class="text-info">@Model.MonthAppointments</h3>
+                    <small class="text-muted">appointments this month</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Charts Row -->
+    <div class="row mb-4">
+        <!-- Monthly Revenue Chart -->
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h6 class="mb-0"><i class="fas fa-chart-line me-2"></i>Monthly Revenue Trend</h6>
+                </div>
+                <div class="card-body">
+                    <canvas id="revenueChart" width="400" height="200"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Appointment Status Distribution -->
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header">
+                    <h6 class="mb-0"><i class="fas fa-chart-pie me-2"></i>Appointment Status</h6>
+                </div>
+                <div class="card-body">
+                    <canvas id="appointmentStatusChart" width="200" height="200"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Data Tables Row -->
+    <div class="row mb-4">
+        <!-- Top Services -->
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h6 class="mb-0"><i class="fas fa-star me-2"></i>Top Services</h6>
+                </div>
+                <div class="card-body">
+                    @if (Model.TopServices.Any())
+                    {
+                        <div class="table-responsive">
+                            <table class="table table-sm">
+                                <thead>
+                                    <tr>
+                                        <th>Service</th>
+                                        <th>Count</th>
+                                        <th>Revenue</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var service in Model.TopServices)
+                                    {
+                                        <tr>
+                                            <td>@service.ServiceName</td>
+                                            <td><span class="badge bg-primary">@service.Count</span></td>
+                                            <td class="text-success">$@service.Revenue.ToString("N0")</td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+                    else
+                    {
+                        <p class="text-muted text-center">No service data available</p>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <!-- Pet Species Distribution -->
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h6 class="mb-0"><i class="fas fa-paw me-2"></i>Pet Species Distribution</h6>
+                </div>
+                <div class="card-body">
+                    @if (Model.PetSpeciesData.Any())
+                    {
+                        <div class="table-responsive">
+                            <table class="table table-sm">
+                                <thead>
+                                    <tr>
+                                        <th>Species</th>
+                                        <th>Count</th>
+                                        <th>Percentage</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @{
+                                        var totalPets = Model.PetSpeciesData.Sum(kvp => kvp.Value);
+                                    }
+                                    @foreach (var species in Model.PetSpeciesData.OrderByDescending(kvp => kvp.Value))
+                                    {
+                                        var percentage = totalPets > 0 ? (species.Value * 100.0 / totalPets) : 0;
+                                        <tr>
+                                            <td>@species.Key</td>
+                                            <td><span class="badge bg-info">@species.Value</span></td>
+                                            <td>
+                                                <div class="progress" style="height: 20px;">
+                                                    <div class="progress-bar" role="progressbar" style="width: @percentage.ToString("F1")%">
+                                                        @percentage.ToString("F1")%
+                                                    </div>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+                    else
+                    {
+                        <p class="text-muted text-center">No pet data available</p>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Export Options -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h6 class="mb-0"><i class="fas fa-download me-2"></i>Export Options</h6>
+                </div>
+                <div class="card-body">
+                    <div class="btn-group" role="group">
+                        <button type="button" class="btn btn-outline-primary" onclick="exportToPDF()">
+                            <i class="fas fa-file-pdf me-1"></i>Export PDF
+                        </button>
+                        <button type="button" class="btn btn-outline-success" onclick="exportToExcel()">
+                            <i class="fas fa-file-excel me-1"></i>Export Excel
+                        </button>
+                        <button type="button" class="btn btn-outline-info" onclick="printReport()">
+                            <i class="fas fa-print me-1"></i>Print Report
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <script>
+        // Monthly Revenue Chart
+        const revenueCtx = document.getElementById('revenueChart').getContext('2d');
+        const revenueChart = new Chart(revenueCtx, {
+            type: 'line',
+            data: {
+                labels: [@Html.Raw(string.Join(",", Model.MonthlyRevenue.Select(r => "\"" + r.Month + "\"")))],
+                datasets: [{
+                    label: 'Revenue ($)',
+                    data: [@string.Join(",", Model.MonthlyRevenue.Select(r => r.Revenue))],
+                    borderColor: 'rgb(75, 192, 192)',
+                    backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                    tension: 0.1
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        position: 'top',
+                    },
+                    title: {
+                        display: true,
+                        text: 'Monthly Revenue Trend'
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            callback: function(value) {
+                                return '$' + value.toLocaleString();
+                            }
+                        }
+                    }
+                }
+            }
+        });
+
+        // Appointment Status Chart
+        const statusCtx = document.getElementById('appointmentStatusChart').getContext('2d');
+        const statusChart = new Chart(statusCtx, {
+            type: 'doughnut',
+            data: {
+                labels: [@Html.Raw(string.Join(",", Model.AppointmentStatusData.Keys.Select(k => "\"" + k + "\"")))],
+                datasets: [{
+                    data: [@string.Join(",", Model.AppointmentStatusData.Values)],
+                    backgroundColor: [
+                        'rgba(255, 99, 132, 0.8)',
+                        'rgba(54, 162, 235, 0.8)',
+                        'rgba(255, 205, 86, 0.8)',
+                        'rgba(75, 192, 192, 0.8)',
+                        'rgba(153, 102, 255, 0.8)'
+                    ]
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                    },
+                    title: {
+                        display: true,
+                        text: 'Appointment Status Distribution'
+                    }
+                }
+            }
+        });
+
+        // Export functions
+        function exportToPDF() {
+            alert('PDF export feature would be implemented here');
+        }
+
+        function exportToExcel() {
+            alert('Excel export feature would be implemented here');
+        }
+
+        function printReport() {
+            window.print();
+        }
+    </script>
+} 
