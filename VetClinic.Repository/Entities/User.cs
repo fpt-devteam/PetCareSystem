@@ -40,5 +40,7 @@ namespace VetClinic.Repository.Entities
         public virtual ICollection<MedicalRecord> DoctorMedicalRecords { get; set; } = new List<MedicalRecord>();
         public virtual ICollection<Feedback> CustomerFeedback { get; set; } = new List<Feedback>();
         public virtual ICollection<Reminder> Reminders { get; set; } = new List<Reminder>();
+        public virtual ICollection<AuditLog> AuditLogs { get; set; } = new List<AuditLog>();
+        public virtual ICollection<LabResult> UploadedLabResults { get; set; } = new List<LabResult>();
     }
 }

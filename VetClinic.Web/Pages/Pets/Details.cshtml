@@ -107,7 +107,7 @@
                                 <p><strong>Weight:</strong> @(Model.Pet.Weight?.ToString("F1") ?? "Not recorded") kg</p>
                                 <p><strong>Color:</strong> @(Model.Pet.Color ?? "Not specified")</p>
                                 <p><strong>Microchip ID:</strong> @(Model.Pet.MicrochipId ?? "Not chipped")</p>
-                                <p><strong>Status:</strong> 
+                                <p><strong>Status:</strong>
                                     @if (Model.Pet.IsActive)
                                     {
                                         <span class="badge bg-success">Active</span>
@@ -218,61 +218,97 @@
         <div class="row mt-4">
             <div class="col-12">
                 <div class="card">
-                    <div class="card-header">
+                    <div class="card-header d-flex justify-content-between align-items-center">
                         <h5 class="mb-0"><i class="fas fa-file-medical me-2"></i>Medical Records</h5>
+                        <span class="badge bg-primary">@Model.MedicalRecords.Count() record(s)</span>
                     </div>
                     <div class="card-body">
                         @if (Model.MedicalRecords.Any())
                         {
-                            <div class="table-responsive">
-                                <table class="table">
-                                    <thead>
-                                        <tr>
-                                            <th>Visit Date</th>
-                                            <th>Diagnosis</th>
-                                            <th>Treatment</th>
-                                            <th>Doctor</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        @foreach (var record in Model.MedicalRecords.OrderByDescending(r => r.VisitDate))
-                                        {
-                                            <tr>
-                                                <td>@record.VisitDate.ToString("MMM dd, yyyy")</td>
-                                                <td>
-                                                    @if (!string.IsNullOrEmpty(record.Diagnosis))
-                                                    {
-                                                        <span class="text-truncate d-inline-block" style="max-width: 200px;" title="@record.Diagnosis">
+                            <div class="row">
+                                @foreach (var record in Model.MedicalRecords.OrderByDescending(r => r.VisitDate).Take(6))
+                                {
+                                    <div class="col-md-6 col-lg-4 mb-3">
+                                        <div class="card h-100 border-primary">
+                                            <div class="card-header bg-primary text-white">
+                                                <div class="d-flex justify-content-between align-items-center">
+                                                    <small><i class="fas fa-calendar me-1"></i>@record.VisitDate.ToString("MMM dd, yyyy")</small>
+                                                    <small><i class="fas fa-clock me-1"></i>@record.VisitDate.ToString("hh:mm tt")</small>
+                                                </div>
+                                            </div>
+                                            <div class="card-body">
+                                                <div class="mb-2">
+                                                    <strong><i class="fas fa-user-md text-success me-1"></i>Doctor:</strong>
+                                                    <span>Dr. @(record.Doctor?.FullName ?? "Unknown")</span>
+                                                </div>
+
+                                                @if (!string.IsNullOrEmpty(record.Diagnosis))
+                                                {
+                                                    <div class="mb-2">
+                                                        <strong><i class="fas fa-stethoscope text-info me-1"></i>Diagnosis:</strong>
+                                                        <div class="text-truncate" style="max-width: 200px;" title="@record.Diagnosis">
                                                             @record.Diagnosis
-                                                        </span>
-                                                    }
-                                                    else
-                                                    {
-                                                        <span class="text-muted">No diagnosis recorded</span>
-                                                    }
-                                                </td>
-                                                <td>
-                                                    @if (!string.IsNullOrEmpty(record.TreatmentNotes))
-                                                    {
-                                                        <span class="text-truncate d-inline-block" style="max-width: 200px;" title="@record.TreatmentNotes">
+                                                        </div>
+                                                    </div>
+                                                }
+
+                                                @if (!string.IsNullOrEmpty(record.TreatmentNotes))
+                                                {
+                                                    <div class="mb-2">
+                                                        <strong><i class="fas fa-notes-medical text-warning me-1"></i>Treatment:</strong>
+                                                        <div class="text-truncate" style="max-width: 200px;" title="@record.TreatmentNotes">
                                                             @record.TreatmentNotes
+                                                        </div>
+                                                    </div>
+                                                }
+
+                                                @if (!string.IsNullOrEmpty(record.Prescription))
+                                                {
+                                                    <div class="mb-2">
+                                                        <strong><i class="fas fa-pills text-danger me-1"></i>Prescription:</strong>
+                                                        <div class="text-truncate" style="max-width: 200px;" title="@record.Prescription">
+                                                            @record.Prescription
+                                                        </div>
+                                                    </div>
+                                                }
+
+                                                @if (record.Appointment?.Invoice != null)
+                                                {
+                                                    <div class="mb-2">
+                                                        <strong><i class="fas fa-receipt text-success me-1"></i>Invoice:</strong>
+                                                        <span>$@record.Appointment.Invoice.TotalAmount.ToString("N2")</span>
+                                                        <span class="badge bg-@(record.Appointment.Invoice.Status == "Paid" ? "success" : "warning") ms-1">
+                                                            @record.Appointment.Invoice.Status
                                                         </span>
-                                                    }
-                                                    else
-                                                    {
-                                                        <span class="text-muted">No treatment notes</span>
-                                                    }
-                                                </td>
-                                                <td>@(record.Doctor?.FullName ?? "Unknown")</td>
-                                            </tr>
-                                        }
-                                    </tbody>
-                                </table>
+                                                    </div>
+                                                }
+                                            </div>
+                                            <div class="card-footer bg-light">
+                                                <a href="/MedicalRecords/Details/@record.Id" class="btn btn-sm btn-outline-primary w-100">
+                                                    <i class="fas fa-eye me-1"></i>View Full Summary
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                }
                             </div>
+
+                            @if (Model.MedicalRecords.Count() > 6)
+                            {
+                                <div class="text-center mt-3">
+                                    <a href="/MedicalRecords?petId=@Model.Pet.Id" class="btn btn-outline-primary">
+                                        <i class="fas fa-list me-1"></i>View All @Model.MedicalRecords.Count() Medical Records
+                                    </a>
+                                </div>
+                            }
                         }
                         else
                         {
-                            <p class="text-muted text-center">No medical records found for this pet</p>
+                            <div class="text-center py-4">
+                                <i class="fas fa-file-medical fa-3x text-muted mb-3"></i>
+                                <h6 class="text-muted">No Medical Records</h6>
+                                <p class="text-muted mb-0">No medical records have been created for this pet yet.</p>
+                            </div>
                         }
                     </div>
                 </div>
@@ -324,4 +360,4 @@
             new bootstrap.Modal(document.getElementById('deleteModal')).show();
         }
     </script>
-} 
+}

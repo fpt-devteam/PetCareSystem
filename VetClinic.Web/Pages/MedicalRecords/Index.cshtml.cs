@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using Microsoft.AspNetCore.Mvc.ViewFeatures;
 using VetClinic.Repository.Entities;
 using VetClinic.Service.Interfaces;
 using VetClinic.Web.Helpers;
@@ -32,8 +33,10 @@ namespace VetClinic.Web.Pages.MedicalRecords
                 return RedirectToPage("/Account/Login");
             }
 
-            // Only doctors and managers can access medical records
-            if (!SessionHelper.IsInAnyRole(HttpContext.Session, new[] { "Doctor", "Manager" }))
+            // Customers can access medical records for their own pets
+            // Doctors, managers, and staff can access all records
+            var userRole = SessionHelper.GetUserRole(HttpContext.Session);
+            if (!SessionHelper.IsInAnyRole(HttpContext.Session, new[] { "Doctor", "Manager", "Staff", "Customer" }))
             {
                 return RedirectToPage("/Index");
             }
@@ -41,30 +44,65 @@ namespace VetClinic.Web.Pages.MedicalRecords
             try
             {
                 var userId = SessionHelper.GetUserId(HttpContext.Session);
-                var userRole = SessionHelper.GetUserRole(HttpContext.Session);
+                userRole = SessionHelper.GetUserRole(HttpContext.Session);
 
                 if (PetId.HasValue)
                 {
                     // Get medical records for specific pet
                     MedicalRecords = await _medicalRecordService.GetMedicalRecordsByPetAsync(PetId.Value);
+
+                    // For customers, verify they own this pet
+                    if (userRole == "Customer" && userId.HasValue)
+                    {
+                        var pet = await _petService.GetPetByIdAsync(PetId.Value);
+                        if (pet == null || pet.OwnerId != userId.Value)
+                        {
+                            TempData["ErrorMessage"] = "You can only view medical records for your own pets.";
+                            return RedirectToPage("/Pets");
+                        }
+                    }
                 }
                 else if (!string.IsNullOrEmpty(SearchTerm))
                 {
-                    // Search medical records - use basic filtering for now
-                    var allRecords = await _medicalRecordService.GetAllMedicalRecordsAsync();
-                    MedicalRecords = allRecords.Where(r => 
-                        (r.Pet?.Name?.Contains(SearchTerm, StringComparison.OrdinalIgnoreCase) == true) ||
-                        (r.Diagnosis?.Contains(SearchTerm, StringComparison.OrdinalIgnoreCase) == true) ||
-                        (r.TreatmentNotes?.Contains(SearchTerm, StringComparison.OrdinalIgnoreCase) == true));
+                    // Search medical records based on user role
+                    if (userRole == "Customer" && userId.HasValue)
+                    {
+                        // Customers can only search their own pets' records
+                        var customerPets = await _petService.GetPetsByOwnerIdAsync(userId.Value);
+                        var petIds = customerPets.Select(p => p.Id).ToList();
+                        var allRecords = await _medicalRecordService.GetAllMedicalRecordsAsync();
+                        MedicalRecords = allRecords.Where(r =>
+                            petIds.Contains(r.PetId) &&
+                            ((r.Pet?.Name?.Contains(SearchTerm, StringComparison.OrdinalIgnoreCase) == true) ||
+                             (r.Diagnosis?.Contains(SearchTerm, StringComparison.OrdinalIgnoreCase) == true) ||
+                             (r.TreatmentNotes?.Contains(SearchTerm, StringComparison.OrdinalIgnoreCase) == true)));
+                    }
+                    else
+                    {
+                        // Staff can search all records
+                        var allRecords = await _medicalRecordService.GetAllMedicalRecordsAsync();
+                        MedicalRecords = allRecords.Where(r =>
+                            (r.Pet?.Name?.Contains(SearchTerm, StringComparison.OrdinalIgnoreCase) == true) ||
+                            (r.Diagnosis?.Contains(SearchTerm, StringComparison.OrdinalIgnoreCase) == true) ||
+                            (r.TreatmentNotes?.Contains(SearchTerm, StringComparison.OrdinalIgnoreCase) == true));
+                    }
                 }
                 else if (userRole == "Doctor" && userId.HasValue)
                 {
                     // Show medical records for appointments with this doctor
                     MedicalRecords = await _medicalRecordService.GetMedicalRecordsByDoctorAsync(userId.Value);
                 }
+                else if (userRole == "Customer" && userId.HasValue)
+                {
+                    // Customers see medical records for all their pets
+                    var customerPets = await _petService.GetPetsByOwnerIdAsync(userId.Value);
+                    var petIds = customerPets.Select(p => p.Id).ToList();
+                    var allRecords = await _medicalRecordService.GetAllMedicalRecordsAsync();
+                    MedicalRecords = allRecords.Where(r => petIds.Contains(r.PetId));
+                }
                 else
                 {
-                    // Show all medical records (for managers)
+                    // Show all medical records (for managers and staff)
                     MedicalRecords = await _medicalRecordService.GetAllMedicalRecordsAsync();
                 }
             }
