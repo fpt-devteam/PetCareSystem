@@ -11,6 +11,7 @@ namespace VetClinic.Service.Services
         private readonly IInvoiceRepository _invoiceRepository;
         private readonly IVaccinationRepository _vaccinationRepository;
         private readonly IFeedbackRepository _feedbackRepository;
+        private readonly IMedicalRecordRepository _medicalRecordRepository;
 
         public DashboardService(
             IPetRepository petRepository,
@@ -18,7 +19,8 @@ namespace VetClinic.Service.Services
             IUserRepository userRepository,
             IInvoiceRepository invoiceRepository,
             IVaccinationRepository vaccinationRepository,
-            IFeedbackRepository feedbackRepository)
+            IFeedbackRepository feedbackRepository,
+            IMedicalRecordRepository medicalRecordRepository)
         {
             _petRepository = petRepository;
             _appointmentRepository = appointmentRepository;
@@ -26,6 +28,7 @@ namespace VetClinic.Service.Services
             _invoiceRepository = invoiceRepository;
             _vaccinationRepository = vaccinationRepository;
             _feedbackRepository = feedbackRepository;
+            _medicalRecordRepository = medicalRecordRepository;
         }
 
         public async Task<int> GetTotalPetsAsync()
@@ -265,7 +268,6 @@ namespace VetClinic.Service.Services
             }
             catch (Exception ex)
             {
-                // Return safe defaults if there's an error
                 Console.WriteLine($"Error in GetCustomerDashboardAsync: {ex.Message}");
                 return new
                 {
@@ -360,6 +362,231 @@ namespace VetClinic.Service.Services
                     UpcomingAppointments = 0,
                     TodaySchedule = new List<object>()
                 };
+            }
+        }
+
+        public async Task<object> GetDoctorMonthlyPerformanceAsync(int doctorId, int year, int month)
+        {
+            try
+            {
+                var startDate = new DateTime(year, month, 1);
+                var endDate = startDate.AddMonths(1).AddDays(-1);
+
+                var doctor = await _userRepository.GetByIdAsync(doctorId);
+                if (doctor == null || doctor.Role != "Doctor")
+                    throw new ArgumentException("Doctor not found");
+
+                var appointments = await _appointmentRepository.GetAppointmentsByDoctorAsync(doctorId, startDate);
+                var monthlyAppointments = appointments
+                    .Where(a => a.AppointmentTime >= startDate && a.AppointmentTime <= endDate)
+                    .ToList();
+
+                var invoiceIds = monthlyAppointments.Select(a => a.Id).ToList();
+                var invoices = await _invoiceRepository.GetInvoicesByDateRangeAsync(startDate, endDate);
+                var monthlyRevenue = invoices
+                    .Where(i => invoiceIds.Contains(i.AppointmentId) && i.Status == "Paid")
+                    .Sum(i => i.TotalAmount);
+
+                var feedback = await _feedbackRepository.GetFeedbackByDoctorAsync(doctorId);
+                var monthlyFeedback = feedback
+                    .Where(f => f.CreatedDate >= startDate && f.CreatedDate <= endDate);
+                var averageRating = monthlyFeedback.Any() ? monthlyFeedback.Average(f => f.Rating) : 0;
+
+                return new
+                {
+                    DoctorName = doctor.FullName,
+                    TotalAppointments = monthlyAppointments.Count,
+                    CompletedAppointments = monthlyAppointments.Count(a => a.Status == "Completed"),
+                    CancelledAppointments = monthlyAppointments.Count(a => a.Status == "Cancelled"),
+                    Revenue = monthlyRevenue,
+                    AverageRating = averageRating,
+                    Month = startDate.ToString("MMM yyyy")
+                };
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error getting doctor monthly performance: {ex.Message}");
+                return new
+                {
+                    DoctorName = "Unknown",
+                    TotalAppointments = 0,
+                    CompletedAppointments = 0,
+                    CancelledAppointments = 0,
+                    Revenue = 0m,
+                    AverageRating = 0.0,
+                    Month = $"{year}-{month:00}"
+                };
+            }
+        }
+
+        public async Task<object> GetPetHealthTimelineAsync(int petId, DateTime? startDate = null, DateTime? endDate = null)
+        {
+            try
+            {
+                var pet = await _petRepository.GetByIdAsync(petId);
+                if (pet == null)
+                    throw new ArgumentException("Pet not found");
+
+                // Default to last 12 months if no date range provided
+                startDate ??= DateTime.Now.AddYears(-1);
+                endDate ??= DateTime.Now;
+
+                var medicalRecords = await _medicalRecordRepository.GetMedicalRecordsByPetAsync(petId);
+                var vaccinations = await _vaccinationRepository.GetVaccinationsByPetAsync(petId);
+
+                var weightRecords = medicalRecords
+                    .Where(m => m.VisitDate >= startDate && m.VisitDate <= endDate && pet.Weight.HasValue)
+                    .Select(m => new
+                    {
+                        Date = m.VisitDate,
+                        Weight = pet.Weight.Value
+                    })
+                    .OrderBy(m => m.Date)
+                    .ToList();
+
+                var vaccineRecords = vaccinations
+                    .Where(v => v.DueDate >= startDate && v.DueDate <= endDate)
+                    .Select(v => new
+                    {
+                        Date = v.DueDate,
+                        VaccineName = v.VaccineName
+                    })
+                    .OrderBy(v => v.Date)
+                    .ToList();
+
+                return new
+                {
+                    PetName = pet.Name,
+                    WeightHistory = weightRecords,
+                    VaccinationHistory = vaccineRecords,
+                    DateRange = new
+                    {
+                        StartDate = startDate.Value.ToString("yyyy-MM-dd"),
+                        EndDate = endDate.Value.ToString("yyyy-MM-dd")
+                    }
+                };
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error getting pet health timeline: {ex.Message}");
+                return new
+                {
+                    PetName = "Unknown",
+                    WeightHistory = new List<object>(),
+                    VaccinationHistory = new List<object>(),
+                    DateRange = new
+                    {
+                        StartDate = startDate?.ToString("yyyy-MM-dd") ?? DateTime.Now.AddYears(-1).ToString("yyyy-MM-dd"),
+                        EndDate = endDate?.ToString("yyyy-MM-dd") ?? DateTime.Now.ToString("yyyy-MM-dd")
+                    }
+                };
+            }
+        }
+
+        public async Task<object> GetMonthlyRevenueAsync(DateTime? startDate = null, DateTime? endDate = null)
+        {
+            try
+            {
+                startDate ??= DateTime.Now.AddMonths(-12);
+                endDate ??= DateTime.Now;
+
+                var invoices = await _invoiceRepository.GetInvoicesByDateRangeAsync(startDate.Value, endDate.Value);
+
+                return invoices
+                    .Where(i => i.Status == "Paid")
+                    .GroupBy(i => new { i.CreatedDate.Year, i.CreatedDate.Month })
+                    .Select(g => new
+                    {
+                        Month = $"{g.Key.Year}-{g.Key.Month:00}",
+                        Revenue = g.Sum(i => i.TotalAmount)
+                    })
+                    .OrderBy(x => x.Month)
+                    .ToList();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error getting monthly revenue: {ex.Message}");
+                return new List<object>();
+            }
+        }
+
+        public async Task<object> GetAppointmentStatusAsync(DateTime? startDate = null, DateTime? endDate = null)
+        {
+            try
+            {
+                startDate ??= DateTime.Now.AddMonths(-1);
+                endDate ??= DateTime.Now;
+
+                var appointments = await _appointmentRepository.GetAllAsync();
+                appointments = appointments.Where(a => a.AppointmentTime >= startDate && a.AppointmentTime <= endDate);
+
+                return new
+                {
+                    Scheduled = appointments.Count(a => a.Status == "Scheduled"),
+                    Completed = appointments.Count(a => a.Status == "Completed"),
+                    Cancelled = appointments.Count(a => a.Status == "Cancelled")
+                };
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error getting appointment status: {ex.Message}");
+                return new
+                {
+                    Scheduled = 0,
+                    Completed = 0,
+                    Cancelled = 0
+                };
+            }
+        }
+
+        public async Task<object> GetPetSpeciesDistributionAsync()
+        {
+            try
+            {
+                var pets = await _petRepository.GetAllAsync();
+
+                return pets
+                    .GroupBy(p => p.Species)
+                    .Select(g => new
+                    {
+                        Species = g.Key,
+                        Count = g.Count()
+                    })
+                    .OrderByDescending(x => x.Count)
+                    .ToList();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error getting pet species distribution: {ex.Message}");
+                return new List<object>();
+            }
+        }
+
+        public async Task<object> GetTopServicesAsync(DateTime? startDate = null, DateTime? endDate = null)
+        {
+            try
+            {
+                startDate ??= DateTime.Now.AddMonths(-1);
+                endDate ??= DateTime.Now;
+
+                var appointments = await _appointmentRepository.GetAllAsync();
+                appointments = appointments.Where(a => a.AppointmentTime >= startDate && a.AppointmentTime <= endDate);
+
+                return appointments
+                    .GroupBy(a => a.Service)
+                    .Select(g => new
+                    {
+                        ServiceName = g.Key?.Name ?? "Unknown",
+                        Count = g.Count()
+                    })
+                    .OrderByDescending(x => x.Count)
+                    .Take(5)
+                    .ToList();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error getting top services: {ex.Message}");
+                return new List<object>();
             }
         }
     }

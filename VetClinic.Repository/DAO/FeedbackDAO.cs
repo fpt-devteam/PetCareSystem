@@ -81,5 +81,13 @@ namespace VetClinic.Repository.DAO
                 .Take(count)
                 .ToListAsync();
         }
+
+        public async Task<IEnumerable<Feedback>> GetFeedbackByDoctorAsync(int doctorId)
+        {
+            return await _dbSet
+                .Include(f => f.Appointment)
+                .Where(f => f.Appointment.DoctorId == doctorId)
+                .ToListAsync();
+        }
     }
 }

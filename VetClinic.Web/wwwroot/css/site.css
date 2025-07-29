@@ -1,22 +1,189 @@
-html {
-  font-size: 14px;
-}
-
-@media (min-width: 768px) {
-  html {
-    font-size: 16px;
-  }
-}
-
-.btn:focus, .btn:active:focus, .btn-link.nav-link:focus, .form-control:focus, .form-check-input:focus {
-  box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
-}
-
-html {
-  position: relative;
-  min-height: 100%;
-}
-
+/* General styles */
 body {
-  margin-bottom: 60px;
+    font-family: 'Arial', sans-serif;
+    background-color: #f4f7fa;
+    color: #333;
 }
+
+.container-fluid {
+    padding: 20px;
+}
+
+/* Breadcrumb */
+.breadcrumb {
+    background-color: #fff;
+    border-radius: 5px;
+    padding: 10px 15px;
+    margin-bottom: 20px;
+}
+
+/* Card styles */
+.card {
+    border: none;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    margin-bottom: 20px;
+    transition: transform 0.2s ease-in-out;
+}
+
+    .card:hover {
+        transform: translateY(-2px);
+    }
+
+.card-header {
+    background-color: #fff;
+    border-bottom: 1px solid #e9ecef;
+    padding: 15px 20px;
+}
+
+.card-body {
+    padding: 20px;
+}
+
+.card.bg-primary, .card.bg-success, .card.bg-info, .card.bg-warning {
+    color: #fff;
+}
+
+    .card.bg-primary h3, .card.bg-success h3, .card.bg-info h3, .card.bg-warning h3 {
+        margin: 0;
+        font-size: 2rem;
+    }
+
+/* Form styles */
+.form-control, .form-select {
+    border-radius: 5px;
+    border: 1px solid #ced4da;
+    padding: 8px;
+    transition: border-color 0.2s ease-in-out;
+}
+
+    .form-control:focus, .form-select:focus {
+        border-color: #007bff;
+        box-shadow: 0 0 5px rgba(0, 123, 255, 0.3);
+    }
+
+.form-label {
+    font-weight: 500;
+    margin-bottom: 5px;
+}
+
+.btn-primary {
+    background-color: #007bff;
+    border-color: #007bff;
+    border-radius: 5px;
+    padding: 8px 16px;
+    transition: background-color 0.2s ease-in-out;
+}
+
+    .btn-primary:hover {
+        background-color: #0056b3;
+        border-color: #0056b3;
+    }
+
+/* Chart container */
+.chart-container {
+    position: relative;
+    margin: 20px auto;
+    width: 100%;
+    max-width: 800px;
+    height: 400px;
+}
+
+@media (max-width: 768px) {
+    .chart-container {
+        height: 300px;
+    }
+}
+
+/* Alerts */
+.alert {
+    border-radius: 5px;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+}
+
+.alert-success {
+    background-color: #d4edda;
+    color: #155724;
+}
+
+.alert-danger {
+    background-color: #f8d7da;
+    color: #721c24;
+}
+
+.alert .fas {
+    margin-right: 10px;
+}
+
+/* Responsive adjustments */
+@media (max-width: 576px) {
+    .card-body {
+        padding: 15px;
+    }
+
+    .card-header {
+        padding: 10px 15px;
+    }
+
+    .form-control, .form-select {
+        font-size: 0.9rem;
+    }
+
+    .btn-primary {
+        font-size: 0.9rem;
+        padding: 6px 12px;
+    }
+
+    .chart-container {
+        height: 250px;
+    }
+}
+
+/* Icon styles */
+.fas {
+    margin-right: 8px;
+}
+
+/* Specific chart styles */
+canvas#monthlyRevenueChart, canvas#appointmentStatusChart, canvas#petSpeciesChart,
+canvas#topServicesChart, canvas#doctorPerformanceChart, canvas#petHealthChart {
+    max-width: 100%;
+    max-height: 400px;
+}
+
+/* Table styles (for potential future use) */
+.table {
+    border-radius: 5px;
+    overflow: hidden;
+}
+
+    .table th, .table td {
+        padding: 12px;
+        vertical-align: middle;
+    }
+
+    .table thead {
+        background-color: #007bff;
+        color: #fff;
+    }
+
+    .table tbody tr:hover {
+        background-color: #f8f9fa;
+    }
+
+/* Export button styles */
+.btn-export {
+    background-color: #28a745;
+    border-color: #28a745;
+    color: #fff;
+    border-radius: 5px;
+    padding: 8px 16px;
+    margin-top: 10px;
+}
+
+    .btn-export:hover {
+        background-color: #218838;
+        border-color: #218838;
+    }

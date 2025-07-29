@@ -18,5 +18,8 @@ namespace VetClinic.Repository.Repositories
         Task<IEnumerable<Vaccination>> GetUpcomingVaccinationsAsync(int days = 30);
         Task<bool> MarkVaccinationCompleteAsync(int vaccinationId, DateTime completedDate);
         Task<IEnumerable<Vaccination>> GetVaccinationsByStatusAsync(string status);
+
+
+
     }
 }
