@@ -18,6 +18,8 @@ namespace VetClinic.Service
             services.AddScoped<IMedicalRecordService, MedicalRecordService>();
             services.AddScoped<IBlockedSlotService, BlockedSlotService>();
             services.AddScoped<IDoctorAvailabilityService, DoctorAvailabilityService>();
+            services.AddScoped<IAuditService, AuditService>();
+            services.AddScoped<ILabResultService, LabResultService>();
 
             // Add remaining service registrations for complete implementation
             // These would need their implementations created for full functionality

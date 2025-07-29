@@ -3,11 +3,24 @@ using VetClinic.Service;
 using VetClinic.Repository.Data;
 using VetClinic.Web.Hubs;
 using VetClinic.Web.Services;
+using Microsoft.AspNetCore.Server.Kestrel.Core;
+using Microsoft.AspNetCore.Server.IIS;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddRazorPages();
+
+// Configure request size limits for file uploads
+builder.Services.Configure<IISServerOptions>(options =>
+{
+    options.MaxRequestBodySize = 50 * 1024 * 1024; // 50MB
+});
+
+builder.Services.Configure<KestrelServerOptions>(options =>
+{
+    options.Limits.MaxRequestBodySize = 50 * 1024 * 1024; // 50MB
+});
 
 // Add SignalR
 builder.Services.AddSignalR();
@@ -39,7 +52,7 @@ if (app.Environment.IsDevelopment())
         await DbSeeder.SeedAsync(context);
     }
 }
-        
+
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
 {
@@ -52,6 +65,8 @@ app.UseHttpsRedirection();
 app.UseStaticFiles();
 
 app.UseRouting();
+
+
 
 app.UseSession();
 
