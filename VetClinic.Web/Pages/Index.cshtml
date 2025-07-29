@@ -1,315 +1,358 @@
 ﻿@page
 @model IndexModel
 @{
-    ViewData["Title"] = "Dashboard";
+    ViewData["Title"] = "VetClinic - Professional Pet Care Services";
 }
 
-<div class="container-fluid">
-    <div class="row">
-        <div class="col-12">
-            <h1 class="mb-4">
-                <i class="fas fa-tachometer-alt me-2"></i>
-                @Model.UserRole Dashboard
-            </h1>
+<!-- Hero Section -->
+<section class="hero-section position-relative overflow-hidden">
+    <div class="hero-background"></div>
+    <div class="container">
+        <div class="row align-items-center min-vh-100">
+            <div class="col-lg-6">
+                <div class="hero-content text-white">
+                    <h1 class="display-4 fw-bold mb-4 animate__animated animate__fadeInUp">
+                        Professional Pet Care
+                    </h1>
+                    <p class="lead mb-4 animate__animated animate__fadeInUp animate__delay-1s">
+                        Trusted veterinary clinic with experienced doctors, modern equipment, and comprehensive care services for your beloved pets.
+                    </p>
+                    <div class="hero-buttons animate__animated animate__fadeInUp animate__delay-2s">
+                        <a href="#services" class="btn btn-primary btn-lg me-3 mb-2">
+                            <i class="fas fa-calendar-plus me-2"></i>Book Appointment
+                        </a>
+                        <a href="#contact" class="btn btn-outline-light btn-lg mb-2">
+                            <i class="fas fa-phone me-2"></i>Contact Us
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-6">
+                <div class="hero-image text-center animate__animated animate__fadeInRight">
+                    <img src="https://images.unsplash.com/photo-1558618666-fcd25c85cd64?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" 
+                         alt="Veterinary Care" class="img-fluid rounded-3 shadow-lg">
+                </div>
+            </div>
         </div>
     </div>
+</section>
 
-    @if (Model.UserRole == "Admin" || Model.UserRole == "Manager")
-    {
-        var managerData = Model.DashboardData as dynamic;
-        <div class="row mb-4">
-            <div class="col-md-3">
-                <div class="card bg-primary text-white">
-                    <div class="card-body">
-                        <div class="d-flex justify-content-between">
-                            <div>
-                                @{
-                                    decimal totalRevenue = 0m;
-                                    try { totalRevenue = managerData?.TotalRevenue ?? 0m; } catch { }
-                                }
-                                <h4>@totalRevenue.ToString("C")</h4>
-                                <p class="mb-0">Monthly Revenue</p>
-                            </div>
-                            <i class="fas fa-dollar-sign fa-2x"></i>
-                        </div>
+<!-- Features Section -->
+<section class="features-section py-5 bg-light">
+    <div class="container">
+        <div class="row text-center mb-5">
+            <div class="col-12">
+                <h2 class="display-5 fw-bold text-primary mb-3">Why Choose Us?</h2>
+                <p class="lead text-muted">Committed to providing the best pet care services</p>
+            </div>
+        </div>
+        <div class="row g-4">
+            <div class="col-md-4">
+                <div class="feature-card text-center p-4 h-100">
+                    <div class="feature-icon mb-3">
+                        <i class="fas fa-user-md fa-3x text-primary"></i>
                     </div>
+                    <h4 class="fw-bold mb-3">Expert Veterinarians</h4>
+                    <p class="text-muted">Team of experienced veterinarians with specialized training and dedicated care for each patient.</p>
                 </div>
             </div>
-            <div class="col-md-3">
-                <div class="card bg-success text-white">
-                    <div class="card-body">
-                        <div class="d-flex justify-content-between">
-                            <div>
-                                @{
-                                    int totalCustomers = 0;
-                                    try { totalCustomers = managerData?.TotalCustomers ?? 0; } catch { }
-                                }
-                                <h4>@totalCustomers</h4>
-                                <p class="mb-0">Total Customers</p>
-                            </div>
-                            <i class="fas fa-users fa-2x"></i>
-                        </div>
+            <div class="col-md-4">
+                <div class="feature-card text-center p-4 h-100">
+                    <div class="feature-icon mb-3">
+                        <i class="fas fa-microscope fa-3x text-success"></i>
                     </div>
+                    <h4 class="fw-bold mb-3">Modern Equipment</h4>
+                    <p class="text-muted">Advanced medical equipment and technology for accurate diagnosis and effective treatment.</p>
                 </div>
             </div>
-            <div class="col-md-3">
-                <div class="card bg-info text-white">
-                    <div class="card-body">
-                        <div class="d-flex justify-content-between">
-                            <div>
-                                @{
-                                    int totalAppointments = 0;
-                                    try { totalAppointments = managerData?.TotalAppointments ?? 0; } catch { }
-                                }
-                                <h4>@totalAppointments</h4>
-                                <p class="mb-0">Total Appointments</p>
-                            </div>
-                            <i class="fas fa-calendar fa-2x"></i>
-                        </div>
+            <div class="col-md-4">
+                <div class="feature-card text-center p-4 h-100">
+                    <div class="feature-icon mb-3">
+                        <i class="fas fa-heart fa-3x text-danger"></i>
                     </div>
-                </div>
-            </div>
-            <div class="col-md-3">
-                <div class="card bg-warning text-white">
-                    <div class="card-body">
-                        <div class="d-flex justify-content-between">
-                            <div>
-                                @{
-                                    double averageRating = 0.0;
-                                    try { averageRating = managerData?.AverageRating ?? 0.0; } catch { }
-                                }
-                                <h4>@averageRating.ToString("F1")/5</h4>
-                                <p class="mb-0">Average Rating</p>
-                            </div>
-                            <i class="fas fa-star fa-2x"></i>
-                        </div>
-                    </div>
+                    <h4 class="fw-bold mb-3">Compassionate Care</h4>
+                    <p class="text-muted">24/7 care services, pet health monitoring, and comprehensive nutritional consultation.</p>
                 </div>
             </div>
         </div>
+    </div>
+</section>
 
-        <div class="row">
-            <div class="col-md-6">
-                <div class="card">
-                    <div class="card-header">
-                        <h5><i class="fas fa-exclamation-triangle me-2"></i>Alerts</h5>
-                    </div>
-                    <div class="card-body">
-                        <div class="alert alert-warning">
-                            @{
-                                int dueVaccinations = 0;
-                                try { dueVaccinations = managerData?.DueVaccinations ?? 0; } catch { }
-                            }
-                            <strong>@dueVaccinations</strong> vaccinations due
-                        </div>
-                        <div class="alert alert-danger">
-                            @{
-                                int unpaidInvoices = 0;
-                                try { unpaidInvoices = managerData?.UnpaidInvoices ?? 0; } catch { }
-                            }
-                            <strong>@unpaidInvoices</strong> unpaid invoices
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-6">
-                <div class="card">
-                    <div class="card-header">
-                        <h5><i class="fas fa-chart-line me-2"></i>Quick Actions</h5>
-                    </div>
-                    <div class="card-body">
-                        <a href="/Appointments/Create" class="btn btn-primary mb-2 d-block">
-                            <i class="fas fa-plus me-2"></i>New Appointment
-                        </a>
-                        <a href="/Services" class="btn btn-secondary mb-2 d-block">
-                            <i class="fas fa-cogs me-2"></i>Manage Services
-                        </a>
-                        <a href="/Reports" class="btn btn-info d-block">
-                            <i class="fas fa-chart-bar me-2"></i>View Reports
-                        </a>
-                    </div>
-                </div>
+<!-- Services Section -->
+<section id="services" class="services-section py-5">
+    <div class="container">
+        <div class="row text-center mb-5">
+            <div class="col-12">
+                <h2 class="display-5 fw-bold text-primary mb-3">Our Services</h2>
+                <p class="lead text-muted">Diverse healthcare services for your pets</p>
             </div>
         </div>
-    }
-    else if (Model.UserRole == "Doctor")
-    {
-        var doctorData = Model.DashboardData as dynamic;
-        <div class="row mb-4">
-            <div class="col-md-6">
-                <div class="card bg-primary text-white">
-                    <div class="card-body">
-                        <div class="d-flex justify-content-between">
-                            <div>
-                                @{
-                                    int todayAppointments = 0;
-                                    try { todayAppointments = doctorData?.TodayAppointments ?? 0; } catch { }
-                                }
-                                <h4>@todayAppointments</h4>
-                                <p class="mb-0">Today's Appointments</p>
-                            </div>
-                            <i class="fas fa-calendar-day fa-2x"></i>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-6">
-                <div class="card bg-info text-white">
-                    <div class="card-body">
-                        <div class="d-flex justify-content-between">
-                            <div>
-                                @{
-                                    int upcomingAppointments = 0;
-                                    try { upcomingAppointments = doctorData?.UpcomingAppointments ?? 0; } catch { }
-                                }
-                                <h4>@upcomingAppointments</h4>
-                                <p class="mb-0">Upcoming This Week</p>
-                            </div>
-                            <i class="fas fa-clock fa-2x"></i>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="card">
-            <div class="card-header">
-                <h5><i class="fas fa-calendar-alt me-2"></i>Today's Schedule</h5>
-            </div>
-            <div class="card-body">
-                <div class="list-group">
-                    <!-- Today's appointments will be listed here -->
-                    <div class="list-group-item">
-                        <div class="d-flex w-100 justify-content-between">
-                            <h6 class="mb-1">No appointments scheduled for today</h6>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    }
-    else if (Model.UserRole == "Customer")
-    {
-        var customerData = Model.DashboardData as dynamic;
-        <div class="row mb-4">
-            <div class="col-md-6">
-                <div class="card bg-success text-white">
-                    <div class="card-body">
-                        <div class="d-flex justify-content-between">
-                            <div>
-                                @{
-                                    int totalPets = 0;
-                                    try { totalPets = customerData?.TotalPets ?? 0; } catch { }
-                                }
-                                <h4>@totalPets</h4>
-                                <p class="mb-0">My Pets</p>
-                            </div>
-                            <i class="fas fa-paw fa-2x"></i>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-6">
-                <div class="card bg-primary text-white">
-                    <div class="card-body">
-                        <div class="d-flex justify-content-between">
-                            <div>
-                                @{
-                                    int upcomingAppointments = 0;
-                                    try { upcomingAppointments = customerData?.UpcomingAppointments ?? 0; } catch { }
-                                }
-                                <h4>@upcomingAppointments</h4>
-                                <p class="mb-0">Upcoming Appointments</p>
-                            </div>
-                            <i class="fas fa-calendar-check fa-2x"></i>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="row">
-            <div class="col-md-8">
-                <div class="card">
-                    <div class="card-header">
-                        <h5><i class="fas fa-history me-2"></i>Recent Appointments</h5>
-                    </div>
-                    <div class="card-body">
-                        <div class="list-group">
-                            <div class="list-group-item">
-                                <div class="d-flex w-100 justify-content-between">
-                                    <h6 class="mb-1">No recent appointments</h6>
+        <div class="row g-4">
+            @if (Model.Services != null && Model.Services.Any())
+            {
+                @foreach (var service in Model.Services.Take(6))
+                {
+                    <div class="col-lg-4 col-md-6">
+                        <div class="service-card h-100">
+                            <div class="service-card-body p-4">
+                                <div class="service-icon mb-3">
+                                    <i class="fas fa-stethoscope fa-2x text-primary"></i>
+                                </div>
+                                <h5 class="fw-bold mb-3">@service.Name</h5>
+                                <p class="text-muted mb-3">@(service.Description ?? "Professional pet care service")</p>
+                                <div class="service-details d-flex justify-content-between align-items-center">
+                                    <span class="badge bg-primary">@service.DurationMinutes min</span>
+                                    <span class="fw-bold text-success">$@service.Price.ToString("N0")</span>
                                 </div>
                             </div>
                         </div>
                     </div>
+                }
+            }
+            else
+            {
+                <div class="col-12 text-center">
+                    <p class="text-muted">Loading services...</p>
+                </div>
+            }
+        </div>
+        <div class="row mt-4">
+            <div class="col-12 text-center">
+                <a href="/Services" class="btn btn-outline-primary btn-lg">
+                    <i class="fas fa-list me-2"></i>View All Services
+                </a>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Doctors Section -->
+<section class="doctors-section py-5 bg-light">
+    <div class="container">
+        <div class="row text-center mb-5">
+            <div class="col-12">
+                <h2 class="display-5 fw-bold text-primary mb-3">Our Veterinarians</h2>
+                <p class="lead text-muted">Experienced and dedicated medical professionals</p>
+            </div>
+        </div>
+        <div class="row g-4">
+            @if (Model.Doctors != null && Model.Doctors.Any())
+            {
+                @foreach (var doctor in Model.Doctors.Take(4))
+                {
+                    <div class="col-lg-3 col-md-6">
+                        <div class="doctor-card text-center h-100">
+                            <div class="doctor-avatar mb-3">
+                                <div class="avatar-placeholder">
+                                    <i class="fas fa-user-md fa-3x text-primary"></i>
+                                </div>
+                            </div>
+                            <h5 class="fw-bold mb-2">@doctor.FullName</h5>
+                            <p class="text-muted mb-3">Veterinarian</p>
+                            <div class="doctor-info">
+                                @if (!string.IsNullOrEmpty(doctor.PhoneNumber))
+                                {
+                                    <p class="small text-muted mb-1">
+                                        <i class="fas fa-phone me-2"></i>@doctor.PhoneNumber
+                                    </p>
+                                }
+                                @if (!string.IsNullOrEmpty(doctor.Email))
+                                {
+                                    <p class="small text-muted mb-0">
+                                        <i class="fas fa-envelope me-2"></i>@doctor.Email
+                                    </p>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                }
+            }
+            else
+            {
+                <div class="col-12 text-center">
+                    <p class="text-muted">Loading doctor information...</p>
+                </div>
+            }
+        </div>
+    </div>
+</section>
+
+<!-- Statistics Section -->
+<section class="stats-section py-5 bg-primary text-white">
+    <div class="container">
+        <div class="row text-center">
+            <div class="col-md-3 col-6 mb-4">
+                <div class="stat-item">
+                    <div class="stat-number display-4 fw-bold mb-2">@Model.TotalDoctors</div>
+                    <div class="stat-label">Doctors</div>
                 </div>
             </div>
-            <div class="col-md-4">
-                <div class="card">
-                    <div class="card-header">
-                        <h5><i class="fas fa-plus me-2"></i>Quick Actions</h5>
-                    </div>
-                    <div class="card-body">
-                        <a href="/Pets/Create" class="btn btn-success mb-2 d-block">
-                            <i class="fas fa-plus me-2"></i>Add Pet
-                        </a>
-                        <a href="/Appointments/Create" class="btn btn-primary mb-2 d-block">
-                            <i class="fas fa-calendar-plus me-2"></i>Book Appointment
-                        </a>
-                        <a href="/Pets" class="btn btn-info d-block">
-                            <i class="fas fa-paw me-2"></i>View My Pets
-                        </a>
-                    </div>
+            <div class="col-md-3 col-6 mb-4">
+                <div class="stat-item">
+                    <div class="stat-number display-4 fw-bold mb-2">@Model.TotalServices</div>
+                    <div class="stat-label">Services</div>
+                </div>
+            </div>
+            <div class="col-md-3 col-6 mb-4">
+                <div class="stat-item">
+                    <div class="stat-number display-4 fw-bold mb-2">@Model.TotalCustomers</div>
+                    <div class="stat-label">Customers</div>
+                </div>
+            </div>
+            <div class="col-md-3 col-6 mb-4">
+                <div class="stat-item">
+                    <div class="stat-number display-4 fw-bold mb-2">@Model.TotalPets</div>
+                    <div class="stat-label">Pets</div>
                 </div>
             </div>
         </div>
-    }
-    else
-    {
-        <!-- Default view for unauthenticated or staff -->
-        <div class="text-center">
-            <h1 class="display-4">VetClinic Management System</h1>
-            <p class="lead">Comprehensive Pet Care Management Solution</p>
+    </div>
+</section>
+
+<!-- Contact Section -->
+<section id="contact" class="contact-section py-5">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-6">
+                <h2 class="display-5 fw-bold text-primary mb-4">Contact Us</h2>
+                <p class="lead mb-4">Contact us now for consultation and to schedule an appointment for your pet</p>
+                
+                <div class="contact-info">
+                    <div class="contact-item d-flex align-items-center mb-3">
+                        <div class="contact-icon me-3">
+                            <i class="fas fa-map-marker-alt fa-2x text-primary"></i>
+                        </div>
+                        <div>
+                            <h6 class="fw-bold mb-1">Address</h6>
+                            <p class="text-muted mb-0">123 ABC Street, District 1, Ho Chi Minh City</p>
+                        </div>
+                    </div>
+                    
+                    <div class="contact-item d-flex align-items-center mb-3">
+                        <div class="contact-icon me-3">
+                            <i class="fas fa-phone fa-2x text-primary"></i>
+                        </div>
+                        <div>
+                            <h6 class="fw-bold mb-1">Phone</h6>
+                            <p class="text-muted mb-0">(028) 1234-5678</p>
+                        </div>
+                    </div>
+                    
+                    <div class="contact-item d-flex align-items-center mb-3">
+                        <div class="contact-icon me-3">
+                            <i class="fas fa-envelope fa-2x text-primary"></i>
+                        </div>
+                        <div>
+                            <h6 class="fw-bold mb-1">Email</h6>
+                            <p class="text-muted mb-0">info@vetclinic.com</p>
+                        </div>
+                    </div>
+                    
+                    <div class="contact-item d-flex align-items-center">
+                        <div class="contact-icon me-3">
+                            <i class="fas fa-clock fa-2x text-primary"></i>
+                        </div>
+                        <div>
+                            <h6 class="fw-bold mb-1">Working Hours</h6>
+                            <p class="text-muted mb-0">Monday - Sunday: 8:00 AM - 8:00 PM</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
             
-            <div class="row mt-5">
-                <div class="col-md-4">
-                    <div class="card h-100">
-                        <div class="card-body text-center">
-                            <i class="fas fa-user-plus fa-3x text-primary mb-3"></i>
-                            <h5 class="card-title">User Management</h5>
-                            <p class="card-text">Register and manage user accounts</p>
-                            <a href="/Account/Register" class="btn btn-primary">Register</a>
+            <div class="col-lg-6">
+                <div class="contact-form bg-light p-4 rounded-3">
+                    <h4 class="fw-bold mb-4">Send Message</h4>
+                    <form>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="name" class="form-label">Full Name</label>
+                                <input type="text" class="form-control" id="name" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="phone" class="form-label">Phone Number</label>
+                                <input type="tel" class="form-control" id="phone" required>
+                            </div>
                         </div>
-                    </div>
-                </div>
-                
-                <div class="col-md-4">
-                    <div class="card h-100">
-                        <div class="card-body text-center">
-                            <i class="fas fa-sign-in-alt fa-3x text-success mb-3"></i>
-                            <h5 class="card-title">Login</h5>
-                            <p class="card-text">Access your account</p>
-                            <a href="/Account/Login" class="btn btn-success">Login</a>
+                        <div class="mb-3">
+                            <label for="email" class="form-label">Email</label>
+                            <input type="email" class="form-control" id="email" required>
                         </div>
-                    </div>
-                </div>
-                
-                <div class="col-md-4">
-                    <div class="card h-100">
-                        <div class="card-body text-center">
-                            <i class="fas fa-users fa-3x text-info mb-3"></i>
-                            <h5 class="card-title">Users List</h5>
-                            <p class="card-text">View all registered users</p>
-                            <a href="/Users" class="btn btn-info">View Users</a>
+                        <div class="mb-3">
+                            <label for="message" class="form-label">Message</label>
+                            <textarea class="form-control" id="message" rows="4" required></textarea>
                         </div>
-                    </div>
+                        <button type="submit" class="btn btn-primary btn-lg w-100">
+                            <i class="fas fa-paper-plane me-2"></i>Send Message
+                        </button>
+                    </form>
                 </div>
             </div>
         </div>
-    }
-</div>
+    </div>
+</section>
+
+<!-- Call to Action -->
+<section class="cta-section py-5 bg-primary text-white text-center">
+    <div class="container">
+        <div class="row">
+            <div class="col-12">
+                <h2 class="display-5 fw-bold mb-4">Ready to Care for Your Pet?</h2>
+                <p class="lead mb-4">Schedule an appointment today for free consultation</p>
+                <div class="cta-buttons">
+                    <a href="/Account/Register" class="btn btn-light btn-lg me-3 mb-2">
+                        <i class="fas fa-user-plus me-2"></i>Register Now
+                    </a>
+                    <a href="/Account/Login" class="btn btn-outline-light btn-lg mb-2">
+                        <i class="fas fa-sign-in-alt me-2"></i>Login
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/landing-page.css" />
+}
 
 @section Scripts {
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        // Smooth scrolling for anchor links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+
+        // Add scroll animations
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.style.opacity = '1';
+                    entry.target.style.transform = 'translateY(0)';
+                }
+            });
+        }, observerOptions);
+
+        // Observe elements for animation
+        document.querySelectorAll('.feature-card, .service-card, .doctor-card').forEach(el => {
+            el.style.opacity = '0';
+            el.style.transform = 'translateY(30px)';
+            el.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+            observer.observe(el);
+        });
+    </script>
 }
