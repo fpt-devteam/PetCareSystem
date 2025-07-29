@@ -1,5 +1,5 @@
 @page
-@model IndexModel
+@model VetClinic.Web.Pages.Reports.IndexModel
 @{
     ViewData["Title"] = "Reports & Analytics";
 }
@@ -10,14 +10,14 @@
     {
         <div class="alert alert-success alert-dismissible fade show" role="alert">
             <i class="fas fa-check-circle"></i> @TempData["SuccessMessage"]
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
     }
     @if (TempData["ErrorMessage"] != null)
     {
         <div class="alert alert-danger alert-dismissible fade show" role="alert">
             <i class="fas fa-exclamation-triangle"></i> @TempData["ErrorMessage"]
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
     }
 
@@ -28,13 +28,13 @@
             <nav aria-label="breadcrumb">
                 <ol class="breadcrumb">
                     <li class="breadcrumb-item"><a href="/">Dashboard</a></li>
-                    <li class="breadcrumb-item active">Reports</li>
+                    <li class="breadcrumb-item active" aria-current="page">Reports</li>
                 </ol>
             </nav>
         </div>
     </div>
 
-    <!-- Date Range Filter -->
+    <!-- Date Range and Filters -->
     <div class="row mb-4">
         <div class="col-12">
             <div class="card">
@@ -61,6 +61,8 @@
                                 <option value="financial">Financial</option>
                                 <option value="appointments">Appointments</option>
                                 <option value="pets">Pets & Services</option>
+                                <option value="doctor-performance">Doctor Performance</option>
+                                <option value="pet-health">Pet Health</option>
                             </select>
                         </div>
                         <div class="col-md-3">
@@ -74,328 +76,605 @@
         </div>
     </div>
 
-    <!-- Key Metrics Overview -->
+    <!-- Key Metrics -->
     <div class="row mb-4">
-        <div class="col-md-2">
-            <div class="card text-center bg-primary text-white">
+        <div class="col-md-3">
+            <div class="card text-white bg-primary">
                 <div class="card-body">
-                    <i class="fas fa-paw fa-2x mb-2"></i>
-                    <h4>@Model.TotalPets</h4>
-                    <small>Total Pets</small>
+                    <h6 class="card-title"><i class="fas fa-paw me-2"></i>Total Pets</h6>
+                    <h3>@Model.TotalPets</h3>
                 </div>
             </div>
         </div>
-        <div class="col-md-2">
-            <div class="card text-center bg-success text-white">
+        <div class="col-md-3">
+            <div class="card text-white bg-success">
                 <div class="card-body">
-                    <i class="fas fa-users fa-2x mb-2"></i>
-                    <h4>@Model.TotalCustomers</h4>
-                    <small>Customers</small>
+                    <h6 class="card-title"><i class="fas fa-users me-2"></i>Total Customers</h6>
+                    <h3>@Model.TotalCustomers</h3>
                 </div>
             </div>
         </div>
-        <div class="col-md-2">
-            <div class="card text-center bg-info text-white">
+        <div class="col-md-3">
+            <div class="card text-white bg-info">
                 <div class="card-body">
-                    <i class="fas fa-user-md fa-2x mb-2"></i>
-                    <h4>@Model.TotalDoctors</h4>
-                    <small>Doctors</small>
+                    <h6 class="card-title"><i class="fas fa-user-md me-2"></i>Total Doctors</h6>
+                    <h3>@Model.TotalDoctors</h3>
                 </div>
             </div>
         </div>
-        <div class="col-md-2">
-            <div class="card text-center bg-warning text-white">
+        <div class="col-md-3">
+            <div class="card text-white bg-warning">
                 <div class="card-body">
-                    <i class="fas fa-calendar-check fa-2x mb-2"></i>
-                    <h4>@Model.TotalAppointments</h4>
-                    <small>Appointments</small>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-2">
-            <div class="card text-center bg-secondary text-white">
-                <div class="card-body">
-                    <i class="fas fa-dollar-sign fa-2x mb-2"></i>
-                    <h4>$@Model.TotalRevenue.ToString("N0")</h4>
-                    <small>Revenue</small>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-2">
-            <div class="card text-center bg-dark text-white">
-                <div class="card-body">
-                    <i class="fas fa-star fa-2x mb-2"></i>
-                    <h4>@Model.AverageRating.ToString("F1")</h4>
-                    <small>Avg Rating</small>
+                    <h6 class="card-title"><i class="fas fa-dollar-sign me-2"></i>Total Revenue</h6>
+                    <h3>$@Model.TotalRevenue.ToString("N0")</h3>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Appointment Statistics -->
-    <div class="row mb-4">
-        <div class="col-md-4">
-            <div class="card">
-                <div class="card-header">
-                    <h6 class="mb-0"><i class="fas fa-calendar-day me-2"></i>Today's Appointments</h6>
-                </div>
-                <div class="card-body text-center">
-                    <h3 class="text-primary">@Model.TodayAppointments</h3>
-                    <small class="text-muted">appointments scheduled</small>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-4">
-            <div class="card">
-                <div class="card-header">
-                    <h6 class="mb-0"><i class="fas fa-calendar-week me-2"></i>This Week</h6>
-                </div>
-                <div class="card-body text-center">
-                    <h3 class="text-success">@Model.WeekAppointments</h3>
-                    <small class="text-muted">appointments this week</small>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-4">
-            <div class="card">
-                <div class="card-header">
-                    <h6 class="mb-0"><i class="fas fa-calendar-alt me-2"></i>This Month</h6>
-                </div>
-                <div class="card-body text-center">
-                    <h3 class="text-info">@Model.MonthAppointments</h3>
-                    <small class="text-muted">appointments this month</small>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Charts Row -->
-    <div class="row mb-4">
-        <!-- Monthly Revenue Chart -->
-        <div class="col-md-8">
-            <div class="card">
-                <div class="card-header">
-                    <h6 class="mb-0"><i class="fas fa-chart-line me-2"></i>Monthly Revenue Trend</h6>
-                </div>
-                <div class="card-body">
-                    <canvas id="revenueChart" width="400" height="200"></canvas>
-                </div>
-            </div>
-        </div>
-
-        <!-- Appointment Status Distribution -->
-        <div class="col-md-4">
-            <div class="card">
-                <div class="card-header">
-                    <h6 class="mb-0"><i class="fas fa-chart-pie me-2"></i>Appointment Status</h6>
-                </div>
-                <div class="card-body">
-                    <canvas id="appointmentStatusChart" width="200" height="200"></canvas>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Data Tables Row -->
-    <div class="row mb-4">
-        <!-- Top Services -->
-        <div class="col-md-6">
-            <div class="card">
-                <div class="card-header">
-                    <h6 class="mb-0"><i class="fas fa-star me-2"></i>Top Services</h6>
-                </div>
-                <div class="card-body">
-                    @if (Model.TopServices.Any())
-                    {
-                        <div class="table-responsive">
-                            <table class="table table-sm">
-                                <thead>
-                                    <tr>
-                                        <th>Service</th>
-                                        <th>Count</th>
-                                        <th>Revenue</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    @foreach (var service in Model.TopServices)
-                                    {
-                                        <tr>
-                                            <td>@service.ServiceName</td>
-                                            <td><span class="badge bg-primary">@service.Count</span></td>
-                                            <td class="text-success">$@service.Revenue.ToString("N0")</td>
-                                        </tr>
-                                    }
-                                </tbody>
-                            </table>
+    <!-- Daily Clinic Summary (USS-28) -->
+    @if (Model.ReportType == "overview" || Model.ReportType == "appointments")
+    {
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h6 class="mb-0"><i class="fas fa-calendar-day me-2"></i>Daily Clinic Summary (@Model.DailySummary.Date)</h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-3">
+                                <p><strong>Total Appointments:</strong> @Model.DailySummary.TotalAppointments</p>
+                            </div>
+                            <div class="col-md-3">
+                                <p><strong>Completed:</strong> @Model.DailySummary.CompletedAppointments</p>
+                            </div>
+                            <div class="col-md-3">
+                                <p><strong>Revenue:</strong> $@Model.DailySummary.Revenue.ToString("N0")</p>
+                            </div>
+                            <div class="col-md-3">
+                                <p><strong>Scheduled:</strong> @Model.DailySummary.ScheduledAppointments</p>
+                            </div>
                         </div>
-                    }
-                    else
-                    {
-                        <p class="text-muted text-center">No service data available</p>
-                    }
-                </div>
-            </div>
-        </div>
-
-        <!-- Pet Species Distribution -->
-        <div class="col-md-6">
-            <div class="card">
-                <div class="card-header">
-                    <h6 class="mb-0"><i class="fas fa-paw me-2"></i>Pet Species Distribution</h6>
-                </div>
-                <div class="card-body">
-                    @if (Model.PetSpeciesData.Any())
-                    {
-                        <div class="table-responsive">
-                            <table class="table table-sm">
-                                <thead>
-                                    <tr>
-                                        <th>Species</th>
-                                        <th>Count</th>
-                                        <th>Percentage</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    @{
-                                        var totalPets = Model.PetSpeciesData.Sum(kvp => kvp.Value);
-                                    }
-                                    @foreach (var species in Model.PetSpeciesData.OrderByDescending(kvp => kvp.Value))
-                                    {
-                                        var percentage = totalPets > 0 ? (species.Value * 100.0 / totalPets) : 0;
-                                        <tr>
-                                            <td>@species.Key</td>
-                                            <td><span class="badge bg-info">@species.Value</span></td>
-                                            <td>
-                                                <div class="progress" style="height: 20px;">
-                                                    <div class="progress-bar" role="progressbar" style="width: @percentage.ToString("F1")%">
-                                                        @percentage.ToString("F1")%
-                                                    </div>
-                                                </div>
-                                            </td>
-                                        </tr>
-                                    }
-                                </tbody>
-                            </table>
-                        </div>
-                    }
-                    else
-                    {
-                        <p class="text-muted text-center">No pet data available</p>
-                    }
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Export Options -->
-    <div class="row">
-        <div class="col-12">
-            <div class="card">
-                <div class="card-header">
-                    <h6 class="mb-0"><i class="fas fa-download me-2"></i>Export Options</h6>
-                </div>
-                <div class="card-body">
-                    <div class="btn-group" role="group">
-                        <button type="button" class="btn btn-outline-primary" onclick="exportToPDF()">
-                            <i class="fas fa-file-pdf me-1"></i>Export PDF
-                        </button>
-                        <button type="button" class="btn btn-outline-success" onclick="exportToExcel()">
-                            <i class="fas fa-file-excel me-1"></i>Export Excel
-                        </button>
-                        <button type="button" class="btn btn-outline-info" onclick="printReport()">
-                            <i class="fas fa-print me-1"></i>Print Report
-                        </button>
                     </div>
                 </div>
             </div>
         </div>
-    </div>
+    }
+
+    <!-- Doctor Monthly Performance (USS-20) -->
+    @if (Model.ReportType == "doctor-performance")
+    {
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h6 class="mb-0"><i class="fas fa-user-md me-2"></i>Doctor Monthly Performance</h6>
+                    </div>
+                    <div class="card-body">
+                        <form method="get" class="row g-3 mb-3">
+                            <div class="col-md-3">
+                                <label for="doctorId" class="form-label">Select Doctor</label>
+                                <select name="doctorId" class="form-select">
+                                    @foreach (var doctor in Model.Doctors)
+                                    {
+                                        <option value="@doctor.Id" selected="@(Model.DoctorId == doctor.Id)">@doctor.FullName</option>
+                                    }
+                                </select>
+                            </div>
+                            <div class="col-md-3">
+                                <label for="month" class="form-label">Month</label>
+                                <input name="month" type="month" class="form-control" value="@(Model.YearMonth?.ToString("yyyy-MM"))" />
+                            </div>
+                            <div class="col-md-3">
+                                <button type="submit" class="btn btn-primary mt-3">
+                                    <i class="fas fa-search me-1"></i>View Performance
+                                </button>
+                            </div>
+                        </form>
+                        @if (Model.DoctorPerformance != null)
+                        {
+                            <div class="row">
+                                <div class="col-md-3">
+                                    <p><strong>Doctor:</strong> @Model.DoctorPerformance.DoctorName</p>
+                                </div>
+                                <div class="col-md-3">
+                                    <p><strong>Total Appointments:</strong> @Model.DoctorPerformance.TotalAppointments</p>
+                                </div>
+                                <div class="col-md-3">
+                                    <p><strong>Revenue:</strong> $@Model.DoctorPerformance.Revenue.ToString("N0")</p>
+                                </div>
+                                <div class="col-md-3">
+                                    <p><strong>Average Rating:</strong> @Model.DoctorPerformance.AverageRating.ToString("F1")</p>
+                                </div>
+                            </div>
+                            <div class="chart-container">
+                                <canvas id="doctorPerformanceChart" width="400" height="200"></canvas>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+
+    <!-- Pet Health Timeline Chart (USS-19) -->
+    @if (Model.ReportType == "pet-health")
+    {
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h6 class="mb-0"><i class="fas fa-paw me-2"></i>Pet Health Timeline</h6>
+                    </div>
+                    <div class="card-body">
+                        <form method="get" class="row g-3 mb-3">
+                            <div class="col-md-3">
+                                <label for="petId" class="form-label">Select Pet</label>
+                                <select name="petId" class="form-select">
+                                    @foreach (var pet in Model.Pets)
+                                    {
+                                        <option value="@pet.Id" selected="@(Model.PetId == pet.Id)">@pet.Name (@pet.Species)</option>
+                                    }
+                                </select>
+                            </div>
+                            <div class="col-md-3">
+                                <label for="startDate" class="form-label">Start Date</label>
+                                <input name="startDate" type="date" class="form-control" value="@Model.StartDate?.ToString("yyyy-MM-dd")" />
+                            </div>
+                            <div class="col-md-3">
+                                <label for="endDate" class="form-label">End Date</label>
+                                <input name="endDate" type="date" class="form-control" value="@Model.EndDate?.ToString("yyyy-MM-dd")" />
+                            </div>
+                            <div class="col-md-3">
+                                <button type="submit" class="btn btn-primary mt-3">
+                                    <i class="fas fa-search me-1"></i>View Timeline
+                                </button>
+                            </div>
+                        </form>
+                        @if (Model.PetHealthTimeline != null)
+                        {
+                            <p><strong>Pet:</strong> @Model.PetHealthTimeline.PetName</p>
+                            <div class="chart-container">
+                                <canvas id="petHealthChart" width="400" height="200"></canvas>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+
+    <!-- Monthly Revenue Chart -->
+    @if (Model.ReportType == "overview" || Model.ReportType == "financial")
+    {
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h6 class="mb-0"><i class="fas fa-dollar-sign me-2"></i>Monthly Revenue</h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="chart-container">
+                            <canvas id="monthlyRevenueChart" width="400" height="200"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+
+    <!-- Appointment Status Chart -->
+    @if (Model.ReportType == "overview" || Model.ReportType == "appointments")
+    {
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h6 class="mb-0"><i class="fas fa-calendar-check me-2"></i>Appointment Status</h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="chart-container">
+                            <canvas id="appointmentStatusChart" width="400" height="200"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+
+    <!-- Pet Species Distribution -->
+    @if (Model.ReportType == "overview" || Model.ReportType == "pets")
+    {
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h6 class="mb-0"><i class="fas fa-paw me-2"></i>Pet Species Distribution</h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="chart-container">
+                            <canvas id="petSpeciesChart" width="400" height="200"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+
+    <!-- Top Services -->
+    @if (Model.ReportType == "overview" || Model.ReportType == "pets")
+    {
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h6 class="mb-0"><i class="fas fa-stethoscope me-2"></i>Top Services</h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="chart-container">
+                            <canvas id="topServicesChart" width="400" height="200"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
 </div>
 
 @section Scripts {
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+
     <script>
         // Monthly Revenue Chart
-        const revenueCtx = document.getElementById('revenueChart').getContext('2d');
-        const revenueChart = new Chart(revenueCtx, {
-            type: 'line',
-            data: {
-                labels: [@Html.Raw(string.Join(",", Model.MonthlyRevenue.Select(r => "\"" + r.Month + "\"")))],
-                datasets: [{
-                    label: 'Revenue ($)',
-                    data: [@string.Join(",", Model.MonthlyRevenue.Select(r => r.Revenue))],
-                    borderColor: 'rgb(75, 192, 192)',
-                    backgroundColor: 'rgba(75, 192, 192, 0.2)',
-                    tension: 0.1
-                }]
-            },
-            options: {
-                responsive: true,
-                plugins: {
-                    legend: {
-                        position: 'top',
-                    },
-                    title: {
-                        display: true,
-                        text: 'Monthly Revenue Trend'
-                    }
+        @if (Model.ReportType == "overview" || Model.ReportType == "financial")
+        {
+            <text>
+                            const monthlyRevenueCtx = document.getElementById('monthlyRevenueChart').getContext('2d');
+            const monthlyRevenueChart = new Chart(monthlyRevenueCtx, {
+                type: 'line',
+                data: {
+                    labels: [@Html.Raw(string.Join(",", Model.MonthlyRevenue.Select(m => "\"" + m.Month + "\"")))],
+                    datasets: [{
+                        label: 'Revenue ($)',
+                        data: [@string.Join(",", Model.MonthlyRevenue.Select(m => m.Revenue))],
+                        borderColor: 'rgb(75, 192, 192)',
+                        backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                        tension: 0.1,
+                        fill: true
+                    }]
                 },
-                scales: {
-                    y: {
-                        beginAtZero: true,
-                        ticks: {
-                            callback: function(value) {
-                                return '$' + value.toLocaleString();
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: { position: 'top' },
+                        title: { display: true, text: 'Monthly Revenue' }
+                    },
+                    scales: {
+                        y: { beginAtZero: true }
+                    }
+                }
+            });
+            </text>
+        }
+
+            // Appointment Status Chart
+        @if (Model.ReportType == "overview" || Model.ReportType == "appointments")
+        {
+            <text>
+                            const appointmentStatusCtx = document.getElementById('appointmentStatusChart').getContext('2d');
+            const appointmentStatusChart = new Chart(appointmentStatusCtx, {
+                type: 'pie',
+                data: {
+                    labels: ['Scheduled', 'Completed', 'Cancelled'],
+                    datasets: [{
+                        label: 'Appointments',
+                        data: [
+                @Model.AppointmentStatus.Scheduled,
+                @Model.AppointmentStatus.Completed,
+                @Model.AppointmentStatus.Cancelled
+                                        ],
+                        backgroundColor: [
+                            'rgba(54, 162, 235, 0.8)',
+                            'rgba(75, 192, 192, 0.8)',
+                            'rgba(255, 99, 132, 0.8)'
+                        ]
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: { position: 'top' },
+                        title: { display: true, text: 'Appointment Status Distribution' }
+                    }
+                }
+            });
+            </text>
+        }
+
+            // Pet Species Chart
+        @if (Model.ReportType == "overview" || Model.ReportType == "pets")
+        {
+            <text>
+                            const petSpeciesCtx = document.getElementById('petSpeciesChart').getContext('2d');
+            const petSpeciesChart = new Chart(petSpeciesCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: [@Html.Raw(string.Join(",", Model.PetSpecies.Select(s => "\"" + s.Species + "\"")))],
+                    datasets: [{
+                        label: 'Pets',
+                        data: [@string.Join(",", Model.PetSpecies.Select(s => s.Count))],
+                        backgroundColor: [
+                            'rgba(255, 99, 132, 0.8)',
+                            'rgba(54, 162, 235, 0.8)',
+                            'rgba(255, 206, 86, 0.8)',
+                            'rgba(75, 192, 192, 0.8)',
+                            'rgba(153, 102, 255, 0.8)'
+                        ]
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: { position: 'top' },
+                        title: { display: true, text: 'Pet Species Distribution' }
+                    }
+                }
+            });
+            </text>
+        }
+
+            // Top Services Chart
+        @if (Model.ReportType == "overview" || Model.ReportType == "pets")
+        {
+            <text>
+                            const topServicesCtx = document.getElementById('topServicesChart').getContext('2d');
+            const topServicesChart = new Chart(topServicesCtx, {
+                type: 'bar',
+                data: {
+                    labels: [@Html.Raw(string.Join(",", Model.TopServices.Select(s => "\"" + s.ServiceName + "\"")))],
+                    datasets: [{
+                        label: 'Service Count',
+                        data: [@string.Join(",", Model.TopServices.Select(s => s.Count))],
+                        backgroundColor: 'rgba(75, 192, 192, 0.8)'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: { position: 'top' },
+                        title: { display: true, text: 'Top Services' }
+                    },
+                    scales: {
+                        y: { beginAtZero: true }
+                    }
+                }
+            });
+            </text>
+        }
+
+            // Doctor Performance Chart (USS-20)
+        @if (Model.DoctorPerformance != null)
+        {
+            <text>
+                            const doctorPerformanceCtx = document.getElementById('doctorPerformanceChart').getContext('2d');
+            const doctorPerformanceChart = new Chart(doctorPerformanceCtx, {
+                type: 'bar',
+                data: {
+                    labels: ['Total Appointments', 'Completed', 'Cancelled', 'Revenue', 'Avg Rating'],
+                    datasets: [{
+                        label: '@Model.DoctorPerformance.DoctorName (@Model.DoctorPerformance.Month)',
+                        data: [
+                @Model.DoctorPerformance.TotalAppointments,
+                @Model.DoctorPerformance.CompletedAppointments,
+                @Model.DoctorPerformance.CancelledAppointments,
+                @Model.DoctorPerformance.Revenue,
+                @Model.DoctorPerformance.AverageRating
+                                        ],
+                        backgroundColor: [
+                            'rgba(75, 192, 192, 0.8)',
+                            'rgba(54, 162, 235, 0.8)',
+                            'rgba(255, 99, 132, 0.8)',
+                            'rgba(255, 205, 86, 0.8)',
+                            'rgba(153, 102, 255, 0.8)'
+                        ]
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: { position: 'top' },
+                        title: { display: true, text: 'Doctor Monthly Performance' }
+                    },
+                    scales: {
+                        y: { beginAtZero: true }
+                    }
+                }
+            });
+            </text>
+        }
+
+            // Pet Health Timeline Chart (USS-19)
+        @if (Model.PetHealthTimeline != null)
+        {
+            <text>
+                            const petHealthCtx = document.getElementById('petHealthChart').getContext('2d');
+            const petHealthChart = new Chart(petHealthCtx, {
+                type: 'line',
+                data: {
+                    labels: [@Html.Raw(string.Join(",", Model.PetHealthTimeline.WeightHistory.Select(w => "\"" + w.Date.ToString("yyyy-MM-dd") + "\"")))],
+                    datasets: [
+                        {
+                            label: 'Weight (kg)',
+                            data: [@string.Join(",", Model.PetHealthTimeline.WeightHistory.Select(w => w.Weight))],
+                            borderColor: 'rgb(75, 192, 192)',
+                            backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                            tension: 0.1,
+                            fill: true
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: { position: 'top' },
+                        title: { display: true, text: 'Pet Health Timeline - @Model.PetHealthTimeline.PetName' },
+                        tooltip: {
+                            callbacks: {
+                                label: function (context) {
+                                    let label = context.dataset.label || '';
+                                    if (label) {
+                                        label += ': ';
+                                    }
+                                    if (context.parsed.y !== null) {
+                                        label += context.parsed.y + ' kg';
+                                    }
+                                    return label;
+                                }
                             }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            title: { display: true, text: 'Date' }
+                        },
+                        y: {
+                            beginAtZero: true,
+                            title: { display: true, text: 'Weight (kg)' }
                         }
                     }
                 }
-            }
-        });
+            });
+            </text>
+        }
 
-        // Appointment Status Chart
-        const statusCtx = document.getElementById('appointmentStatusChart').getContext('2d');
-        const statusChart = new Chart(statusCtx, {
-            type: 'doughnut',
-            data: {
-                labels: [@Html.Raw(string.Join(",", Model.AppointmentStatusData.Keys.Select(k => "\"" + k + "\"")))],
-                datasets: [{
-                    data: [@string.Join(",", Model.AppointmentStatusData.Values)],
-                    backgroundColor: [
-                        'rgba(255, 99, 132, 0.8)',
-                        'rgba(54, 162, 235, 0.8)',
-                        'rgba(255, 205, 86, 0.8)',
-                        'rgba(75, 192, 192, 0.8)',
-                        'rgba(153, 102, 255, 0.8)'
-                    ]
-                }]
-            },
-            options: {
-                responsive: true,
-                plugins: {
-                    legend: {
-                        position: 'bottom',
-                    },
-                    title: {
-                        display: true,
-                        text: 'Appointment Status Distribution'
-                    }
+            // Export functionality
+            function exportToPDF() {
+                const { jsPDF } = window.jspdf;
+                const doc = new jsPDF();
+
+                doc.setFontSize(18);
+                doc.text('Vet Clinic Reports', 20, 20);
+
+                doc.setFontSize(12);
+                let yOffset = 30;
+
+                // Export Daily Summary
+        @if (Model.DailySummary != null)
+        {
+            <text>
+                        doc.text('Daily Clinic Summary (@Model.DailySummary.Date)', 20, yOffset);
+                    yOffset += 10;
+                    doc.text(`Total Appointments: @Model.DailySummary.TotalAppointments`, 20, yOffset);
+                    yOffset += 10;
+                    doc.text(`Completed: @Model.DailySummary.CompletedAppointments`, 20, yOffset);
+                    yOffset += 10;
+                    doc.text(`Revenue: $@Model.DailySummary.Revenue.ToString("N0")`, 20, yOffset);
+                    yOffset += 10;
+                    doc.text(`Scheduled: @Model.DailySummary.ScheduledAppointments`, 20, yOffset);
+                    yOffset += 20;
+            </text>
+        }
+
+                    // Export Doctor Performance
+        @if (Model.DoctorPerformance != null)
+        {
+            <text>
+                        doc.text('Doctor Monthly Performance', 20, yOffset);
+                    yOffset += 10;
+                    doc.text(`Doctor: @Model.DoctorPerformance.DoctorName`, 20, yOffset);
+                    yOffset += 10;
+                    doc.text(`Total Appointments: @Model.DoctorPerformance.TotalAppointments`, 20, yOffset);
+                    yOffset += 10;
+                    doc.text(`Revenue: $@Model.DoctorPerformance.Revenue.ToString("N0")`, 20, yOffset);
+                    yOffset += 10;
+                    doc.text(`Average Rating: @Model.DoctorPerformance.AverageRating.ToString("F1")`, 20, yOffset);
+                    yOffset += 20;
+            </text>
+        }
+
+                    // Export Pet Health Timeline
+        @if (Model.PetHealthTimeline != null)
+        {
+            <text>
+                        doc.text('Pet Health Timeline - @Model.PetHealthTimeline.PetName', 20, yOffset);
+                    yOffset += 10;
+                    doc.text('Weight History:', 20, yOffset);
+                    yOffset += 10;
+                @foreach (var record in Model.PetHealthTimeline.WeightHistory)
+                {
+                    <text>
+                            doc.text(`@record.Date.ToString("yyyy-MM-dd"): @record.Weight kg`, 20, yOffset);
+                        yOffset += 10;
+                    </text>
                 }
+                        doc.text('Vaccination History:', 20, yOffset);
+                    yOffset += 10;
+                @foreach (var vaccine in Model.PetHealthTimeline.VaccinationHistory)
+                {
+                    <text>
+                            doc.text(`@vaccine.Date.ToString("yyyy-MM-dd"): @vaccine.VaccineName`, 20, yOffset);
+                        yOffset += 10;
+                    </text>
+                }
+            </text>
+        }
+
+                    doc.save('VetClinic_Reports.pdf');
             }
-        });
 
-        // Export functions
-        function exportToPDF() {
-            alert('PDF export feature would be implemented here');
+        function exportToCSV() {
+            let csvContent = "data:text/csv;charset=utf-8,";
+
+            // Daily Summary
+        @if (Model.DailySummary != null)
+        {
+            <text>
+                    csvContent += "Daily Clinic Summary\n";
+                csvContent += "Date,Total Appointments,Completed,Revenue,Scheduled\n";
+                csvContent += `@Model.DailySummary.Date,@Model.DailySummary.TotalAppointments,@Model.DailySummary.CompletedAppointments,@Model.DailySummary.Revenue,@Model.DailySummary.ScheduledAppointments\n\n`;
+            </text>
         }
 
-        function exportToExcel() {
-            alert('Excel export feature would be implemented here');
+                // Doctor Performance
+        @if (Model.DoctorPerformance != null)
+        {
+            <text>
+                    csvContent += "Doctor Monthly Performance\n";
+                csvContent += "Doctor,Month,Total Appointments,Completed,Cancelled,Revenue,Average Rating\n";
+                csvContent += `"@Model.DoctorPerformance.DoctorName","@Model.DoctorPerformance.Month",@Model.DoctorPerformance.TotalAppointments,@Model.DoctorPerformance.CompletedAppointments,@Model.DoctorPerformance.CancelledAppointments,@Model.DoctorPerformance.Revenue,@Model.DoctorPerformance.AverageRating\n\n`;
+            </text>
         }
 
-        function printReport() {
-            window.print();
+                // Pet Health Timeline
+        @if (Model.PetHealthTimeline != null)
+        {
+            <text>
+                    csvContent += "Pet Health Timeline - @Model.PetHealthTimeline.PetName\n";
+                csvContent += "Weight History\nDate,Weight (kg)\n";
+                @foreach (var record in Model.PetHealthTimeline.WeightHistory)
+                {
+                    <text>
+                        csvContent += `"@record.Date.ToString("yyyy-MM-dd")",@record.Weight\n`;
+                    </text>
+                }
+                    csvContent += "\nVaccination History\nDate,Vaccine\n";
+                @foreach (var vaccine in Model.PetHealthTimeline.VaccinationHistory)
+                {
+                    <text>
+                        csvContent += `"@vaccine.Date.ToString("yyyy-MM-dd")","@vaccine.VaccineName"\n`;
+                    </text>
+                }
+            </text>
+        }
+
+                    const encodedUri = encodeURI(csvContent);
+            const link = document.createElement("a");
+            link.setAttribute("href", encodedUri);
+            link.setAttribute("download", "VetClinic_Reports.csv");
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
         }
     </script>
-} 
+}

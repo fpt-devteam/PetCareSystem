@@ -24,40 +24,43 @@ namespace VetClinic.Web.Pages.Reports
             _userService = userService;
         }
 
-        // Analytics Properties
+        // Properties for key metrics
         public int TotalPets { get; set; }
         public int TotalCustomers { get; set; }
         public int TotalDoctors { get; set; }
         public int TotalAppointments { get; set; }
         public decimal TotalRevenue { get; set; }
         public double AverageRating { get; set; }
-
-        // Appointment Statistics
         public int TodayAppointments { get; set; }
         public int WeekAppointments { get; set; }
         public int MonthAppointments { get; set; }
 
-        // Monthly Revenue Data (for charts)
-        public List<MonthlyRevenueData> MonthlyRevenue { get; set; } = new List<MonthlyRevenueData>();
-
-        // Appointment Status Distribution
-        public Dictionary<string, int> AppointmentStatusData { get; set; } = new Dictionary<string, int>();
-
-        // Top Services Data
-        public List<ServiceUsageData> TopServices { get; set; } = new List<ServiceUsageData>();
-
-        // Pet Species Distribution
-        public Dictionary<string, int> PetSpeciesData { get; set; } = new Dictionary<string, int>();
-
-        // Filter Properties
+        // Properties for filters
         [BindProperty(SupportsGet = true)]
         public DateTime? StartDate { get; set; }
-
         [BindProperty(SupportsGet = true)]
         public DateTime? EndDate { get; set; }
-
         [BindProperty(SupportsGet = true)]
         public string ReportType { get; set; } = "overview";
+
+        // Properties for specific reports
+        public DailySummaryData DailySummary { get; set; } = new DailySummaryData();
+        public DoctorPerformanceData DoctorPerformance { get; set; }
+        public PetHealthTimelineData PetHealthTimeline { get; set; }
+        public List<VetClinic.Repository.Entities.User> Doctors { get; set; } = new List<VetClinic.Repository.Entities.User>();
+        public List<VetClinic.Repository.Entities.Pet> Pets { get; set; } = new List<VetClinic.Repository.Entities.Pet>();
+        [BindProperty(SupportsGet = true)]
+        public int? DoctorId { get; set; }
+        [BindProperty(SupportsGet = true)]
+        public int? PetId { get; set; }
+        [BindProperty(SupportsGet = true)]
+        public DateTime? YearMonth { get; set; }
+
+        // Properties for chart data
+        public List<MonthlyRevenueData> MonthlyRevenue { get; set; } = new List<MonthlyRevenueData>();
+        public AppointmentStatusData AppointmentStatus { get; set; } = new AppointmentStatusData();
+        public List<PetSpeciesData> PetSpecies { get; set; } = new List<PetSpeciesData>();
+        public List<TopServiceData> TopServices { get; set; } = new List<TopServiceData>();
 
         public async Task<IActionResult> OnGetAsync()
         {
@@ -66,9 +69,9 @@ namespace VetClinic.Web.Pages.Reports
                 return RedirectToPage("/Account/Login");
             }
 
-            // Only admins and managers can view reports
             if (!SessionHelper.IsInAnyRole(HttpContext.Session, new[] { "Admin", "Manager" }))
             {
+                TempData["ErrorMessage"] = "Access denied. Admin or Manager role required.";
                 return RedirectToPage("/Index");
             }
 
@@ -95,39 +98,61 @@ namespace VetClinic.Web.Pages.Reports
         {
             try
             {
-                // Load basic statistics
+                // Load daily summary (USS-28)
+                var dailySummaryResult = await _dashboardService.GetDailySummaryAsync(DateTime.Today);
+                DailySummary = dailySummaryResult as DailySummaryData ?? new DailySummaryData();
+
+                // Load doctors and pets for dropdowns
+                Doctors = (await _userService.GetUsersByRoleAsync("Doctor")).ToList();
+                Pets = (await _petService.GetAllPetsAsync()).ToList();
+
+                // Load doctor performance (USS-20)
+                if (ReportType == "doctor-performance" && DoctorId.HasValue && YearMonth.HasValue)
+                {
+                    var doctorPerformanceResult = await _dashboardService.GetDoctorMonthlyPerformanceAsync(
+                        DoctorId.Value, YearMonth.Value.Year, YearMonth.Value.Month);
+                    DoctorPerformance = doctorPerformanceResult as DoctorPerformanceData;
+                }
+
+                // Load pet health timeline (USS-19)
+                if (ReportType == "pet-health" && PetId.HasValue)
+                {
+                    var petHealthResult = await _dashboardService.GetPetHealthTimelineAsync(
+                        PetId.Value, StartDate, EndDate);
+                    PetHealthTimeline = petHealthResult as PetHealthTimelineData;
+                }
+
+                // Load key metrics
                 TotalPets = await _dashboardService.GetTotalPetsAsync();
                 TotalCustomers = await _dashboardService.GetTotalCustomersAsync();
                 TotalDoctors = await _dashboardService.GetTotalDoctorsAsync();
                 TotalAppointments = await _dashboardService.GetTotalAppointmentsAsync(StartDate, EndDate);
                 TotalRevenue = await _dashboardService.GetTotalRevenueAsync(StartDate, EndDate);
                 AverageRating = await _dashboardService.GetAverageRatingAsync();
-
-                // Load appointment statistics
                 TodayAppointments = await _dashboardService.GetTotalAppointmentsAsync(DateTime.Today, DateTime.Today.AddDays(1));
                 WeekAppointments = await _dashboardService.GetTotalAppointmentsAsync(DateTime.Now.AddDays(-7), DateTime.Now);
                 MonthAppointments = await _dashboardService.GetTotalAppointmentsAsync(DateTime.Now.AddDays(-30), DateTime.Now);
 
-                // Load monthly revenue data (last 12 months)
+                // Load chart data
                 await LoadMonthlyRevenueDataAsync();
-
-                // Load appointment status distribution
                 await LoadAppointmentStatusDataAsync();
-
-                // Load pet species distribution
                 await LoadPetSpeciesDataAsync();
-
-                // Load top services data
                 await LoadTopServicesDataAsync();
             }
             catch (Exception ex)
             {
                 Console.WriteLine($"Error in LoadReportDataAsync: {ex.Message}");
+                TempData["ErrorMessage"] = "Error loading report data. Please try again.";
                 // Set safe defaults
                 TotalPets = TotalCustomers = TotalDoctors = TotalAppointments = 0;
                 TotalRevenue = 0m;
                 AverageRating = 0.0;
                 TodayAppointments = WeekAppointments = MonthAppointments = 0;
+                DailySummary = new DailySummaryData();
+                MonthlyRevenue = new List<MonthlyRevenueData>();
+                AppointmentStatus = new AppointmentStatusData();
+                PetSpecies = new List<PetSpeciesData>();
+                TopServices = new List<TopServiceData>();
             }
         }
 
@@ -135,28 +160,8 @@ namespace VetClinic.Web.Pages.Reports
         {
             try
             {
-                var revenueData = await _dashboardService.GetRevenueByMonthAsync(DateTime.Now.Year);
-                MonthlyRevenue = revenueData.Cast<object>().Select(item => new MonthlyRevenueData
-                {
-                    Month = "Unknown", // You'd extract this from the dynamic object
-                    Revenue = 0m // You'd extract this from the dynamic object
-                }).ToList();
-
-                // Fallback: Generate sample data if service doesn't return proper data
-                if (!MonthlyRevenue.Any())
-                {
-                    for (int i = 11; i >= 0; i--)
-                    {
-                        var date = DateTime.Now.AddMonths(-i);
-                        MonthlyRevenue.Add(new MonthlyRevenueData
-                        {
-                            Month = date.ToString("MMM yyyy"),
-                            Revenue = await _dashboardService.GetTotalRevenueAsync(
-                                new DateTime(date.Year, date.Month, 1),
-                                new DateTime(date.Year, date.Month, 1).AddMonths(1).AddDays(-1))
-                        });
-                    }
-                }
+                var revenueData = await _dashboardService.GetMonthlyRevenueAsync(StartDate, EndDate);
+                MonthlyRevenue = revenueData as List<MonthlyRevenueData> ?? new List<MonthlyRevenueData>();
             }
             catch (Exception ex)
             {
@@ -169,15 +174,13 @@ namespace VetClinic.Web.Pages.Reports
         {
             try
             {
-                var appointments = await _appointmentService.GetAllAppointmentsAsync();
-                AppointmentStatusData = appointments
-                    .GroupBy(a => a.Status)
-                    .ToDictionary(g => g.Key, g => g.Count());
+                var statusData = await _dashboardService.GetAppointmentStatusAsync(StartDate, EndDate);
+                AppointmentStatus = statusData as AppointmentStatusData ?? new AppointmentStatusData();
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Error loading appointment status data: {ex.Message}");
-                AppointmentStatusData = new Dictionary<string, int>();
+                Console.WriteLine($"Error loading appointment status: {ex.Message}");
+                AppointmentStatus = new AppointmentStatusData();
             }
         }
 
@@ -185,15 +188,13 @@ namespace VetClinic.Web.Pages.Reports
         {
             try
             {
-                var pets = await _petService.GetAllPetsAsync();
-                PetSpeciesData = pets
-                    .GroupBy(p => p.Species)
-                    .ToDictionary(g => g.Key, g => g.Count());
+                var speciesData = await _dashboardService.GetPetSpeciesDistributionAsync();
+                PetSpecies = speciesData as List<PetSpeciesData> ?? new List<PetSpeciesData>();
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Error loading pet species data: {ex.Message}");
-                PetSpeciesData = new Dictionary<string, int>();
+                Console.WriteLine($"Error loading pet species: {ex.Message}");
+                PetSpecies = new List<PetSpeciesData>();
             }
         }
 
@@ -201,38 +202,86 @@ namespace VetClinic.Web.Pages.Reports
         {
             try
             {
-                var appointments = await _appointmentService.GetAllAppointmentsAsync();
-                TopServices = appointments
-                    .Where(a => a.Service != null)
-                    .GroupBy(a => a.Service!.Name)
-                    .Select(g => new ServiceUsageData
-                    {
-                        ServiceName = g.Key,
-                        Count = g.Count(),
-                        Revenue = g.Sum(a => a.Service!.Price)
-                    })
-                    .OrderByDescending(s => s.Count)
-                    .Take(10)
-                    .ToList();
+                var servicesData = await _dashboardService.GetTopServicesAsync(StartDate, EndDate);
+                TopServices = servicesData as List<TopServiceData> ?? new List<TopServiceData>();
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Error loading top services data: {ex.Message}");
-                TopServices = new List<ServiceUsageData>();
+                Console.WriteLine($"Error loading top services: {ex.Message}");
+                TopServices = new List<TopServiceData>();
             }
         }
-    }
 
-    public class MonthlyRevenueData
-    {
-        public string Month { get; set; } = string.Empty;
-        public decimal Revenue { get; set; }
-    }
+        // Data models
+        public class DailySummaryData
+        {
+            public string Date { get; set; } = DateTime.Today.ToString("yyyy-MM-dd");
+            public int TotalAppointments { get; set; }
+            public int CompletedAppointments { get; set; }
+            public decimal Revenue { get; set; }
+            public int ScheduledAppointments { get; set; }
+        }
 
-    public class ServiceUsageData
-    {
-        public string ServiceName { get; set; } = string.Empty;
-        public int Count { get; set; }
-        public decimal Revenue { get; set; }
+        public class DoctorPerformanceData
+        {
+            public string DoctorName { get; set; } = string.Empty;
+            public int TotalAppointments { get; set; }
+            public int CompletedAppointments { get; set; }
+            public int CancelledAppointments { get; set; }
+            public decimal Revenue { get; set; }
+            public double AverageRating { get; set; }
+            public string Month { get; set; } = string.Empty;
+        }
+
+        public class PetHealthTimelineData
+        {
+            public string PetName { get; set; } = string.Empty;
+            public List<WeightRecord> WeightHistory { get; set; } = new List<WeightRecord>();
+            public List<VaccineRecord> VaccinationHistory { get; set; } = new List<VaccineRecord>();
+            public DateRange DateRange { get; set; } = new DateRange();
+        }
+
+        public class WeightRecord
+        {
+            public DateTime Date { get; set; }
+            public decimal Weight { get; set; }
+        }
+
+        public class VaccineRecord
+        {
+            public DateTime Date { get; set; }
+            public string VaccineName { get; set; } = string.Empty;
+        }
+
+        public class DateRange
+        {
+            public string StartDate { get; set; } = string.Empty;
+            public string EndDate { get; set; } = string.Empty;
+        }
+
+        public class MonthlyRevenueData
+        {
+            public string Month { get; set; } = string.Empty;
+            public decimal Revenue { get; set; }
+        }
+
+        public class AppointmentStatusData
+        {
+            public int Scheduled { get; set; }
+            public int Completed { get; set; }
+            public int Cancelled { get; set; }
+        }
+
+        public class PetSpeciesData
+        {
+            public string Species { get; set; } = string.Empty;
+            public int Count { get; set; }
+        }
+
+        public class TopServiceData
+        {
+            public string ServiceName { get; set; } = string.Empty;
+            public int Count { get; set; }
+        }
     }
 }

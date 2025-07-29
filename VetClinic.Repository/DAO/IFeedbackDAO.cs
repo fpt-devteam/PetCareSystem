@@ -11,5 +11,6 @@ namespace VetClinic.Repository.DAO
         Task<bool> ApproveFeedbackAsync(int feedbackId);
         Task<double> GetAverageRatingAsync();
         Task<IEnumerable<Feedback>> GetTopRatedFeedbackAsync(int count = 10);
+        Task<IEnumerable<Feedback>> GetFeedbackByDoctorAsync(int doctorId);
     }
 }

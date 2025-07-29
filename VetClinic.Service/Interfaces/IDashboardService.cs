@@ -26,5 +26,17 @@ namespace VetClinic.Service.Interfaces
         Task<object> GetDoctorDashboardAsync(int doctorId);
         Task<object> GetManagerDashboardAsync();
         Task<object> GetStaffDashboardAsync();
+
+        // USS-20: Doctor Monthly Performance
+        Task<object> GetDoctorMonthlyPerformanceAsync(int doctorId, int year, int month);
+
+        // USS-19: Pet Health Timeline Chart
+        Task<object> GetPetHealthTimelineAsync(int petId, DateTime? startDate = null, DateTime? endDate = null);
+
+        // Additional methods for chart data
+        Task<object> GetMonthlyRevenueAsync(DateTime? startDate = null, DateTime? endDate = null);
+        Task<object> GetAppointmentStatusAsync(DateTime? startDate = null, DateTime? endDate = null);
+        Task<object> GetPetSpeciesDistributionAsync();
+        Task<object> GetTopServicesAsync(DateTime? startDate = null, DateTime? endDate = null);
     }
 }
