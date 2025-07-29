@@ -1,10 +1,19 @@
 using Microsoft.EntityFrameworkCore;
 using VetClinic.Repository.Entities;
+using System.Security.Cryptography;
+using System.Text;
 
 namespace VetClinic.Repository.Data
 {
     public static class DbSeeder
     {
+        private static string HashPassword(string password)
+        {
+            using var sha256 = SHA256.Create();
+            var hashedBytes = sha256.ComputeHash(Encoding.UTF8.GetBytes(password));
+            return Convert.ToBase64String(hashedBytes);
+        }
+
         public static async Task SeedAsync(VetClinicDbContext context)
         {
             // Ensure database is created
@@ -13,7 +22,24 @@ namespace VetClinic.Repository.Data
             // Check if data already exists
             if (context.Users.Any())
             {
-                return; // Database has been seeded
+                return;
+                // context.Reminders.RemoveRange(context.Reminders);
+                // context.Feedback.RemoveRange(context.Feedback);
+
+                // context.MedicalRecords.RemoveRange(context.MedicalRecords);
+                // context.Invoices.RemoveRange(context.Invoices);
+
+                // context.Vaccinations.RemoveRange(context.Vaccinations);
+
+                // context.Appointments.RemoveRange(context.Appointments);
+
+                // context.Pets.RemoveRange(context.Pets);
+
+                // context.Services.RemoveRange(context.Services);
+
+                // context.Users.RemoveRange(context.Users);
+
+                // await context.SaveChangesAsync();
             }
 
             // Seed Users
@@ -24,7 +50,7 @@ namespace VetClinic.Repository.Data
                 {
                     FullName = "System Administrator",
                     Email = "admin@vetclinic.com",
-                    PasswordHash = BCrypt.Net.BCrypt.HashPassword("Admin123!"),
+                    PasswordHash = HashPassword("Admin123!"),
                     Role = "Admin",
                     IsActive = true,
                     CreatedDate = DateTime.Now.AddDays(-30)
@@ -34,7 +60,7 @@ namespace VetClinic.Repository.Data
                 {
                     FullName = "Dr. Sarah Johnson",
                     Email = "manager@vetclinic.com",
-                    PasswordHash = BCrypt.Net.BCrypt.HashPassword("Manager123!"),
+                    PasswordHash = HashPassword("Manager123!"),
                     Role = "Manager",
                     IsActive = true,
                     CreatedDate = DateTime.Now.AddDays(-25)
@@ -44,7 +70,7 @@ namespace VetClinic.Repository.Data
                 {
                     FullName = "Dr. Michael Chen",
                     Email = "dr.chen@vetclinic.com",
-                    PasswordHash = BCrypt.Net.BCrypt.HashPassword("Doctor123!"),
+                    PasswordHash = HashPassword("Doctor123!"),
                     Role = "Doctor",
                     IsActive = true,
                     CreatedDate = DateTime.Now.AddDays(-20)
@@ -53,7 +79,7 @@ namespace VetClinic.Repository.Data
                 {
                     FullName = "Dr. Emily Rodriguez",
                     Email = "dr.rodriguez@vetclinic.com",
-                    PasswordHash = BCrypt.Net.BCrypt.HashPassword("Doctor123!"),
+                    PasswordHash = HashPassword("Doctor123!"),
                     Role = "Doctor",
                     IsActive = true,
                     CreatedDate = DateTime.Now.AddDays(-18)
@@ -63,7 +89,7 @@ namespace VetClinic.Repository.Data
                 {
                     FullName = "Lisa Thompson",
                     Email = "staff@vetclinic.com",
-                    PasswordHash = BCrypt.Net.BCrypt.HashPassword("Staff123!"),
+                    PasswordHash = HashPassword("Staff123!"),
                     Role = "Staff",
                     IsActive = true,
                     CreatedDate = DateTime.Now.AddDays(-15)
@@ -73,7 +99,7 @@ namespace VetClinic.Repository.Data
                 {
                     FullName = "John Smith",
                     Email = "john.smith@email.com",
-                    PasswordHash = BCrypt.Net.BCrypt.HashPassword("Customer123!"),
+                    PasswordHash = HashPassword("Customer123!"),
                     Role = "Customer",
                     IsActive = true,
                     CreatedDate = DateTime.Now.AddDays(-10)
@@ -82,7 +108,7 @@ namespace VetClinic.Repository.Data
                 {
                     FullName = "Maria Garcia",
                     Email = "maria.garcia@email.com",
-                    PasswordHash = BCrypt.Net.BCrypt.HashPassword("Customer123!"),
+                    PasswordHash = HashPassword("Customer123!"),
                     Role = "Customer",
                     IsActive = true,
                     CreatedDate = DateTime.Now.AddDays(-8)
@@ -91,7 +117,7 @@ namespace VetClinic.Repository.Data
                 {
                     FullName = "David Wilson",
                     Email = "david.wilson@email.com",
-                    PasswordHash = BCrypt.Net.BCrypt.HashPassword("Customer123!"),
+                    PasswordHash = HashPassword("Customer123!"),
                     Role = "Customer",
                     IsActive = true,
                     CreatedDate = DateTime.Now.AddDays(-5)
@@ -100,7 +126,7 @@ namespace VetClinic.Repository.Data
                 {
                     FullName = "Jennifer Brown",
                     Email = "jennifer.brown@email.com",
-                    PasswordHash = BCrypt.Net.BCrypt.HashPassword("Customer123!"),
+                    PasswordHash = HashPassword("Customer123!"),
                     Role = "Customer",
                     IsActive = true,
                     CreatedDate = DateTime.Now.AddDays(-3)
