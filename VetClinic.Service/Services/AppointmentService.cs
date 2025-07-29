@@ -10,17 +10,20 @@ namespace VetClinic.Service.Services
         private readonly IPetRepository _petRepository;
         private readonly IServiceRepository _serviceRepository;
         private readonly IUserRepository _userRepository;
+        private readonly IDoctorAvailabilityService _doctorAvailabilityService;
 
         public AppointmentService(
             IAppointmentRepository appointmentRepository,
             IPetRepository petRepository,
             IServiceRepository serviceRepository,
-            IUserRepository userRepository)
+            IUserRepository userRepository,
+            IDoctorAvailabilityService doctorAvailabilityService)
         {
             _appointmentRepository = appointmentRepository;
             _petRepository = petRepository;
             _serviceRepository = serviceRepository;
             _userRepository = userRepository;
+            _doctorAvailabilityService = doctorAvailabilityService;
         }
 
         public async Task<Appointment?> GetAppointmentByIdAsync(int id)
@@ -80,7 +83,7 @@ namespace VetClinic.Service.Services
 
         public async Task<bool> IsDoctorAvailableAsync(int doctorId, DateTime appointmentTime, int durationMinutes)
         {
-            return await _appointmentRepository.IsDoctorAvailableAsync(doctorId, appointmentTime, durationMinutes);
+            return await _doctorAvailabilityService.IsDoctorAvailableAsync(doctorId, appointmentTime, durationMinutes);
         }
 
         public async Task<IEnumerable<Appointment>> GetUpcomingAppointmentsAsync(int days = 7)
@@ -96,13 +99,22 @@ namespace VetClinic.Service.Services
         public async Task<bool> CanUserAccessAppointmentAsync(int userId, int appointmentId, string userRole)
         {
             var appointment = await _appointmentRepository.GetByIdAsync(appointmentId);
-            if (appointment == null) return false;
+            if (appointment == null) 
+            {
+                return false;
+            }
 
             // Admins and managers can access all appointments
-            if (userRole == "Admin" || userRole == "Manager") return true;
+            if (userRole == "Admin" || userRole == "Manager") 
+            {
+                return true;
+            }
 
             // Doctors can access appointments assigned to them
-            if (userRole == "Doctor" && appointment.DoctorId == userId) return true;
+            if (userRole == "Doctor" && appointment.DoctorId == userId) 
+            {
+                return true;
+            }
 
             // Customers can access appointments for their pets
             if (userRole == "Customer")
@@ -112,7 +124,10 @@ namespace VetClinic.Service.Services
             }
 
             // Staff can access all appointments
-            if (userRole == "Staff") return true;
+            if (userRole == "Staff") 
+            {
+                return true;
+            }
 
             return false;
         }
@@ -140,6 +155,19 @@ namespace VetClinic.Service.Services
             if (appointmentTime.DayOfWeek == DayOfWeek.Sunday)
                 throw new ArgumentException("Appointments cannot be scheduled on Sundays");
 
+            // Check if appointment is in the future
+            if (appointmentTime <= DateTime.Now)
+                throw new ArgumentException("Appointments cannot be scheduled in the past");
+
+            // Check if doctor is available (no conflicting appointments and no blocked slots)
+            var appointmentEndTime = appointmentTime.AddMinutes(service.DurationMinutes);
+            var isAvailable = await _doctorAvailabilityService.IsDoctorAvailableAsync(doctorId, appointmentTime, appointmentEndTime);
+            if (!isAvailable)
+            {
+                var reason = await _doctorAvailabilityService.GetAvailabilityReasonAsync(doctorId, appointmentTime, appointmentEndTime);
+                throw new ArgumentException(reason ?? "The selected doctor is not available at this time. Please choose a different time slot.");
+            }
+
             var appointment = new Appointment
             {
                 PetId = petId,
@@ -155,17 +183,26 @@ namespace VetClinic.Service.Services
         public async Task<bool> CancelAppointmentAsync(int appointmentId, int userId, string userRole)
         {
             var appointment = await _appointmentRepository.GetByIdAsync(appointmentId);
-            if (appointment == null) return false;
+            if (appointment == null) 
+            {
+                return false;
+            }
 
             // Check if user can access this appointment
             if (!await CanUserAccessAppointmentAsync(userId, appointmentId, userRole))
+            {
                 return false;
+            }
 
             // Check if appointment can be cancelled (not in the past and not already completed)
             if (appointment.AppointmentTime <= DateTime.Now || appointment.Status == "Completed")
+            {
                 return false;
+            }
 
-            return await _appointmentRepository.UpdateAppointmentStatusAsync(appointmentId, "Cancelled");
+            var result = await _appointmentRepository.UpdateAppointmentStatusAsync(appointmentId, "Cancelled");
+            
+            return result;
         }
 
         public async Task<bool> RescheduleAppointmentAsync(int appointmentId, DateTime newAppointmentTime, int userId, string userRole)

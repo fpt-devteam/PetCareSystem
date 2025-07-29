@@ -28,8 +28,8 @@ namespace VetClinic.Repository.Repositories
             if (string.IsNullOrWhiteSpace(service.Name))
                 throw new ArgumentException("Service name is required");
 
-            if (service.Price <= 0)
-                throw new ArgumentException("Service price must be greater than zero");
+            if (service.Price <= 0 && service.IsActive)
+                throw new ArgumentException("Active service price must be greater than zero");
 
             if (service.DurationMinutes <= 0)
                 throw new ArgumentException("Service duration must be greater than zero");
@@ -53,8 +53,8 @@ namespace VetClinic.Repository.Repositories
             if (string.IsNullOrWhiteSpace(service.Name))
                 throw new ArgumentException("Service name is required");
 
-            if (service.Price <= 0)
-                throw new ArgumentException("Service price must be greater than zero");
+            if (service.Price <= 0 && service.IsActive)
+                throw new ArgumentException("Active service price must be greater than zero");
 
             if (service.DurationMinutes <= 0)
                 throw new ArgumentException("Service duration must be greater than zero");

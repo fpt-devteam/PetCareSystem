@@ -25,6 +25,7 @@ namespace VetClinic.Repository
             services.AddScoped<IFeedbackDAO, FeedbackDAO>();
             services.AddScoped<IInvoiceDAO, InvoiceDAO>();
             services.AddScoped<IReminderDAO, ReminderDAO>();
+            services.AddScoped<IBlockedSlotDAO, BlockedSlotDAO>();
 
             // Register Repositories
             services.AddScoped<IUserRepository, UserRepository>();
@@ -36,6 +37,7 @@ namespace VetClinic.Repository
             services.AddScoped<IFeedbackRepository, FeedbackRepository>();
             services.AddScoped<IInvoiceRepository, InvoiceRepository>();
             services.AddScoped<IReminderRepository, ReminderRepository>();
+            services.AddScoped<IBlockedSlotRepository, BlockedSlotRepository>();
 
             return services;
         }

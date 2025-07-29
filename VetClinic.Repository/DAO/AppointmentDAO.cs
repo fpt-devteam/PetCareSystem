@@ -10,6 +10,18 @@ namespace VetClinic.Repository.DAO
         {
         }
 
+        // Override GetAllAsync to include navigation properties
+        public override async Task<IEnumerable<Appointment>> GetAllAsync()
+        {
+            return await _dbSet
+                .Include(a => a.Pet)
+                .ThenInclude(p => p.Owner)
+                .Include(a => a.Doctor)
+                .Include(a => a.Service)
+                .OrderBy(a => a.AppointmentTime)
+                .ToListAsync();
+        }
+
         public async Task<IEnumerable<Appointment>> GetAppointmentsByDoctorAsync(int doctorId, DateTime date)
         {
             return await _dbSet
@@ -101,11 +113,21 @@ namespace VetClinic.Repository.DAO
         {
             var appointment = await GetByIdAsync(appointmentId);
             if (appointment == null)
+            {
                 return false;
+            }
 
             appointment.Status = status;
-            await _context.SaveChangesAsync();
-            return true;
+            
+            try
+            {
+                var result = await _context.SaveChangesAsync();
+                return result > 0;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
         }
     }
 }

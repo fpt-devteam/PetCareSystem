@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using VetClinic.Repository.Entities;
 using VetClinic.Service.Interfaces;
 using VetClinic.Web.Helpers;
+using VetClinic.Web.Services;
 
 namespace VetClinic.Web.Pages.Appointments
 {
@@ -11,11 +12,16 @@ namespace VetClinic.Web.Pages.Appointments
     {
         private readonly IAppointmentService _appointmentService;
         private readonly IUserService _userService;
+        private readonly IAppointmentNotificationService _notificationService;
 
-        public IndexModel(IAppointmentService appointmentService, IUserService userService)
+        public IndexModel(
+            IAppointmentService appointmentService, 
+            IUserService userService,
+            IAppointmentNotificationService notificationService)
         {
             _appointmentService = appointmentService;
             _userService = userService;
+            _notificationService = notificationService;
         }
 
         public IEnumerable<Appointment> Appointments { get; set; } = new List<Appointment>();
@@ -37,6 +43,9 @@ namespace VetClinic.Web.Pages.Appointments
         [BindProperty(SupportsGet = true)]
         public int? DoctorFilter { get; set; }
 
+        [BindProperty(SupportsGet = true)]
+        public bool HideCancelled { get; set; } = true; // Default to hide cancelled appointments
+
         // Stats properties
         public int TodayCount { get; set; }
         public int UpcomingCount { get; set; }
@@ -49,6 +58,11 @@ namespace VetClinic.Web.Pages.Appointments
             {
                 return RedirectToPage("/Account/Login");
             }
+
+            // Add no-cache headers
+            Response.Headers["Cache-Control"] = "no-cache, no-store, must-revalidate";
+            Response.Headers["Pragma"] = "no-cache";
+            Response.Headers["Expires"] = "0";
 
             try
             {
@@ -96,8 +110,20 @@ namespace VetClinic.Web.Pages.Appointments
             return RedirectToPage();
         }
 
+        public async Task<IActionResult> OnPostAsync()
+        {
+            Console.WriteLine("=== OnPostAsync called (default handler) ===");
+            Console.WriteLine($"All form data: {string.Join(", ", Request.Form.Select(f => $"{f.Key}={f.Value}"))}");
+            
+            return await OnGetAsync();
+        }
+
         public async Task<IActionResult> OnPostCancelAsync(int appointmentId)
         {
+            Console.WriteLine($"OnPostCancelAsync called with appointmentId: {appointmentId}");
+            Console.WriteLine($"X-Requested-With header: {Request.Headers["X-Requested-With"]}");
+            Console.WriteLine($"All headers: {string.Join(", ", Request.Headers.Select(h => $"{h.Key}={h.Value}"))}");
+            
             if (!SessionHelper.IsAuthenticated(HttpContext.Session))
             {
                 return RedirectToPage("/Account/Login");
@@ -106,15 +132,36 @@ namespace VetClinic.Web.Pages.Appointments
             try
             {
                 var userId = SessionHelper.GetUserId(HttpContext.Session);
+                var userRole = SessionHelper.GetUserRole(HttpContext.Session) ?? "";
+                
                 if (!userId.HasValue)
                 {
                     TempData["ErrorMessage"] = "Unable to verify user session.";
                     return RedirectToPage();
                 }
 
-                var userRole = SessionHelper.GetUserRole(HttpContext.Session) ?? "";
-                await _appointmentService.CancelAppointmentAsync(appointmentId, userId.Value, userRole);
-                TempData["SuccessMessage"] = "Appointment has been cancelled.";
+                var result = await _appointmentService.CancelAppointmentAsync(appointmentId, userId.Value, userRole);
+                
+                if (result)
+                {
+                    TempData["SuccessMessage"] = "Appointment has been cancelled successfully.";
+                    
+                    // Get appointment details for SignalR notification
+                    var appointment = await _appointmentService.GetAppointmentWithDetailsAsync(appointmentId);
+                    if (appointment != null && appointment.Pet != null)
+                    {
+                        // Send SignalR notification
+                        await _notificationService.NotifyAppointmentCancelled(
+                            appointmentId, 
+                            appointment.Pet.OwnerId, 
+                            appointment.Pet.Name, 
+                            appointment.AppointmentTime);
+                    }
+                }
+                else
+                {
+                    TempData["ErrorMessage"] = "Unable to cancel appointment. It may not exist, be in the past, or you may not have permission.";
+                }
             }
             catch (UnauthorizedAccessException)
             {
@@ -122,10 +169,34 @@ namespace VetClinic.Web.Pages.Appointments
             }
             catch (Exception ex)
             {
-                TempData["ErrorMessage"] = "Error cancelling appointment.";
-                Console.WriteLine($"Error cancelling appointment: {ex.Message}");
+                TempData["ErrorMessage"] = $"Error cancelling appointment: {ex.Message}";
             }
 
+            // Check if this is an AJAX request by checking headers
+            bool isAjaxRequest = Request.Headers["X-Requested-With"] == "XMLHttpRequest" ||
+                                Request.Headers.ContainsKey("X-Requested-With");
+
+            Console.WriteLine($"Is AJAX request: {isAjaxRequest}");
+            Console.WriteLine($"Success message: {TempData["SuccessMessage"]}");
+            Console.WriteLine($"Error message: {TempData["ErrorMessage"]}");
+
+            if (isAjaxRequest)
+            {
+                Console.WriteLine("Returning JSON response");
+                // Return JSON response for AJAX requests
+                if (TempData["SuccessMessage"] != null)
+                {
+                    var successMessage = TempData["SuccessMessage"]?.ToString() ?? "Operation completed successfully";
+                    return new JsonResult(new { success = true, message = successMessage });
+                }
+                else
+                {
+                    var errorMessage = TempData["ErrorMessage"]?.ToString() ?? "Unknown error occurred";
+                    return new JsonResult(new { success = false, message = errorMessage });
+                }
+            }
+
+            Console.WriteLine("Returning page redirect");
             return RedirectToPage();
         }
 
@@ -133,6 +204,8 @@ namespace VetClinic.Web.Pages.Appointments
         {
             var userId = SessionHelper.GetUserId(HttpContext.Session);
             var userRole = SessionHelper.GetUserRole(HttpContext.Session);
+
+            Console.WriteLine($"LoadDataAsync: UserId={userId}, UserRole={userRole}");
 
             if (!userId.HasValue)
             {
@@ -146,18 +219,28 @@ namespace VetClinic.Web.Pages.Appointments
                 // Customers see only their pets' appointments
                 var pets = await _appointmentService.GetAppointmentsByOwnerAsync(userId.Value);
                 Appointments = pets;
+                Console.WriteLine($"Customer appointments loaded: {Appointments.Count()} total");
             }
             else if (userRole == "Doctor")
             {
                 // Doctors see their assigned appointments (for today and future)
                 var doctorAppointments = await _appointmentService.GetAppointmentsByDoctorAsync(userId.Value, DateTime.Today);
                 Appointments = doctorAppointments;
+                Console.WriteLine($"Doctor appointments loaded: {Appointments.Count()} total");
             }
             else
             {
                 // Admin, Manager, Staff see all appointments
                 var allAppointments = await _appointmentService.GetAllAppointmentsAsync();
                 Appointments = allAppointments;
+                Console.WriteLine($"All appointments loaded: {Appointments.Count()} total");
+            }
+
+            // Log status of each appointment for debugging
+            Console.WriteLine("Appointment statuses before filtering:");
+            foreach (var apt in Appointments.Take(5)) // Log first 5 for debugging
+            {
+                Console.WriteLine($"  - Appointment {apt.Id}: Status = {apt.Status}, Time = {apt.AppointmentTime}");
             }
 
             // Apply filters
@@ -189,6 +272,13 @@ namespace VetClinic.Web.Pages.Appointments
             if (DoctorFilter.HasValue && DoctorFilter > 0)
             {
                 Appointments = Appointments.Where(a => a.DoctorId == DoctorFilter);
+            }
+
+            // Hide cancelled appointments by default (unless specifically filtering for them)
+            if (HideCancelled && StatusFilter != "Cancelled")
+            {
+                Appointments = Appointments.Where(a => a.Status != "Cancelled");
+                Console.WriteLine($"After hiding cancelled: {Appointments.Count()} appointments");
             }
 
             // Sort by appointment time

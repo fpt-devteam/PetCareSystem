@@ -1,0 +1,318 @@
+@page
+@model VetClinic.Web.Pages.Doctors.BlockSlotsModel
+@{
+    ViewData["Title"] = "Block Personal Time Slots";
+}
+
+<div class="container">
+    <!-- Success/Error Messages -->
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="fas fa-check-circle"></i> @TempData["SuccessMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="fas fa-exclamation-triangle"></i> @TempData["ErrorMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    <!-- Page Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <h2><i class="fas fa-calendar-times text-warning"></i> Block Personal Time Slots</h2>
+                <a asp-page="/Appointments/Index" class="btn btn-outline-primary">
+                    <i class="fas fa-calendar-alt"></i> View My Schedule
+                </a>
+            </div>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="/">Dashboard</a></li>
+                    <li class="breadcrumb-item">Doctors</li>
+                    <li class="breadcrumb-item active">Block Time Slots</li>
+                </ol>
+            </nav>
+        </div>
+    </div>
+
+    <!-- Block Time Form -->
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card">
+                <div class="card-header bg-warning text-dark">
+                    <h5 class="mb-0"><i class="fas fa-clock me-2"></i>Block Personal Time</h5>
+                </div>
+                <div class="card-body">
+                    <form method="post" asp-page-handler="BlockTime">
+                        <div class="row mb-4">
+                            <!-- Block Date -->
+                            <div class="col-md-6">
+                                <label asp-for="BlockRequest.BlockDate" class="form-label">
+                                    <i class="fas fa-calendar-alt me-1"></i>Date
+                                </label>
+                                <input asp-for="BlockRequest.BlockDate" type="date" class="form-control" />
+                                <span asp-validation-for="BlockRequest.BlockDate" class="text-danger small"></span>
+                            </div>
+
+                            <!-- Block Type -->
+                            <div class="col-md-6">
+                                <label asp-for="BlockRequest.BlockType" class="form-label">
+                                    <i class="fas fa-list me-1"></i>Block Type
+                                </label>
+                                <select asp-for="BlockRequest.BlockType" class="form-select" onchange="toggleTimeInputs()">
+                                    <option value="">-- Select Block Type --</option>
+                                    <option value="FullDay">Full Day</option>
+                                    <option value="Morning">Morning (8:00 AM - 12:00 PM)</option>
+                                    <option value="Afternoon">Afternoon (1:00 PM - 6:00 PM)</option>
+                                    <option value="Custom">Custom Time Range</option>
+                                </select>
+                                <span asp-validation-for="BlockRequest.BlockType" class="text-danger small"></span>
+                            </div>
+                        </div>
+
+                        <!-- Custom Time Range (Hidden by default) -->
+                        <div id="customTimeRange" class="row mb-4" style="display: none;">
+                            <div class="col-md-6">
+                                <label asp-for="BlockRequest.StartTime" class="form-label">
+                                    <i class="fas fa-clock me-1"></i>Start Time
+                                </label>
+                                <input asp-for="BlockRequest.StartTime" type="time" class="form-control" min="08:00" max="17:30" />
+                                <span asp-validation-for="BlockRequest.StartTime" class="text-danger small"></span>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label asp-for="BlockRequest.EndTime" class="form-label">
+                                    <i class="fas fa-clock me-1"></i>End Time
+                                </label>
+                                <input asp-for="BlockRequest.EndTime" type="time" class="form-control" min="08:00" max="18:00" />
+                                <span asp-validation-for="BlockRequest.EndTime" class="text-danger small"></span>
+                            </div>
+                        </div>
+
+                        <!-- Reason -->
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <label asp-for="BlockRequest.Reason" class="form-label">
+                                    <i class="fas fa-comment me-1"></i>Reason (Optional)
+                                </label>
+                                <textarea asp-for="BlockRequest.Reason" class="form-control" rows="3" 
+                                          placeholder="e.g., Personal appointment, Conference, Training, etc."></textarea>
+                                <span asp-validation-for="BlockRequest.Reason" class="text-danger small"></span>
+                            </div>
+                        </div>
+
+                        <!-- Submit Button -->
+                        <div class="row">
+                            <div class="col-12">
+                                <div class="d-flex justify-content-between">
+                                    <a asp-page="/Appointments/Index" class="btn btn-outline-secondary">
+                                        <i class="fas fa-arrow-left me-1"></i>Back to Schedule
+                                    </a>
+                                    <button type="submit" class="btn btn-warning">
+                                        <i class="fas fa-ban me-1"></i>Block Time Slot
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Information Card -->
+            <div class="card mt-4">
+                <div class="card-header">
+                    <h6 class="mb-0"><i class="fas fa-info-circle me-2"></i>Important Information</h6>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6><i class="fas fa-clock me-1"></i>Business Hours</h6>
+                            <ul class="list-unstyled small">
+                                <li>Monday - Friday: 8:00 AM - 6:00 PM</li>
+                                <li>Saturday: 9:00 AM - 4:00 PM</li>
+                                <li>Sunday: Closed</li>
+                            </ul>
+                        </div>
+                        <div class="col-md-6">
+                            <h6><i class="fas fa-exclamation-triangle me-1"></i>Notes</h6>
+                            <ul class="list-unstyled small">
+                                <li>• Time slots can only be blocked during business hours</li>
+                                <li>• Cannot block time if appointments are already scheduled</li>
+                                <li>• Blocked slots can be unblocked if needed</li>
+                                <li>• Minimum 1-hour block duration required</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- My Blocked Slots -->
+    <div class="row mt-5">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h6 class="mb-0"><i class="fas fa-calendar-times me-2"></i>My Blocked Time Slots</h6>
+                    <span class="badge bg-warning">@Model.BlockedSlots.Count() slot(s)</span>
+                </div>
+                <div class="card-body">
+                    @if (Model.BlockedSlots.Any())
+                    {
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Date</th>
+                                        <th>Time</th>
+                                        <th>Type</th>
+                                        <th>Reason</th>
+                                        <th>Status</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var slot in Model.BlockedSlots)
+                                    {
+                                        <tr>
+                                            <td>
+                                                <span class="fw-bold">@slot.StartTime.ToString("MMM dd, yyyy")</span>
+                                                @if (slot.StartTime.Date == DateTime.Today)
+                                                {
+                                                    <br><span class="badge bg-info">Today</span>
+                                                }
+                                                else if (slot.StartTime.Date == DateTime.Today.AddDays(1))
+                                                {
+                                                    <br><span class="badge bg-warning">Tomorrow</span>
+                                                }
+                                            </td>
+                                            <td>
+                                                <span class="fw-bold">@slot.StartTime.ToString("hh:mm tt")</span>
+                                                - 
+                                                <span class="fw-bold">@slot.EndTime.ToString("hh:mm tt")</span>
+                                                <br>
+                                                <small class="text-muted">@((int)(slot.EndTime - slot.StartTime).TotalMinutes) min</small>
+                                            </td>
+                                            <td>
+                                                <span class="badge bg-secondary">@slot.BlockType</span>
+                                            </td>
+                                            <td>
+                                                <small>@(slot.Reason ?? "No reason provided")</small>
+                                            </td>
+                                            <td>
+                                                <span class="badge bg-warning">Blocked</span>
+                                            </td>
+                                            <td>
+                                                @if (slot.StartTime > DateTime.Now)
+                                                {
+                                                    <button type="button" class="btn btn-sm btn-outline-danger" 
+                                                            onclick="unblockSlot(@slot.Id, '@slot.StartTime.ToString("MMM dd, yyyy hh:mm tt")')"
+                                                            title="Unblock this time slot">
+                                                        <i class="fas fa-unlock"></i> Unblock
+                                                    </button>
+                                                }
+                                                else
+                                                {
+                                                    <span class="text-muted small">Past</span>
+                                                }
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="text-center py-4">
+                            <i class="fas fa-calendar-check fa-3x text-muted mb-3"></i>
+                            <h6 class="text-muted">No blocked time slots</h6>
+                            <p class="text-muted">You haven't blocked any time slots yet.</p>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Unblock Form (Hidden) -->
+<form id="unblockForm" method="post" asp-page-handler="UnblockTime" style="display: none;">
+    <input name="blockedSlotId" id="unblockBlockedSlotId" type="hidden" />
+</form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    
+    <script>
+        function toggleTimeInputs() {
+            const blockType = document.querySelector('select[name="BlockRequest.BlockType"]').value;
+            const customTimeRange = document.getElementById('customTimeRange');
+            
+            if (blockType === 'Custom') {
+                customTimeRange.style.display = 'flex';
+                document.querySelector('input[name="BlockRequest.StartTime"]').required = true;
+                document.querySelector('input[name="BlockRequest.EndTime"]').required = true;
+            } else {
+                customTimeRange.style.display = 'none';
+                document.querySelector('input[name="BlockRequest.StartTime"]').required = false;
+                document.querySelector('input[name="BlockRequest.EndTime"]').required = false;
+            }
+        }
+
+        function unblockSlot(blockedSlotId, timeSlot) {
+            if (confirm(`Are you sure you want to unblock the time slot: ${timeSlot}?`)) {
+                document.getElementById('unblockBlockedSlotId').value = blockedSlotId;
+                document.getElementById('unblockForm').submit();
+            }
+        }
+
+        // Set minimum date to today
+        document.addEventListener('DOMContentLoaded', function() {
+            const dateInput = document.querySelector('input[name="BlockRequest.BlockDate"]');
+            const today = new Date().toISOString().split('T')[0];
+            dateInput.min = today;
+            
+            // Set default to tomorrow
+            const tomorrow = new Date();
+            tomorrow.setDate(tomorrow.getDate() + 1);
+            dateInput.value = tomorrow.toISOString().split('T')[0];
+        });
+
+        // Validate time range
+        function validateTimeRange() {
+            const startTime = document.querySelector('input[name="BlockRequest.StartTime"]').value;
+            const endTime = document.querySelector('input[name="BlockRequest.EndTime"]').value;
+            
+            if (startTime && endTime) {
+                const start = new Date(`2000-01-01T${startTime}`);
+                const end = new Date(`2000-01-01T${endTime}`);
+                const diffInHours = (end - start) / (1000 * 60 * 60);
+                
+                if (diffInHours < 1) {
+                    alert('Minimum block duration is 1 hour.');
+                    return false;
+                }
+                
+                if (start >= end) {
+                    alert('End time must be after start time.');
+                    return false;
+                }
+            }
+            
+            return true;
+        }
+
+        // Add validation to form submission
+        document.querySelector('form').addEventListener('submit', function(e) {
+            if (!validateTimeRange()) {
+                e.preventDefault();
+            }
+        });
+    </script>
+}

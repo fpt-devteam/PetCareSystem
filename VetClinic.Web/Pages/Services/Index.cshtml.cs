@@ -9,13 +9,16 @@ namespace VetClinic.Web.Pages.Services
     public class IndexModel : PageModel
     {
         private readonly IServiceService _serviceService;
+        private readonly IUserService _userService;
 
-        public IndexModel(IServiceService serviceService)
+        public IndexModel(IServiceService serviceService, IUserService userService)
         {
             _serviceService = serviceService;
+            _userService = userService;
         }
 
         public IEnumerable<VetClinic.Repository.Entities.Service> Services { get; set; } = new List<VetClinic.Repository.Entities.Service>();
+        public IEnumerable<User> Doctors { get; set; } = new List<User>();
 
         // Filter properties
         [BindProperty(SupportsGet = true)]
@@ -38,20 +41,16 @@ namespace VetClinic.Web.Pages.Services
 
         public async Task<IActionResult> OnGetAsync()
         {
-            if (!SessionHelper.IsAuthenticated(HttpContext.Session))
-            {
-                return RedirectToPage("/Account/Login");
-            }
-
             try
             {
                 await LoadServicesAsync();
+                await LoadDoctorsAsync();
                 await LoadStatsAsync();
                 return Page();
             }
             catch (Exception ex)
             {
-                TempData["ErrorMessage"] = "Error loading services. Please try again.";
+                TempData["ErrorMessage"] = "Error loading services and doctors. Please try again.";
                 Console.WriteLine($"Error loading services: {ex.Message}");
                 return Page();
             }
@@ -177,6 +176,20 @@ namespace VetClinic.Web.Pages.Services
             {
                 Console.WriteLine($"Error loading services: {ex.Message}");
                 Services = new List<VetClinic.Repository.Entities.Service>();
+            }
+        }
+
+        private async Task LoadDoctorsAsync()
+        {
+            try
+            {
+                var doctors = await _userService.GetUsersByRoleAsync("Doctor");
+                Doctors = doctors.OrderBy(d => d.FullName).ToList();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error loading doctors: {ex.Message}");
+                Doctors = new List<User>();
             }
         }
 
