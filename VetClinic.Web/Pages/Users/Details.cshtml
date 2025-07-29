@@ -1,6 +1,7 @@
-@page
+@page "{id:int}"
 @model VetClinic.Web.Pages.Users.DetailsModel
-@{
+@if (Model.UserDetails != null)
+{
     ViewData["Title"] = "User Details";
 }
 
@@ -31,9 +32,9 @@
                         <i class="fas fa-arrow-left me-1"></i>Back to List
                     </a>
                     @if (ViewSessionHelper.IsInAnyRole(ViewContext.HttpContext.Session, "Admin", "Manager") && 
-                         Model.User.Id != ViewSessionHelper.GetUserId(ViewContext.HttpContext.Session))
+                         Model.UserDetails?.Id != ViewSessionHelper.GetUserId(ViewContext.HttpContext.Session))
                     {
-                        <a href="/Users/Edit/@Model.User.Id" class="btn btn-primary">
+                        <a href="/Users/Edit/@Model.UserDetails?.Id" class="btn btn-primary">
                             <i class="fas fa-edit me-1"></i>Edit
                         </a>
                     }
@@ -61,8 +62,8 @@
                         <div class="avatar-lg mx-auto">
                             <i class="fas fa-user fa-3x"></i>
                         </div>
-                        <h4 class="mt-3">@Model.User.FullName</h4>
-                        <span class="badge @(Model.User.Role switch 
+                        <h4 class="mt-3">@Model.UserDetails?.FullName</h4>
+                        <span class="badge @(Model.UserDetails?.Role switch 
                         {
                             "Admin" => "bg-danger",
                             "Manager" => "bg-warning",
@@ -70,32 +71,32 @@
                             "Staff" => "bg-info",
                             _ => "bg-primary"
                         })">
-                            <i class="fas fa-user-tag me-1"></i>@Model.User.Role
+                            <i class="fas fa-user-tag me-1"></i>@Model.UserDetails?.Role
                         </span>
-                        <span class="badge @(Model.User.IsActive ? "bg-success" : "bg-secondary") ms-1">
-                            <i class="fas @(Model.User.IsActive ? "fa-check" : "fa-times") me-1"></i>
-                            @(Model.User.IsActive ? "Active" : "Inactive")
+                        <span class="badge @(Model.UserDetails?.IsActive == true ? "bg-success" : "bg-secondary") ms-1">
+                            <i class="fas @(Model.UserDetails?.IsActive == true ? "fa-check" : "fa-times") me-1"></i>
+                            @(Model.UserDetails?.IsActive == true ? "Active" : "Inactive")
                         </span>
                     </div>
 
                     <div class="mb-3">
                         <h6 class="text-primary">User ID</h6>
-                        <p>@Model.User.Id</p>
+                        <p>@Model.UserDetails?.Id</p>
                     </div>
 
                     <div class="mb-3">
                         <h6 class="text-primary">Email</h6>
                         <p>
                             <i class="fas fa-envelope me-1"></i>
-                            <a href="mailto:@Model.User.Email">@Model.User.Email</a>
+                            <a href="mailto:@Model.UserDetails?.Email">@Model.UserDetails?.Email</a>
                         </p>
                     </div>
 
-                    @if (!string.IsNullOrEmpty(Model.User.PhoneNumber))
+                    @if (!string.IsNullOrEmpty(Model.UserDetails?.PhoneNumber))
                     {
                         <div class="mb-3">
                             <h6 class="text-primary">Phone</h6>
-                            <p><i class="fas fa-phone me-1"></i>@Model.User.PhoneNumber</p>
+                            <p><i class="fas fa-phone me-1"></i>@Model.UserDetails?.PhoneNumber</p>
                         </div>
                     }
 
@@ -103,17 +104,17 @@
                         <h6 class="text-primary">Joined</h6>
                         <p>
                             <i class="fas fa-calendar me-1"></i>
-                            @Model.User.CreatedDate.ToString("MMMM dd, yyyy")
+                            @Model.UserDetails?.CreatedDate.ToString("MMMM dd, yyyy")
                         </p>
                     </div>
 
-                    @if (Model.User.LastLoginDate.HasValue)
+                    @if (Model.UserDetails?.LastLoginDate.HasValue == true)
                     {
                         <div class="mb-3">
                             <h6 class="text-primary">Last Login</h6>
                             <p>
                                 <i class="fas fa-clock me-1"></i>
-                                @Model.User.LastLoginDate.Value.ToString("MMMM dd, yyyy 'at' hh:mm tt")
+                                @Model.UserDetails.LastLoginDate.Value.ToString("MMMM dd, yyyy 'at' hh:mm tt")
                             </p>
                         </div>
                     }
@@ -121,7 +122,7 @@
             </div>
 
             @if (ViewSessionHelper.IsInAnyRole(ViewContext.HttpContext.Session, "Admin", "Manager") && 
-                 Model.User.Id != ViewSessionHelper.GetUserId(ViewContext.HttpContext.Session))
+                 Model.UserDetails?.Id != ViewSessionHelper.GetUserId(ViewContext.HttpContext.Session))
             {
                 <div class="card mb-4">
                     <div class="card-header bg-danger text-white">
@@ -129,24 +130,24 @@
                     </div>
                     <div class="card-body">
                         <div class="d-grid gap-2">
-                            @if (Model.User.IsActive)
+                            @if (Model.UserDetails?.IsActive == true)
                             {
-                                <button type="button" class="btn btn-warning" onclick="toggleUserStatus(@Model.User.Id, 'deactivate')">
+                                <button type="button" class="btn btn-warning" onclick="toggleUserStatus(@Model.UserDetails?.Id, 'deactivate')">
                                     <i class="fas fa-ban me-1"></i>Deactivate User
                                 </button>
                             }
                             else
                             {
-                                <button type="button" class="btn btn-success" onclick="toggleUserStatus(@Model.User.Id, 'activate')">
+                                <button type="button" class="btn btn-success" onclick="toggleUserStatus(@Model.UserDetails?.Id, 'activate')">
                                     <i class="fas fa-check-circle me-1"></i>Activate User
                                 </button>
                             }
                             
-                            <button type="button" class="btn btn-outline-danger" onclick="deleteUser(@Model.User.Id, '@Model.User.FullName')">
+                            <button type="button" class="btn btn-outline-danger" onclick="deleteUser(@Model.UserDetails?.Id, '@Model.UserDetails?.FullName')">
                                 <i class="fas fa-trash-alt me-1"></i>Delete User
                             </button>
                             
-                            <button type="button" class="btn btn-outline-warning" onclick="resetPassword(@Model.User.Id, '@Model.User.FullName')">
+                            <button type="button" class="btn btn-outline-warning" onclick="resetPassword(@Model.UserDetails?.Id, '@Model.UserDetails?.FullName')">
                                 <i class="fas fa-key me-1"></i>Reset Password
                             </button>
                         </div>
@@ -156,7 +157,7 @@
         </div>
 
         <div class="col-md-8">
-            @if (Model.User.Role == "Doctor")
+            @if (Model.UserDetails?.Role == "Doctor")
             {
                 <div class="card mb-4">
                     <div class="card-header bg-success text-white">
@@ -225,7 +226,7 @@
                 </div>
             }
 
-            @if (Model.User.Role == "Customer")
+            @if (Model.UserDetails?.Role == "Customer")
             {
                 <div class="card mb-4">
                     <div class="card-header bg-primary text-white">
@@ -354,7 +355,7 @@
 </div>
 
 @if (ViewSessionHelper.IsInAnyRole(ViewContext.HttpContext.Session, "Admin", "Manager") && 
-     Model.User.Id != ViewSessionHelper.GetUserId(ViewContext.HttpContext.Session))
+     Model.UserDetails?.Id != ViewSessionHelper.GetUserId(ViewContext.HttpContext.Session))
 {
     <!-- Delete User Form -->
     <form id="deleteForm" method="post" asp-page-handler="Delete" style="display: none;">
