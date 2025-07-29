@@ -1,0 +1,318 @@
+@page "{id:int}"
+@model EditModel
+@{
+    ViewData["Title"] = "Edit Pet";
+}
+
+<div class="container">
+    <div class="row">
+        <div class="col-12">
+            <h2><i class="fas fa-edit text-warning me-2"></i>Edit Pet</h2>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="/">Dashboard</a></li>
+                    <li class="breadcrumb-item"><a href="/Pets">Pets</a></li>
+                    <li class="breadcrumb-item active">Edit Pet</li>
+                </ol>
+            </nav>
+        </div>
+    </div>
+
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="fas fa-paw me-2"></i>Edit Pet Information</h5>
+                </div>
+                <div class="card-body">
+                    <form method="post">
+                        <input type="hidden" asp-for="Pet.Id" />
+                        <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
+
+                        <!-- Basic Information -->
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <h6 class="text-muted mb-3">
+                                    <i class="fas fa-info-circle me-1"></i>Basic Information
+                                </h6>
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label asp-for="Pet.Name" class="form-label">
+                                    <i class="fas fa-tag me-1"></i>Pet Name
+                                </label>
+                                <input asp-for="Pet.Name" class="form-control" placeholder="Enter pet name..." />
+                                <span asp-validation-for="Pet.Name" class="text-danger small"></span>
+                            </div>
+                            <div class="col-md-6">
+                                <label asp-for="Pet.OwnerId" class="form-label">
+                                    <i class="fas fa-user me-1"></i>Owner
+                                </label>
+                                <select asp-for="Pet.OwnerId" asp-items="Model.OwnerSelectList" class="form-select">
+                                    <option value="">-- Select Owner --</option>
+                                </select>
+                                <span asp-validation-for="Pet.OwnerId" class="text-danger small"></span>
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-4">
+                                <label asp-for="Pet.Species" class="form-label">
+                                    <i class="fas fa-paw me-1"></i>Species
+                                </label>
+                                <select asp-for="Pet.Species" class="form-select">
+                                    <option value="">-- Select Species --</option>
+                                    <option value="Dog">Dog</option>
+                                    <option value="Cat">Cat</option>
+                                    <option value="Bird">Bird</option>
+                                    <option value="Fish">Fish</option>
+                                    <option value="Rabbit">Rabbit</option>
+                                    <option value="Hamster">Hamster</option>
+                                    <option value="Guinea Pig">Guinea Pig</option>
+                                    <option value="Ferret">Ferret</option>
+                                    <option value="Reptile">Reptile</option>
+                                    <option value="Other">Other</option>
+                                </select>
+                                <span asp-validation-for="Pet.Species" class="text-danger small"></span>
+                            </div>
+                            <div class="col-md-4">
+                                <label asp-for="Pet.Breed" class="form-label">
+                                    <i class="fas fa-dna me-1"></i>Breed
+                                </label>
+                                <input asp-for="Pet.Breed" class="form-control" placeholder="e.g., Golden Retriever, Persian..." />
+                                <span asp-validation-for="Pet.Breed" class="text-danger small"></span>
+                            </div>
+                            <div class="col-md-4">
+                                <label asp-for="Pet.Gender" class="form-label">
+                                    <i class="fas fa-venus-mars me-1"></i>Gender
+                                </label>
+                                <select asp-for="Pet.Gender" class="form-select">
+                                    <option value="">-- Select Gender --</option>
+                                    <option value="Male">Male</option>
+                                    <option value="Female">Female</option>
+                                    <option value="Unknown">Unknown</option>
+                                </select>
+                                <span asp-validation-for="Pet.Gender" class="text-danger small"></span>
+                            </div>
+                        </div>
+
+                        <!-- Physical Details -->
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <h6 class="text-muted mb-3 mt-4">
+                                    <i class="fas fa-ruler me-1"></i>Physical Details
+                                </h6>
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-4">
+                                <label asp-for="Pet.BirthDate" class="form-label">
+                                    <i class="fas fa-birthday-cake me-1"></i>Birth Date
+                                </label>
+                                <input asp-for="Pet.BirthDate" type="date" class="form-control" />
+                                <span asp-validation-for="Pet.BirthDate" class="text-danger small"></span>
+                                <div class="form-text">
+                                    <i class="fas fa-info-circle me-1"></i>
+                                    Leave blank if unknown
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <label asp-for="Pet.Weight" class="form-label">
+                                    <i class="fas fa-weight me-1"></i>Weight (kg)
+                                </label>
+                                <input asp-for="Pet.Weight" type="number" step="0.1" min="0.1" max="999.9" 
+                                       class="form-control" placeholder="0.0" />
+                                <span asp-validation-for="Pet.Weight" class="text-danger small"></span>
+                            </div>
+                            <div class="col-md-4">
+                                <label asp-for="Pet.Color" class="form-label">
+                                    <i class="fas fa-palette me-1"></i>Color
+                                </label>
+                                <input asp-for="Pet.Color" class="form-control" placeholder="e.g., Brown, Black, White..." />
+                                <span asp-validation-for="Pet.Color" class="text-danger small"></span>
+                            </div>
+                        </div>
+
+                        <!-- Identification -->
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <h6 class="text-muted mb-3 mt-4">
+                                    <i class="fas fa-id-card me-1"></i>Identification
+                                </h6>
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label asp-for="Pet.MicrochipId" class="form-label">
+                                    <i class="fas fa-microchip me-1"></i>Microchip ID
+                                </label>
+                                <input asp-for="Pet.MicrochipId" class="form-control" placeholder="Enter microchip ID..." />
+                                <span asp-validation-for="Pet.MicrochipId" class="text-danger small"></span>
+                                <div class="form-text">
+                                    <i class="fas fa-info-circle me-1"></i>
+                                    Optional - for identification purposes
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <label asp-for="Pet.IsActive" class="form-label">
+                                    <i class="fas fa-toggle-on me-1"></i>Status
+                                </label>
+                                <div class="form-check form-switch mt-2">
+                                    <input asp-for="Pet.IsActive" class="form-check-input" type="checkbox" />
+                                    <label asp-for="Pet.IsActive" class="form-check-label">
+                                        Active Pet
+                                    </label>
+                                </div>
+                                <span asp-validation-for="Pet.IsActive" class="text-danger small"></span>
+                            </div>
+                        </div>
+
+                        <!-- Medical Information -->
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <h6 class="text-muted mb-3 mt-4">
+                                    <i class="fas fa-notes-medical me-1"></i>Medical Information
+                                </h6>
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-12">
+                                <label asp-for="Pet.MedicalNotes" class="form-label">
+                                    <i class="fas fa-stethoscope me-1"></i>Medical Notes
+                                </label>
+                                <textarea asp-for="Pet.MedicalNotes" class="form-control" rows="4" 
+                                          placeholder="Enter any medical notes, allergies, special care requirements..."></textarea>
+                                <span asp-validation-for="Pet.MedicalNotes" class="text-danger small"></span>
+                                <div class="form-text">
+                                    <i class="fas fa-info-circle me-1"></i>
+                                    Important medical information for veterinary staff
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Action Buttons -->
+                        <div class="row">
+                            <div class="col-12">
+                                <div class="d-flex justify-content-between">
+                                    <a href="/Pets" class="btn btn-outline-secondary">
+                                        <i class="fas fa-arrow-left me-1"></i>Back to Pets
+                                    </a>
+                                    <div>
+                                        <button type="button" class="btn btn-outline-warning me-2" onclick="resetForm()">
+                                            <i class="fas fa-undo me-1"></i>Reset
+                                        </button>
+                                        <button type="submit" class="btn btn-warning">
+                                            <i class="fas fa-save me-1"></i>Update Pet
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Pet Information Card -->
+            @if (Model.CurrentPet != null)
+            {
+                <div class="card mt-4">
+                    <div class="card-header">
+                        <h6 class="mb-0"><i class="fas fa-info-circle me-2"></i>Current Pet Information</h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <p><strong>Pet Name:</strong> @Model.CurrentPet.Name</p>
+                                <p><strong>Species:</strong> @Model.CurrentPet.Species</p>
+                                <p><strong>Breed:</strong> @(Model.CurrentPet.Breed ?? "Not specified")</p>
+                                <p><strong>Gender:</strong> @Model.CurrentPet.Gender</p>
+                                <p><strong>Owner:</strong> @(Model.CurrentPet.Owner?.FullName ?? "Unknown")</p>
+                            </div>
+                            <div class="col-md-6">
+                                <p><strong>Birth Date:</strong> @(Model.CurrentPet.BirthDate?.ToString("MMM dd, yyyy") ?? "Unknown")</p>
+                                <p><strong>Weight:</strong> @(Model.CurrentPet.Weight?.ToString("F1") ?? "Not recorded") kg</p>
+                                <p><strong>Color:</strong> @(Model.CurrentPet.Color ?? "Not specified")</p>
+                                <p><strong>Microchip ID:</strong> @(Model.CurrentPet.MicrochipId ?? "Not chipped")</p>
+                                <p><strong>Status:</strong> 
+                                    @if (Model.CurrentPet.IsActive)
+                                    {
+                                        <span class="badge bg-success">Active</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-secondary">Inactive</span>
+                                    }
+                                </p>
+                            </div>
+                        </div>
+                        @if (!string.IsNullOrEmpty(Model.CurrentPet.MedicalNotes))
+                        {
+                            <div class="row mt-3">
+                                <div class="col-12">
+                                    <p><strong>Medical Notes:</strong></p>
+                                    <div class="alert alert-info">
+                                        @Model.CurrentPet.MedicalNotes
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    
+    <script>
+        function resetForm() {
+            if (confirm('Are you sure you want to reset all fields to their original values?')) {
+                // Reset form to original values
+                document.querySelector('form').reset();
+                
+                // Re-populate with original values if available
+                @if (Model.CurrentPet != null)
+                {
+                    <text>
+                    document.getElementById('Pet_Name').value = '@Model.CurrentPet.Name';
+                    document.getElementById('Pet_Species').value = '@Model.CurrentPet.Species';
+                    document.getElementById('Pet_Breed').value = '@(Model.CurrentPet.Breed ?? "")';
+                    document.getElementById('Pet_Gender').value = '@Model.CurrentPet.Gender';
+                    document.getElementById('Pet_Color').value = '@(Model.CurrentPet.Color ?? "")';
+                    document.getElementById('Pet_MicrochipId').value = '@(Model.CurrentPet.MicrochipId ?? "")';
+                    document.getElementById('Pet_MedicalNotes').value = '@(Model.CurrentPet.MedicalNotes ?? "")';
+                    document.getElementById('Pet_IsActive').checked = @Model.CurrentPet.IsActive.ToString().ToLower();
+                    </text>
+                }
+            }
+        }
+
+        // Auto-calculate age when birth date changes
+        document.addEventListener('DOMContentLoaded', function() {
+            const birthDateInput = document.getElementById('Pet_BirthDate');
+            if (birthDateInput) {
+                birthDateInput.addEventListener('change', function() {
+                    if (this.value) {
+                        const birthDate = new Date(this.value);
+                        const today = new Date();
+                        const age = today.getFullYear() - birthDate.getFullYear();
+                        const monthDiff = today.getMonth() - birthDate.getMonth();
+                        
+                        if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+                            age--;
+                        }
+                        
+                        console.log(`Pet age: ${age} years`);
+                    }
+                });
+            }
+        });
+    </script>
+} 
