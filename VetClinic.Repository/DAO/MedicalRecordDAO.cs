@@ -10,12 +10,44 @@ namespace VetClinic.Repository.DAO
         {
         }
 
+        public override async Task<MedicalRecord?> GetByIdAsync(int id)
+        {
+            return await _dbSet
+                .Include(m => m.Pet)
+                .ThenInclude(p => p.Owner)
+                .Include(m => m.Doctor)
+                .Include(m => m.Appointment)
+                .ThenInclude(a => a.Service)
+                .Include(m => m.Appointment)
+                .ThenInclude(a => a.Invoice)
+                .FirstOrDefaultAsync(m => m.Id == id);
+        }
+
+        public override async Task<IEnumerable<MedicalRecord>> GetAllAsync()
+        {
+            return await _dbSet
+                .Include(m => m.Pet)
+                .ThenInclude(p => p.Owner)
+                .Include(m => m.Doctor)
+                .Include(m => m.Appointment)
+                .ThenInclude(a => a.Service)
+                .Include(m => m.Appointment)
+                .ThenInclude(a => a.Invoice)
+                .OrderByDescending(m => m.VisitDate)
+                .ToListAsync();
+        }
+
         public async Task<IEnumerable<MedicalRecord>> GetMedicalRecordsByPetAsync(int petId)
         {
             return await _dbSet
                 .Where(m => m.PetId == petId)
+                .Include(m => m.Pet)
+                .ThenInclude(p => p.Owner)
                 .Include(m => m.Doctor)
                 .Include(m => m.Appointment)
+                .ThenInclude(a => a.Service)
+                .Include(m => m.Appointment)
+                .ThenInclude(a => a.Invoice)
                 .OrderByDescending(m => m.VisitDate)
                 .ToListAsync();
         }
@@ -26,7 +58,11 @@ namespace VetClinic.Repository.DAO
                 .Where(m => m.DoctorId == doctorId)
                 .Include(m => m.Pet)
                 .ThenInclude(p => p.Owner)
+                .Include(m => m.Doctor)
                 .Include(m => m.Appointment)
+                .ThenInclude(a => a.Service)
+                .Include(m => m.Appointment)
+                .ThenInclude(a => a.Invoice)
                 .OrderByDescending(m => m.VisitDate)
                 .ToListAsync();
         }
@@ -48,6 +84,10 @@ namespace VetClinic.Repository.DAO
                 .Include(m => m.Pet)
                 .ThenInclude(p => p.Owner)
                 .Include(m => m.Doctor)
+                .Include(m => m.Appointment)
+                .ThenInclude(a => a.Service)
+                .Include(m => m.Appointment)
+                .ThenInclude(a => a.Invoice)
                 .OrderByDescending(m => m.VisitDate)
                 .ToListAsync();
         }
@@ -56,9 +96,13 @@ namespace VetClinic.Repository.DAO
         {
             return await _dbSet
                 .Where(m => m.PetId == petId)
+                .Include(m => m.Pet)
+                .ThenInclude(p => p.Owner)
                 .Include(m => m.Doctor)
                 .Include(m => m.Appointment)
                 .ThenInclude(a => a.Service)
+                .Include(m => m.Appointment)
+                .ThenInclude(a => a.Invoice)
                 .OrderByDescending(m => m.VisitDate)
                 .ToListAsync();
         }

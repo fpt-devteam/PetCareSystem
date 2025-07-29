@@ -27,7 +27,7 @@
                             <label for="searchTerm" class="form-label">
                                 <i class="fas fa-search me-1"></i>Search Records
                             </label>
-                            <input asp-for="SearchTerm" class="form-control" 
+                            <input asp-for="SearchTerm" class="form-control"
                                    placeholder="Search by pet name, diagnosis, treatment..." />
                         </div>
                         <div class="col-md-4">
@@ -57,10 +57,16 @@
                     </span>
                 </div>
                 <div>
-                    @if (ViewSessionHelper.IsInRole(ViewBag.Session, "Doctor"))
+                    @if (ViewSessionHelper.IsInRole(ViewContext.HttpContext.Session, "Doctor"))
                     {
                         <a href="/MedicalRecords/Create" class="btn btn-success">
                             <i class="fas fa-plus me-1"></i>Add Medical Record
+                        </a>
+                    }
+                    @if (ViewSessionHelper.IsInRole(ViewContext.HttpContext.Session, "Customer"))
+                    {
+                        <a href="/Pets" class="btn btn-outline-primary">
+                            <i class="fas fa-paw me-1"></i>My Pets
                         </a>
                     }
                 </div>
@@ -130,12 +136,15 @@
                                                     <a href="/MedicalRecords/Details/@record.Id" class="btn btn-sm btn-outline-primary" title="View Details">
                                                         <i class="fas fa-eye"></i>
                                                     </a>
-                                                    @if (ViewSessionHelper.IsInRole(ViewBag.Session, "Doctor"))
+                                                    @if (ViewSessionHelper.IsInRole(ViewContext.HttpContext.Session, "Doctor"))
                                                     {
                                                         <a href="/MedicalRecords/Edit/@record.Id" class="btn btn-sm btn-outline-warning" title="Edit Record">
                                                             <i class="fas fa-edit"></i>
                                                         </a>
                                                     }
+                                                    <a href="/Pets/Details/@record.PetId" class="btn btn-sm btn-outline-info" title="View Pet">
+                                                        <i class="fas fa-paw"></i>
+                                                    </a>
                                                 </div>
                                             </td>
                                         </tr>
@@ -190,4 +199,4 @@
             }
         });
     </script>
-} 
+}

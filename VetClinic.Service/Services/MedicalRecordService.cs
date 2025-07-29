@@ -10,22 +10,34 @@ namespace VetClinic.Service.Services
         private readonly IAppointmentRepository _appointmentRepository;
         private readonly IPetRepository _petRepository;
         private readonly IUserRepository _userRepository;
+        private readonly IAuditService _auditService;
 
         public MedicalRecordService(
             IMedicalRecordRepository medicalRecordRepository,
             IAppointmentRepository appointmentRepository,
             IPetRepository petRepository,
-            IUserRepository userRepository)
+            IUserRepository userRepository,
+            IAuditService auditService)
         {
             _medicalRecordRepository = medicalRecordRepository;
             _appointmentRepository = appointmentRepository;
             _petRepository = petRepository;
             _userRepository = userRepository;
+            _auditService = auditService;
         }
 
         public async Task<MedicalRecord?> GetMedicalRecordByIdAsync(int id)
         {
-            return await _medicalRecordRepository.GetByIdAsync(id);
+            var record = await _medicalRecordRepository.GetByIdAsync(id);
+
+            // Log access for audit purposes
+            if (record != null)
+            {
+                // Note: We'll need to get user info from the calling context
+                // This will be handled in the web layer
+            }
+
+            return record;
         }
 
         public async Task<IEnumerable<MedicalRecord>> GetAllMedicalRecordsAsync()
@@ -58,12 +70,24 @@ namespace VetClinic.Service.Services
             if (doctor == null || doctor.Role != "Doctor")
                 throw new ArgumentException("Doctor not found");
 
-            return await _medicalRecordRepository.CreateAsync(medicalRecord);
+            var createdRecord = await _medicalRecordRepository.CreateAsync(medicalRecord);
+
+            // Log creation for audit purposes
+            // Note: We'll need to get user info from the calling context
+            // This will be handled in the web layer
+
+            return createdRecord;
         }
 
         public async Task<MedicalRecord> UpdateMedicalRecordAsync(MedicalRecord medicalRecord)
         {
-            return await _medicalRecordRepository.UpdateAsync(medicalRecord);
+            var updatedRecord = await _medicalRecordRepository.UpdateAsync(medicalRecord);
+
+            // Log update for audit purposes
+            // Note: We'll need to get user info from the calling context
+            // This will be handled in the web layer
+
+            return updatedRecord;
         }
 
         public async Task<bool> DeleteMedicalRecordAsync(int id)

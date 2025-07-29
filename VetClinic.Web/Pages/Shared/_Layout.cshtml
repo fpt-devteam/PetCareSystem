@@ -77,11 +77,19 @@
                                     </a>
                                 </li>
                             }
-                            @if (userRole == "Doctor" || userRole == "Manager")
+                            @if (userRole == "Doctor" || userRole == "Manager" || userRole == "Staff")
                             {
                                 <li class="nav-item">
                                     <a class="nav-link text-dark" asp-area="" asp-page="/MedicalRecords/Index">
                                         <i class="fas fa-file-medical me-1"></i>Medical Records
+                                    </a>
+                                </li>
+                            }
+                            @if (userRole == "Customer")
+                            {
+                                <li class="nav-item">
+                                    <a class="nav-link text-dark" asp-area="" asp-page="/MedicalRecords/Index">
+                                        <i class="fas fa-file-medical me-1"></i>Medical History
                                     </a>
                                 </li>
                             }

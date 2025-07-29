@@ -15,6 +15,9 @@ namespace VetClinic.Repository.Data.Configurations
             builder.Property(e => e.VisitDate)
                 .IsRequired();
 
+            builder.Property(e => e.ExaminationNotes)
+                .HasColumnType("ntext");
+
             builder.Property(e => e.Diagnosis)
                 .HasColumnType("ntext");
 
@@ -22,6 +25,9 @@ namespace VetClinic.Repository.Data.Configurations
                 .HasColumnType("ntext");
 
             builder.Property(e => e.Prescription)
+                .HasColumnType("ntext");
+
+            builder.Property(e => e.FollowUpInstructions)
                 .HasColumnType("ntext");
 
             builder.Property(e => e.CreatedDate)
