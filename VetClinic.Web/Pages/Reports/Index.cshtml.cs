@@ -1,7 +1,9 @@
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using VetClinic.Service.Interfaces;
 using VetClinic.Web.Helpers;
+using System.Diagnostics;
+using VetClinic.Service.Models;
 
 namespace VetClinic.Web.Pages.Reports
 {
@@ -76,10 +78,14 @@ namespace VetClinic.Web.Pages.Reports
             }
 
             // Set default date range if not provided
-            if (!StartDate.HasValue)
-                StartDate = DateTime.Now.AddMonths(-1);
-            if (!EndDate.HasValue)
-                EndDate = DateTime.Now;
+            //if (!StartDate.HasValue)
+            //    StartDate = DateTime.Now.AddMonths(-1);
+            //if (!EndDate.HasValue)
+            //    EndDate = DateTime.Now;
+            if (!StartDate.HasValue) StartDate = new DateTime(2025, 7, 1); // Bắt đầu từ 00:00:00 ngày 01/07/2025
+            if (!EndDate.HasValue) EndDate = new DateTime(2025, 7, 31, 23, 59, 59); // Kết thúc 23:59:59 ngày 31/07/2025
+
+            Debug.WriteLine($"StartDate: {StartDate}, EndDate: {EndDate}");
 
             try
             {
@@ -88,7 +94,7 @@ namespace VetClinic.Web.Pages.Reports
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Error loading reports: {ex.Message}");
+                Debug.WriteLine($"Error loading reports: {ex.Message}");
                 TempData["ErrorMessage"] = "Error loading reports. Please try again.";
                 return Page();
             }
@@ -99,12 +105,14 @@ namespace VetClinic.Web.Pages.Reports
             try
             {
                 // Load daily summary (USS-28)
-                var dailySummaryResult = await _dashboardService.GetDailySummaryAsync(DateTime.Today);
+                var dailySummaryResult = StartDate.HasValue ? await _dashboardService.GetDailySummaryAsync(StartDate.Value) : await _dashboardService.GetDailySummaryAsync(DateTime.Today);
                 DailySummary = dailySummaryResult as DailySummaryData ?? new DailySummaryData();
+                Debug.WriteLine($"DailySummary loaded: Date={DailySummary.Date}, TotalAppointments={DailySummary.TotalAppointments}");
 
                 // Load doctors and pets for dropdowns
                 Doctors = (await _userService.GetUsersByRoleAsync("Doctor")).ToList();
                 Pets = (await _petService.GetAllPetsAsync()).ToList();
+                Debug.WriteLine($"Doctors count: {Doctors.Count}, Pets count: {Pets.Count}");
 
                 // Load doctor performance (USS-20)
                 if (ReportType == "doctor-performance" && DoctorId.HasValue && YearMonth.HasValue)
@@ -132,6 +140,7 @@ namespace VetClinic.Web.Pages.Reports
                 TodayAppointments = await _dashboardService.GetTotalAppointmentsAsync(DateTime.Today, DateTime.Today.AddDays(1));
                 WeekAppointments = await _dashboardService.GetTotalAppointmentsAsync(DateTime.Now.AddDays(-7), DateTime.Now);
                 MonthAppointments = await _dashboardService.GetTotalAppointmentsAsync(DateTime.Now.AddDays(-30), DateTime.Now);
+                Debug.WriteLine($"Key Metrics: TotalPets={TotalPets}, TotalRevenue={TotalRevenue}");
 
                 // Load chart data
                 await LoadMonthlyRevenueDataAsync();
@@ -141,7 +150,7 @@ namespace VetClinic.Web.Pages.Reports
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Error in LoadReportDataAsync: {ex.Message}");
+                Debug.WriteLine($"Error in LoadReportDataAsync: {ex.Message}");
                 TempData["ErrorMessage"] = "Error loading report data. Please try again.";
                 // Set safe defaults
                 TotalPets = TotalCustomers = TotalDoctors = TotalAppointments = 0;
@@ -161,12 +170,17 @@ namespace VetClinic.Web.Pages.Reports
             try
             {
                 var revenueData = await _dashboardService.GetMonthlyRevenueAsync(StartDate, EndDate);
-                MonthlyRevenue = revenueData as List<MonthlyRevenueData> ?? new List<MonthlyRevenueData>();
+                MonthlyRevenue = revenueData ?? new List<MonthlyRevenueData>();
+                if (MonthlyRevenue.Count == 0)
+                {
+                    Debug.WriteLine("No monthly revenue data found for the specified date range.");
+                }
+                Debug.WriteLine($"MonthlyRevenue loaded: Count={MonthlyRevenue.Count}, First Month={MonthlyRevenue.FirstOrDefault()?.Month}, First Revenue={MonthlyRevenue.FirstOrDefault()?.Revenue}");
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Error loading monthly revenue: {ex.Message}");
-                MonthlyRevenue = new List<MonthlyRevenueData>();
+                Debug.WriteLine($"Error loading monthly revList<MonthlyRevenueData>enue: {ex.Message}");
+                MonthlyRevenue = new ();
             }
         }
 
@@ -175,11 +189,12 @@ namespace VetClinic.Web.Pages.Reports
             try
             {
                 var statusData = await _dashboardService.GetAppointmentStatusAsync(StartDate, EndDate);
-                AppointmentStatus = statusData as AppointmentStatusData ?? new AppointmentStatusData();
+                AppointmentStatus = statusData ?? new AppointmentStatusData();
+                Debug.WriteLine($"AppointmentStatus loaded: Scheduled={AppointmentStatus.Scheduled}, Completed={AppointmentStatus.Completed}, Cancelled={AppointmentStatus.Cancelled}");
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Error loading appointment status: {ex.Message}");
+                Debug.WriteLine($"Error loading appointment status: {ex.Message}");
                 AppointmentStatus = new AppointmentStatusData();
             }
         }
@@ -189,11 +204,12 @@ namespace VetClinic.Web.Pages.Reports
             try
             {
                 var speciesData = await _dashboardService.GetPetSpeciesDistributionAsync();
-                PetSpecies = speciesData as List<PetSpeciesData> ?? new List<PetSpeciesData>();
+                PetSpecies = speciesData ?? new List<PetSpeciesData>();
+                Debug.WriteLine($"PetSpecies loaded: Count={PetSpecies.Count}, First Species={PetSpecies.FirstOrDefault()?.Species}, First Count={PetSpecies.FirstOrDefault()?.Count}");
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Error loading pet species: {ex.Message}");
+                Debug.WriteLine($"Error loading pet species: {ex.Message}");
                 PetSpecies = new List<PetSpeciesData>();
             }
         }
@@ -203,11 +219,12 @@ namespace VetClinic.Web.Pages.Reports
             try
             {
                 var servicesData = await _dashboardService.GetTopServicesAsync(StartDate, EndDate);
-                TopServices = servicesData as List<TopServiceData> ?? new List<TopServiceData>();
+                TopServices = servicesData ?? new List<TopServiceData>();
+                Debug.WriteLine($"TopServices loaded: Count={TopServices.Count}, First Service={TopServices.FirstOrDefault()?.ServiceName}, First Count={TopServices.FirstOrDefault()?.Count}");
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Error loading top services: {ex.Message}");
+                Debug.WriteLine($"Error loading top services: {ex.Message}");
                 TopServices = new List<TopServiceData>();
             }
         }
@@ -259,29 +276,6 @@ namespace VetClinic.Web.Pages.Reports
             public string EndDate { get; set; } = string.Empty;
         }
 
-        public class MonthlyRevenueData
-        {
-            public string Month { get; set; } = string.Empty;
-            public decimal Revenue { get; set; }
-        }
-
-        public class AppointmentStatusData
-        {
-            public int Scheduled { get; set; }
-            public int Completed { get; set; }
-            public int Cancelled { get; set; }
-        }
-
-        public class PetSpeciesData
-        {
-            public string Species { get; set; } = string.Empty;
-            public int Count { get; set; }
-        }
-
-        public class TopServiceData
-        {
-            public string ServiceName { get; set; } = string.Empty;
-            public int Count { get; set; }
-        }
+        
     }
 }
