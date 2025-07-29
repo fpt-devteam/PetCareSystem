@@ -101,5 +101,10 @@ namespace VetClinic.Repository.Repositories
         {
             return await _feedbackDAO.GetTopRatedFeedbackAsync(count);
         }
+
+        public async Task<IEnumerable<Feedback>> GetFeedbackByDoctorAsync(int doctorId)
+        {
+            return await _feedbackDAO.GetFeedbackByDoctorAsync(doctorId);
+        }
     }
 }

@@ -31,7 +31,7 @@ if (app.Environment.IsDevelopment())
         await DbSeeder.SeedAsync(context);
     }
 }
-
+        
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
 {
