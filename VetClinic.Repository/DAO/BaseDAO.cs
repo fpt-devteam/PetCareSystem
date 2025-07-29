@@ -33,7 +33,7 @@ namespace VetClinic.Repository.DAO
 
         public virtual async Task<T> UpdateAsync(T entity)
         {
-            _dbSet.Update(entity);
+            _context.Entry(entity).State = EntityState.Modified;
             await _context.SaveChangesAsync();
             return entity;
         }

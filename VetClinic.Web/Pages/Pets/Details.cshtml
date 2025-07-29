@@ -1,0 +1,330 @@
+@page "{id:int}"
+@model DetailsModel
+@{
+    ViewData["Title"] = "Pet Details";
+}
+
+<div class="container-fluid">
+    <!-- Success/Error Messages -->
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="fas fa-check-circle"></i> @TempData["SuccessMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="fas fa-exclamation-triangle"></i> @TempData["ErrorMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    @if (Model.Pet != null)
+    {
+        <!-- Page Header -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h2><i class="fas fa-paw text-primary me-2"></i>@Model.Pet.Name</h2>
+                        <nav aria-label="breadcrumb">
+                            <ol class="breadcrumb">
+                                <li class="breadcrumb-item"><a href="/">Dashboard</a></li>
+                                <li class="breadcrumb-item"><a href="/Pets">Pets</a></li>
+                                <li class="breadcrumb-item active" aria-current="page">@Model.Pet.Name</li>
+                            </ol>
+                        </nav>
+                    </div>
+                    <div class="btn-group" role="group">
+                        <a href="/Pets/Edit/@Model.Pet.Id" class="btn btn-warning">
+                            <i class="fas fa-edit me-1"></i>Edit
+                        </a>
+                        <button type="button" class="btn btn-danger" onclick="deletePet(@Model.Pet.Id, '@Model.Pet.Name')">
+                            <i class="fas fa-trash me-1"></i>Delete
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Pet Statistics -->
+        <div class="row mb-4">
+            <div class="col-md-3">
+                <div class="card text-center bg-primary text-white">
+                    <div class="card-body">
+                        <i class="fas fa-calendar-check fa-2x mb-2"></i>
+                        <h4>@Model.TotalAppointments</h4>
+                        <small>Total Appointments</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card text-center bg-success text-white">
+                    <div class="card-body">
+                        <i class="fas fa-check-circle fa-2x mb-2"></i>
+                        <h4>@Model.CompletedAppointments</h4>
+                        <small>Completed</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card text-center bg-info text-white">
+                    <div class="card-body">
+                        <i class="fas fa-clock fa-2x mb-2"></i>
+                        <h4>@Model.UpcomingAppointments</h4>
+                        <small>Upcoming</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card text-center bg-warning text-white">
+                    <div class="card-body">
+                        <i class="fas fa-dollar-sign fa-2x mb-2"></i>
+                        <h4>$@Model.TotalSpent.ToString("N0")</h4>
+                        <small>Total Spent</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <!-- Pet Information -->
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0"><i class="fas fa-info-circle me-2"></i>Pet Information</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <p><strong>Name:</strong> @Model.Pet.Name</p>
+                                <p><strong>Species:</strong> @Model.Pet.Species</p>
+                                <p><strong>Breed:</strong> @(Model.Pet.Breed ?? "Not specified")</p>
+                                <p><strong>Gender:</strong> @Model.Pet.Gender</p>
+                                <p><strong>Age:</strong> @Model.GetAgeString(Model.Pet.BirthDate)</p>
+                            </div>
+                            <div class="col-md-6">
+                                <p><strong>Birth Date:</strong> @(Model.Pet.BirthDate?.ToString("MMM dd, yyyy") ?? "Unknown")</p>
+                                <p><strong>Weight:</strong> @(Model.Pet.Weight?.ToString("F1") ?? "Not recorded") kg</p>
+                                <p><strong>Color:</strong> @(Model.Pet.Color ?? "Not specified")</p>
+                                <p><strong>Microchip ID:</strong> @(Model.Pet.MicrochipId ?? "Not chipped")</p>
+                                <p><strong>Status:</strong> 
+                                    @if (Model.Pet.IsActive)
+                                    {
+                                        <span class="badge bg-success">Active</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-secondary">Inactive</span>
+                                    }
+                                </p>
+                            </div>
+                        </div>
+
+                        @if (!string.IsNullOrEmpty(Model.Pet.MedicalNotes))
+                        {
+                            <div class="row mt-3">
+                                <div class="col-12">
+                                    <p><strong>Medical Notes:</strong></p>
+                                    <div class="alert alert-info">
+                                        @Model.Pet.MedicalNotes
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+
+                <!-- Owner Information -->
+                <div class="card mt-4">
+                    <div class="card-header">
+                        <h5 class="mb-0"><i class="fas fa-user me-2"></i>Owner Information</h5>
+                    </div>
+                    <div class="card-body">
+                        @if (Model.Pet.Owner != null)
+                        {
+                            <p><strong>Name:</strong> @Model.Pet.Owner.FullName</p>
+                            <p><strong>Email:</strong> @Model.Pet.Owner.Email</p>
+                            <p><strong>Phone:</strong> @(Model.Pet.Owner.PhoneNumber ?? "Not provided")</p>
+                            <p><strong>Address:</strong> @(Model.Pet.Owner.Address ?? "Not provided")</p>
+                        }
+                        else
+                        {
+                            <p class="text-muted">Owner information not available</p>
+                        }
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recent Appointments -->
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0"><i class="fas fa-calendar-alt me-2"></i>Recent Appointments</h5>
+                    </div>
+                    <div class="card-body">
+                        @if (Model.Appointments.Any())
+                        {
+                            <div class="table-responsive">
+                                <table class="table table-sm">
+                                    <thead>
+                                        <tr>
+                                            <th>Date</th>
+                                            <th>Service</th>
+                                            <th>Doctor</th>
+                                            <th>Status</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach (var appointment in Model.Appointments)
+                                        {
+                                            <tr>
+                                                <td>@appointment.AppointmentTime.ToString("MMM dd, yyyy HH:mm")</td>
+                                                <td>@(appointment.Service?.Name ?? "Unknown")</td>
+                                                <td>@(appointment.Doctor?.FullName ?? "Unknown")</td>
+                                                <td>
+                                                    @{
+                                                        var badgeClass = appointment.Status switch
+                                                        {
+                                                            "Scheduled" => "bg-primary",
+                                                            "Completed" => "bg-success",
+                                                            "Cancelled" => "bg-danger",
+                                                            "No_Show" => "bg-warning",
+                                                            _ => "bg-secondary"
+                                                        };
+                                                    }
+                                                    <span class="badge @badgeClass">@appointment.Status</span>
+                                                </td>
+                                            </tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+                            <div class="text-center mt-3">
+                                <a href="/Appointments?petId=@Model.Pet.Id" class="btn btn-outline-primary btn-sm">
+                                    <i class="fas fa-eye me-1"></i>View All Appointments
+                                </a>
+                            </div>
+                        }
+                        else
+                        {
+                            <p class="text-muted text-center">No appointments found for this pet</p>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Medical Records -->
+        <div class="row mt-4">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0"><i class="fas fa-file-medical me-2"></i>Medical Records</h5>
+                    </div>
+                    <div class="card-body">
+                        @if (Model.MedicalRecords.Any())
+                        {
+                            <div class="table-responsive">
+                                <table class="table">
+                                    <thead>
+                                        <tr>
+                                            <th>Visit Date</th>
+                                            <th>Diagnosis</th>
+                                            <th>Treatment</th>
+                                            <th>Doctor</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach (var record in Model.MedicalRecords.OrderByDescending(r => r.VisitDate))
+                                        {
+                                            <tr>
+                                                <td>@record.VisitDate.ToString("MMM dd, yyyy")</td>
+                                                <td>
+                                                    @if (!string.IsNullOrEmpty(record.Diagnosis))
+                                                    {
+                                                        <span class="text-truncate d-inline-block" style="max-width: 200px;" title="@record.Diagnosis">
+                                                            @record.Diagnosis
+                                                        </span>
+                                                    }
+                                                    else
+                                                    {
+                                                        <span class="text-muted">No diagnosis recorded</span>
+                                                    }
+                                                </td>
+                                                <td>
+                                                    @if (!string.IsNullOrEmpty(record.TreatmentNotes))
+                                                    {
+                                                        <span class="text-truncate d-inline-block" style="max-width: 200px;" title="@record.TreatmentNotes">
+                                                            @record.TreatmentNotes
+                                                        </span>
+                                                    }
+                                                    else
+                                                    {
+                                                        <span class="text-muted">No treatment notes</span>
+                                                    }
+                                                </td>
+                                                <td>@(record.Doctor?.FullName ?? "Unknown")</td>
+                                            </tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+                        }
+                        else
+                        {
+                            <p class="text-muted text-center">No medical records found for this pet</p>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="text-center">
+            <i class="fas fa-exclamation-triangle fa-3x text-warning mb-3"></i>
+            <h3>Pet Not Found</h3>
+            <p class="text-muted">The pet you're looking for could not be found.</p>
+            <a href="/Pets" class="btn btn-primary">
+                <i class="fas fa-arrow-left me-1"></i>Back to Pets
+            </a>
+        </div>
+    }
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="deleteModalLabel">Confirm Delete</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure you want to delete this pet? This action cannot be undone.</p>
+                <p><strong>Pet Name:</strong> <span id="petNameToDelete"></span></p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <form method="post" style="display: inline;">
+                    <input type="hidden" name="handler" value="Delete" />
+                    <input type="hidden" name="petId" id="petIdToDelete" />
+                    <button type="submit" class="btn btn-danger">Delete Pet</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function deletePet(petId, petName) {
+            document.getElementById('petIdToDelete').value = petId;
+            document.getElementById('petNameToDelete').textContent = petName;
+            new bootstrap.Modal(document.getElementById('deleteModal')).show();
+        }
+    </script>
+} 
