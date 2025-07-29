@@ -9,6 +9,7 @@
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/VetClinic.Web.styles.css" asp-append-version="true" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
+    @await RenderSectionAsync("Styles", required: false)
 </head>
 <body>
     <header>
@@ -43,6 +44,11 @@
                                         <i class="fas fa-calendar-plus me-1"></i>Book Appointment
                                     </a>
                                 </li>
+                                <li class="nav-item">
+                                    <a class="nav-link text-dark" asp-area="" asp-page="/Feedback/MyReviews">
+                                        <i class="fas fa-star me-1"></i>My Reviews
+                                    </a>
+                                </li>
                             }
                             @if (userRole == "Doctor" || userRole == "Admin" || userRole == "Manager" || userRole == "Staff")
                             {
@@ -55,6 +61,11 @@
                             <li class="nav-item">
                                 <a class="nav-link text-dark" asp-area="" asp-page="/Appointments/Index">
                                     <i class="fas fa-calendar-alt me-1"></i>Appointments
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-area="" asp-page="/Feedback/Index">
+                                    <i class="fas fa-star me-1"></i>Customer Reviews
                                 </a>
                             </li>
                             @if (userRole == "Staff" || userRole == "Admin" || userRole == "Manager")
@@ -79,9 +90,9 @@
                                     <a class="nav-link text-dark" asp-area="" asp-page="/Doctors/BlockSlots">
                                         <i class="fas fa-calendar-times me-1"></i>Block Time Slots
                                     </a>
-                                </li>
+                                </li>   
                             }
-                            @if (userRole == "Admin" || userRole == "Manager")
+                            @if (userRole == "Admin" || userRole == "Manager" || userRole == "Staff")
                             {
                                 <li class="nav-item dropdown">
                                     <a class="nav-link dropdown-toggle text-dark" href="#" role="button" data-bs-toggle="dropdown">
@@ -90,6 +101,7 @@
                                     <ul class="dropdown-menu">
                                         <li><a class="dropdown-item" asp-page="/Users/Index"><i class="fas fa-users me-1"></i>Users</a></li>
                                         <li><a class="dropdown-item" asp-page="/Services/Index"><i class="fas fa-concierge-bell me-1"></i>Services</a></li>
+                                        <li><a class="dropdown-item" asp-page="/Feedback/Index"><i class="fas fa-comments me-1"></i>Customer Feedback</a></li>
                                         <li><hr class="dropdown-divider"></li>
                                         <li><a class="dropdown-item" asp-page="/Reports/Index"><i class="fas fa-chart-bar me-1"></i>Reports</a></li>
                                     </ul>

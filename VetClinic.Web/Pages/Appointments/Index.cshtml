@@ -26,7 +26,7 @@
         <div class="col-12">
             <div class="d-flex justify-content-between align-items-center">
                 <h2><i class="fas fa-calendar-alt text-primary"></i> Appointments</h2>
-                @if (ViewSessionHelper.IsInRole(ViewContext.HttpContext.Session, "Customer") || ViewSessionHelper.IsInAnyRole(ViewContext.HttpContext.Session, "Admin", "Manager") || ViewSessionHelper.IsInRole(ViewContext.HttpContext.Session, "Staff"))
+                @if (SessionHelper.IsInRole(ViewContext.HttpContext.Session, "Customer") || SessionHelper.IsInAnyRole(ViewContext.HttpContext.Session, "Admin", "Manager") || SessionHelper.IsInRole(ViewContext.HttpContext.Session, "Staff"))
                 {
                     <a asp-page="./Book" class="btn btn-primary">
                         <i class="fas fa-plus"></i> Book Appointment
@@ -77,7 +77,7 @@
                             <input asp-for="DateTo" type="date" class="form-control" />
                         </div>
 
-                        @if (ViewSessionHelper.IsInAnyRole(ViewContext.HttpContext.Session, "Admin", "Manager"))
+                        @if (SessionHelper.IsInAnyRole(ViewContext.HttpContext.Session, "Admin", "Manager"))
                         {
                             <!-- Doctor Filter -->
                             <div class="col-md-2">
@@ -111,7 +111,7 @@
     </div>
 
     <!-- Quick Stats -->
-    @if (ViewSessionHelper.IsInAnyRole(ViewContext.HttpContext.Session, "Admin", "Manager") || ViewSessionHelper.IsInRole(ViewContext.HttpContext.Session, "Doctor"))
+    @if (SessionHelper.IsInAnyRole(ViewContext.HttpContext.Session, "Admin", "Manager") || SessionHelper.IsInRole(ViewContext.HttpContext.Session, "Doctor"))
     {
         <div class="row mb-4">
             <div class="col-md-3">
@@ -166,12 +166,12 @@
                                     <tr>
                                         <th>Date & Time</th>
                                         <th>Pet</th>
-                                        @if (ViewSessionHelper.IsInAnyRole(ViewContext.HttpContext.Session, "Admin", "Manager") || ViewSessionHelper.IsInRole(ViewContext.HttpContext.Session, "Staff") || ViewSessionHelper.IsInRole(ViewContext.HttpContext.Session, "Doctor"))
+                                        @if (SessionHelper.IsInAnyRole(ViewContext.HttpContext.Session, "Admin", "Manager") || SessionHelper.IsInRole(ViewContext.HttpContext.Session, "Staff") || SessionHelper.IsInRole(ViewContext.HttpContext.Session, "Doctor"))
                                         {
                                             <th>Owner</th>
                                         }
                                         <th>Service</th>
-                                        @if (ViewSessionHelper.IsInAnyRole(ViewContext.HttpContext.Session, "Admin", "Manager") || ViewSessionHelper.IsInRole(ViewContext.HttpContext.Session, "Customer"))
+                                        @if (SessionHelper.IsInAnyRole(ViewContext.HttpContext.Session, "Admin", "Manager") || SessionHelper.IsInRole(ViewContext.HttpContext.Session, "Customer"))
                                         {
                                             <th>Doctor</th>
                                         }
@@ -200,7 +200,7 @@
                                             </td>
 
                                             <!-- Owner (for staff view) -->
-                                            @if (ViewSessionHelper.IsInAnyRole(ViewContext.HttpContext.Session, "Admin", "Manager") || ViewSessionHelper.IsInRole(ViewContext.HttpContext.Session, "Staff") || ViewSessionHelper.IsInRole(ViewContext.HttpContext.Session, "Doctor"))
+                                            @if (SessionHelper.IsInAnyRole(ViewContext.HttpContext.Session, "Admin", "Manager") || SessionHelper.IsInRole(ViewContext.HttpContext.Session, "Staff") || SessionHelper.IsInRole(ViewContext.HttpContext.Session, "Doctor"))
                                             {
                                                 <td>
                                                     <strong>@appointment.Pet?.Owner?.FullName</strong><br />
@@ -215,7 +215,7 @@
                                             </td>
 
                                             <!-- Doctor (for customer view) -->
-                                            @if (ViewSessionHelper.IsInAnyRole(ViewContext.HttpContext.Session, "Admin", "Manager") || ViewSessionHelper.IsInRole(ViewContext.HttpContext.Session, "Customer"))
+                                            @if (SessionHelper.IsInAnyRole(ViewContext.HttpContext.Session, "Admin", "Manager") || SessionHelper.IsInRole(ViewContext.HttpContext.Session, "Customer"))
                                             {
                                                 <td>
                                                     <strong>@appointment.Doctor?.FullName</strong>
@@ -247,7 +247,7 @@
                                                         <i class="fas fa-eye"></i>
                                                     </a>
 
-                                                    @if (ViewSessionHelper.IsInAnyRole(ViewContext.HttpContext.Session, "Admin", "Manager") || ViewSessionHelper.IsInRole(ViewContext.HttpContext.Session, "Staff"))
+                                                    @if (SessionHelper.IsInAnyRole(ViewContext.HttpContext.Session, "Admin", "Manager") || SessionHelper.IsInRole(ViewContext.HttpContext.Session, "Staff"))
                                                     {
                                                         <!-- Status Actions -->
                                                         @if (appointment.Status == "Scheduled")
@@ -271,16 +271,23 @@
                                                     }
 
                                                     @{
-                                                        var isCustomer = ViewSessionHelper.IsInRole(ViewContext.HttpContext.Session, "Customer");
+                                                        var isCustomer = SessionHelper.IsInRole(ViewContext.HttpContext.Session, "Customer");
                                                         var currentUserId = ViewContext.HttpContext.Session.GetInt32("UserId");
                                                         var isOwner = appointment.Pet?.OwnerId == currentUserId;
-                                                        var canEdit = ViewSessionHelper.IsInAnyRole(ViewContext.HttpContext.Session, "Admin", "Manager", "Staff") || 
+                                                        var canEdit = SessionHelper.IsInAnyRole(ViewContext.HttpContext.Session, "Admin", "Manager", "Staff") || 
                                                                      (isCustomer && isOwner);
                                                         var canCancelCustomer = isCustomer && appointment.Status == "Scheduled" && appointment.AppointmentTime > DateTime.Now.AddHours(24);
-                                                        var canCancelStaff = ViewSessionHelper.IsInAnyRole(ViewContext.HttpContext.Session, "Admin", "Manager", "Staff") && appointment.Status != "Completed" && appointment.Status != "Cancelled";
+                                                        var canCancelStaff = SessionHelper.IsInAnyRole(ViewContext.HttpContext.Session, "Admin", "Manager", "Staff") && appointment.Status != "Completed" && appointment.Status != "Cancelled";
                                                     }
 
-
+                                                    <!-- Rate Visit button for customers with completed appointments -->
+                                                    @if (isCustomer && isOwner && appointment.Status == "Completed")
+                                                    {
+                                                        <a asp-page="/Feedback/Create" asp-route-appointmentId="@appointment.Id" 
+                                                           class="btn btn-outline-warning" title="Rate Your Visit">
+                                                            <i class="fas fa-star"></i> Rate
+                                                        </a>
+                                                    }
 
                                                     @if (canEdit)
                                                     {
@@ -328,7 +335,7 @@
                             <i class="fas fa-calendar-times fa-3x text-muted mb-3"></i>
                             <h5 class="text-muted">No appointments found</h5>
                             <p class="text-muted">
-                                @if (ViewSessionHelper.IsInRole(ViewContext.HttpContext.Session, "Customer"))
+                                @if (SessionHelper.IsInRole(ViewContext.HttpContext.Session, "Customer"))
                                 {
                                     <text>You don't have any appointments scheduled.</text>
                                 }
@@ -337,7 +344,7 @@
                                     <text>No appointments match your current filters.</text>
                                 }
                             </p>
-                            @if (ViewSessionHelper.IsInRole(ViewContext.HttpContext.Session, "Customer") || ViewSessionHelper.IsInAnyRole(ViewContext.HttpContext.Session, "Admin", "Manager") || ViewSessionHelper.IsInRole(ViewContext.HttpContext.Session, "Staff"))
+                            @if (SessionHelper.IsInRole(ViewContext.HttpContext.Session, "Customer") || SessionHelper.IsInAnyRole(ViewContext.HttpContext.Session, "Admin", "Manager") || SessionHelper.IsInRole(ViewContext.HttpContext.Session, "Staff"))
                             {
                                 <a asp-page="./Book" class="btn btn-primary">
                                     <i class="fas fa-plus"></i> Book First Appointment

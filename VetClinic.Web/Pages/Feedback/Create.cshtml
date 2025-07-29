@@ -1,0 +1,147 @@
+@page "/feedback/create/{appointmentId:int}"
+@model VetClinic.Web.Pages.Feedback.CreateModel
+@{
+    ViewData["Title"] = "Rate Your Visit";
+}
+
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h4 class="mb-0">
+                        <i class="fas fa-star text-warning"></i>
+                        Rate Your Visit
+                    </h4>
+                </div>
+                <div class="card-body">
+                    @if (!string.IsNullOrEmpty(Model.ErrorMessage))
+                    {
+                        <div class="alert alert-danger">
+                            <i class="fas fa-exclamation-circle"></i>
+                            @Model.ErrorMessage
+                        </div>
+                    }
+
+                    @if (Model.Appointment != null)
+                    {
+                        <div class="appointment-info mb-4">
+                            <h5>Appointment Details</h5>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <p><strong>Pet:</strong> @Model.Appointment.Pet?.Name</p>
+                                    <p><strong>Service:</strong> @Model.Appointment.Service?.Name</p>
+                                </div>
+                                <div class="col-md-6">
+                                    <p><strong>Doctor:</strong> @Model.Appointment.Doctor?.FullName</p>
+                                    <p><strong>Date:</strong> @Model.Appointment.AppointmentTime.ToString("dd/MM/yyyy HH:mm")</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <form method="post">
+                            <input type="hidden" asp-for="AppointmentId" />
+                            
+                            <div class="mb-4">
+                                <label class="form-label">
+                                    <strong>How would you rate your experience?</strong>
+                                </label>
+                                <div class="star-rating">
+                                    <input type="radio" asp-for="Rating" value="5" id="star5" />
+                                    <label for="star5" title="Excellent">
+                                        <i class="fas fa-star"></i>
+                                    </label>
+                                    
+                                    <input type="radio" asp-for="Rating" value="4" id="star4" />
+                                    <label for="star4" title="Very Good">
+                                        <i class="fas fa-star"></i>
+                                    </label>
+                                    
+                                    <input type="radio" asp-for="Rating" value="3" id="star3" />
+                                    <label for="star3" title="Good">
+                                        <i class="fas fa-star"></i>
+                                    </label>
+                                    
+                                    <input type="radio" asp-for="Rating" value="2" id="star2" />
+                                    <label for="star2" title="Fair">
+                                        <i class="fas fa-star"></i>
+                                    </label>
+                                    
+                                    <input type="radio" asp-for="Rating" value="1" id="star1" />
+                                    <label for="star1" title="Poor">
+                                        <i class="fas fa-star"></i>
+                                    </label>
+                                </div>
+                                <span asp-validation-for="Rating" class="text-danger"></span>
+                            </div>
+
+                            <div class="mb-4">
+                                <label asp-for="Comment" class="form-label">
+                                    <strong>Tell us about your experience (optional)</strong>
+                                </label>
+                                <textarea asp-for="Comment" 
+                                        class="form-control" 
+                                        rows="4" 
+                                        placeholder="Share your thoughts about the service quality, doctor's care, staff friendliness, etc."></textarea>
+                                <span asp-validation-for="Comment" class="text-danger"></span>
+                            </div>
+
+                            <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                                <a href="/appointments" class="btn btn-secondary me-md-2">
+                                    <i class="fas fa-arrow-left"></i> Back to Appointments
+                                </a>
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-paper-plane"></i> Submit Review
+                                </button>
+                            </div>
+                        </form>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Styles {
+    <style>
+        .star-rating {
+            direction: rtl;
+            display: inline-flex;
+            padding: 0;
+            font-size: 2rem;
+        }
+
+        .star-rating input[type="radio"] {
+            display: none;
+        }
+
+        .star-rating label {
+            color: #ddd;
+            cursor: pointer;
+            padding: 5px;
+            transition: color 0.2s;
+        }
+
+        .star-rating label:hover,
+        .star-rating label:hover ~ label,
+        .star-rating input[type="radio"]:checked ~ label {
+            color: #ffc107;
+        }
+
+        .appointment-info {
+            background-color: #f8f9fa;
+            padding: 15px;
+            border-radius: 5px;
+            border-left: 4px solid #007bff;
+        }
+
+        .appointment-info h5 {
+            color: #007bff;
+            margin-bottom: 15px;
+        }
+    </style>
+}
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

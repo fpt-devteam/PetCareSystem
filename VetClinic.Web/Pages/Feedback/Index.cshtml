@@ -1,0 +1,336 @@
+@page "/feedback"
+@model VetClinic.Web.Pages.Feedback.IndexModel
+@{
+    ViewData["Title"] = "Customer Feedback";
+}
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h4 class="mb-0">
+                        <i class="fas fa-comments text-primary"></i>
+                        Customer Feedback Management
+                    </h4>
+                    <div class="btn-group" role="group">
+                        <input type="radio" class="btn-check" name="feedbackFilter" id="all" value="all" checked>
+                        <label class="btn btn-outline-primary" for="all">All</label>
+
+                        <input type="radio" class="btn-check" name="feedbackFilter" id="pending" value="pending">
+                        <label class="btn btn-outline-warning" for="pending">Pending</label>
+
+                        <input type="radio" class="btn-check" name="feedbackFilter" id="approved" value="approved">
+                        <label class="btn btn-outline-success" for="approved">Approved</label>
+                    </div>
+                </div>
+                <div class="card-body">
+                    @if (TempData["SuccessMessage"] != null)
+                    {
+                        <div class="alert alert-success alert-dismissible fade show">
+                            <i class="fas fa-check-circle"></i>
+                            @TempData["SuccessMessage"]
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                    }
+
+                    @if (Model.AllFeedback?.Any() == true)
+                    {
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Date</th>
+                                        <th>Customer</th>
+                                        <th>Pet & Service</th>
+                                        <th>Doctor</th>
+                                        <th>Rating</th>
+                                        <th>Comment</th>
+                                        <th>Status</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var feedback in Model.AllFeedback)
+                                    {
+                                        <tr class="feedback-row" data-status="@(feedback.Approved ? "approved" : "pending")">
+                                            <td>
+                                                <small class="text-muted">
+                                                    @feedback.CreatedDate.ToString("dd/MM/yyyy")
+                                                    <br>@feedback.CreatedDate.ToString("HH:mm")
+                                                </small>
+                                            </td>
+                                            <td>
+                                                <strong>@feedback.Customer?.FullName</strong>
+                                                <br><small class="text-muted">@feedback.Customer?.Email</small>
+                                            </td>
+                                            <td>
+                                                <strong>@feedback.Appointment?.Pet?.Name</strong>
+                                                <br><small class="text-muted">@feedback.Appointment?.Service?.Name</small>
+                                            </td>
+                                            <td>
+                                                @feedback.Appointment?.Doctor?.FullName
+                                            </td>
+                                            <td>
+                                                <div class="rating-display">
+                                                    @for (int i = 1; i <= 5; i++)
+                                                    {
+                                                        <i class="fas fa-star @(i <= feedback.Rating ? "text-warning" : "text-muted")"></i>
+                                                    }
+                                                    <br><small class="text-muted">(@feedback.Rating/5)</small>
+                                                </div>
+                                            </td>
+                                            <td>
+                                                @if (!string.IsNullOrEmpty(feedback.Comment))
+                                                {
+                                                    <div class="comment-preview" data-bs-toggle="tooltip" title="@feedback.Comment">
+                                                        @(feedback.Comment.Length > 50 ? feedback.Comment.Substring(0, 50) + "..." : feedback.Comment)
+                                                    </div>
+                                                }
+                                                else
+                                                {
+                                                    <small class="text-muted">No comment</small>
+                                                }
+                                            </td>
+                                            <td>
+                                                @if (feedback.Approved)
+                                                {
+                                                    <span class="badge bg-success">
+                                                        <i class="fas fa-check"></i> Approved
+                                                    </span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="badge bg-warning">
+                                                        <i class="fas fa-clock"></i> Pending
+                                                    </span>
+                                                }
+                                            </td>
+                                            <td>
+                                                @if (!feedback.Approved)
+                                                {
+                                                    <form method="post" asp-page-handler="Approve" class="d-inline">
+                                                        <input type="hidden" name="feedbackId" value="@feedback.Id" />
+                                                        <button type="submit" class="btn btn-sm btn-success" 
+                                                                onclick="return confirm('Approve this feedback?')">
+                                                            <i class="fas fa-check"></i> Approve
+                                                        </button>
+                                                    </form>
+                                                }
+                                                <button type="button" class="btn btn-sm btn-info" 
+                                                        data-bs-toggle="modal" 
+                                                        data-bs-target="#feedbackModal"
+                                                        onclick="showFeedbackDetails(@Html.Raw(Json.Serialize(new { 
+                                                            Id = feedback.Id, 
+                                                            CustomerName = feedback.Customer?.FullName,
+                                                            PetName = feedback.Appointment?.Pet?.Name,
+                                                            ServiceName = feedback.Appointment?.Service?.Name,
+                                                            DoctorName = feedback.Appointment?.Doctor?.FullName,
+                                                            Rating = feedback.Rating,
+                                                            Comment = feedback.Comment,
+                                                            CreatedDate = feedback.CreatedDate.ToString("dd/MM/yyyy HH:mm"),
+                                                            Approved = feedback.Approved
+                                                        })))">
+                                                    <i class="fas fa-eye"></i> View
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <!-- Pagination for Admin/Staff/Doctor -->
+                        @if (Model.TotalPages > 1)
+                        {
+                            <div class="row mt-4">
+                                <div class="col-12">
+                                    <nav aria-label="Feedback pagination">
+                                        <ul class="pagination justify-content-center">
+                                            <!-- Previous button -->
+                                            <li class="page-item @(Model.CurrentPage <= 1 ? "disabled" : "")">
+                                                <a class="page-link" href="?pageNumber=@(Model.CurrentPage - 1)" aria-label="Previous">
+                                                    <span aria-hidden="true">&laquo;</span>
+                                                </a>
+                                            </li>
+
+                                            <!-- Page numbers -->
+                                            @{
+                                                int startPage = Math.Max(1, Model.CurrentPage - 2);
+                                                int endPage = Math.Min(Model.TotalPages, Model.CurrentPage + 2);
+                                            }
+
+                                            @if (startPage > 1)
+                                            {
+                                                <li class="page-item">
+                                                    <a class="page-link" href="?pageNumber=1">1</a>
+                                                </li>
+                                                @if (startPage > 2)
+                                                {
+                                                    <li class="page-item disabled">
+                                                        <span class="page-link">...</span>
+                                                    </li>
+                                                }
+                                            }
+
+                                            @for (int i = startPage; i <= endPage; i++)
+                                            {
+                                                <li class="page-item @(i == Model.CurrentPage ? "active" : "")">
+                                                    <a class="page-link" href="?pageNumber=@i">@i</a>
+                                                </li>
+                                            }
+
+                                            @if (endPage < Model.TotalPages)
+                                            {
+                                                @if (endPage < Model.TotalPages - 1)
+                                                {
+                                                    <li class="page-item disabled">
+                                                        <span class="page-link">...</span>
+                                                    </li>
+                                                }
+                                                <li class="page-item">
+                                                    <a class="page-link" href="?pageNumber=@Model.TotalPages">@Model.TotalPages</a>
+                                                </li>
+                                            }
+
+                                            <!-- Next button -->
+                                            <li class="page-item @(Model.CurrentPage >= Model.TotalPages ? "disabled" : "")">
+                                                <a class="page-link" href="?pageNumber=@(Model.CurrentPage + 1)" aria-label="Next">
+                                                    <span aria-hidden="true">&raquo;</span>
+                                                </a>
+                                            </li>
+                                        </ul>
+                                    </nav>
+
+                                    <!-- Page info -->
+                                    <div class="text-center mt-2">
+                                        <small class="text-muted">
+                                            @if (Model.CurrentUserRole == "Doctor")
+                                            {
+                                                <span>Your Reviews - Page @Model.CurrentPage of @Model.TotalPages</span>
+                                            }
+                                            else
+                                            {
+                                                <span>All Feedback - Page @Model.CurrentPage of @Model.TotalPages</span>
+                                            }
+                                        </small>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    }
+                    else
+                    {
+                        <div class="text-center py-5">
+                            <i class="fas fa-comments fa-3x text-muted mb-3"></i>
+                            <h5 class="text-muted">No feedback available</h5>
+                            <p class="text-muted">Customer feedback will appear here once submitted.</p>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Feedback Details Modal -->
+<div class="modal fade" id="feedbackModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="fas fa-comment-dots text-primary"></i>
+                    Feedback Details
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div id="feedbackDetails"></div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // Filter functionality
+        document.querySelectorAll('input[name="feedbackFilter"]').forEach(radio => {
+            radio.addEventListener('change', function() {
+                const filterValue = this.value;
+                const rows = document.querySelectorAll('.feedback-row');
+                
+                rows.forEach(row => {
+                    if (filterValue === 'all') {
+                        row.style.display = '';
+                    } else {
+                        const status = row.getAttribute('data-status');
+                        row.style.display = status === filterValue ? '' : 'none';
+                    }
+                });
+            });
+        });
+
+        // Show feedback details in modal
+        function showFeedbackDetails(feedback) {
+            const detailsHtml = `
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6>Customer Information</h6>
+                        <p><strong>Name:</strong> ${feedback.CustomerName}</p>
+                        <p><strong>Date:</strong> ${feedback.CreatedDate}</p>
+                    </div>
+                    <div class="col-md-6">
+                        <h6>Appointment Information</h6>
+                        <p><strong>Pet:</strong> ${feedback.PetName}</p>
+                        <p><strong>Service:</strong> ${feedback.ServiceName}</p>
+                        <p><strong>Doctor:</strong> ${feedback.DoctorName}</p>
+                    </div>
+                </div>
+                <hr>
+                <div class="row">
+                    <div class="col-12">
+                        <h6>Rating</h6>
+                        <div class="rating-display mb-3">
+                            ${Array.from({length: 5}, (_, i) => 
+                                `<i class="fas fa-star ${i < feedback.Rating ? 'text-warning' : 'text-muted'}"></i>`
+                            ).join('')}
+                            <span class="ms-2">(${feedback.Rating}/5 stars)</span>
+                        </div>
+                    </div>
+                </div>
+                ${feedback.Comment ? `
+                <div class="row">
+                    <div class="col-12">
+                        <h6>Customer Comment</h6>
+                        <div class="border rounded p-3 bg-light">
+                            ${feedback.Comment}
+                        </div>
+                    </div>
+                </div>
+                ` : ''}
+                <div class="row mt-3">
+                    <div class="col-12">
+                        <h6>Status</h6>
+                        <span class="badge ${feedback.Approved ? 'bg-success' : 'bg-warning'}">
+                            <i class="fas ${feedback.Approved ? 'fa-check' : 'fa-clock'}"></i>
+                            ${feedback.Approved ? 'Approved' : 'Pending Approval'}
+                        </span>
+                    </div>
+                </div>
+            `;
+            
+            document.getElementById('feedbackDetails').innerHTML = detailsHtml;
+        }
+
+        // Initialize tooltips
+        document.addEventListener('DOMContentLoaded', function() {
+            var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+            var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+                return new bootstrap.Tooltip(tooltipTriggerEl);
+            });
+        });
+    </script>
+}
