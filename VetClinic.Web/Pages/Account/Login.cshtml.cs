@@ -68,7 +68,7 @@ namespace VetClinic.Web.Pages.Account
                     if (!string.IsNullOrEmpty(returnUrl) && Url.IsLocalUrl(returnUrl))
                         return Redirect(returnUrl);
 
-                    return RedirectToPage("/Index");
+                    return RedirectToPage("/Dashboard");
                 }
                 else
                 {

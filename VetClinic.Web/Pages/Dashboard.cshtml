@@ -1,0 +1,315 @@
+@page
+@model DashboardModel
+@{
+    ViewData["Title"] = "Dashboard";
+}
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <h1 class="mb-4">
+                <i class="fas fa-tachometer-alt me-2"></i>
+                @Model.UserRole Dashboard
+            </h1>
+        </div>
+    </div>
+
+    @if (Model.UserRole == "Admin" || Model.UserRole == "Manager")
+    {
+        var managerData = Model.DashboardData as dynamic;
+        <div class="row mb-4">
+            <div class="col-md-3">
+                <div class="card bg-primary text-white">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between">
+                            <div>
+                                @{
+                                    decimal totalRevenue = 0m;
+                                    try { totalRevenue = managerData?.TotalRevenue ?? 0m; } catch { }
+                                }
+                                <h4>@totalRevenue.ToString("C")</h4>
+                                <p class="mb-0">Monthly Revenue</p>
+                            </div>
+                            <i class="fas fa-dollar-sign fa-2x"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card bg-success text-white">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between">
+                            <div>
+                                @{
+                                    int totalCustomers = 0;
+                                    try { totalCustomers = managerData?.TotalCustomers ?? 0; } catch { }
+                                }
+                                <h4>@totalCustomers</h4>
+                                <p class="mb-0">Total Customers</p>
+                            </div>
+                            <i class="fas fa-users fa-2x"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card bg-info text-white">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between">
+                            <div>
+                                @{
+                                    int totalAppointments = 0;
+                                    try { totalAppointments = managerData?.TotalAppointments ?? 0; } catch { }
+                                }
+                                <h4>@totalAppointments</h4>
+                                <p class="mb-0">Total Appointments</p>
+                            </div>
+                            <i class="fas fa-calendar fa-2x"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card bg-warning text-white">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between">
+                            <div>
+                                @{
+                                    double averageRating = 0.0;
+                                    try { averageRating = managerData?.AverageRating ?? 0.0; } catch { }
+                                }
+                                <h4>@averageRating.ToString("F1")/5</h4>
+                                <p class="mb-0">Average Rating</p>
+                            </div>
+                            <i class="fas fa-star fa-2x"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">
+                        <h5><i class="fas fa-exclamation-triangle me-2"></i>Alerts</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="alert alert-warning">
+                            @{
+                                int dueVaccinations = 0;
+                                try { dueVaccinations = managerData?.DueVaccinations ?? 0; } catch { }
+                            }
+                            <strong>@dueVaccinations</strong> vaccinations due
+                        </div>
+                        <div class="alert alert-danger">
+                            @{
+                                int unpaidInvoices = 0;
+                                try { unpaidInvoices = managerData?.UnpaidInvoices ?? 0; } catch { }
+                            }
+                            <strong>@unpaidInvoices</strong> unpaid invoices
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">
+                        <h5><i class="fas fa-chart-line me-2"></i>Quick Actions</h5>
+                    </div>
+                    <div class="card-body">
+                        <a href="/Appointments/Create" class="btn btn-primary mb-2 d-block">
+                            <i class="fas fa-plus me-2"></i>New Appointment
+                        </a>
+                        <a href="/Services" class="btn btn-secondary mb-2 d-block">
+                            <i class="fas fa-cogs me-2"></i>Manage Services
+                        </a>
+                        <a href="/Reports" class="btn btn-info d-block">
+                            <i class="fas fa-chart-bar me-2"></i>View Reports
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+    else if (Model.UserRole == "Doctor")
+    {
+        var doctorData = Model.DashboardData as dynamic;
+        <div class="row mb-4">
+            <div class="col-md-6">
+                <div class="card bg-primary text-white">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between">
+                            <div>
+                                @{
+                                    int todayAppointments = 0;
+                                    try { todayAppointments = doctorData?.TodayAppointments ?? 0; } catch { }
+                                }
+                                <h4>@todayAppointments</h4>
+                                <p class="mb-0">Today's Appointments</p>
+                            </div>
+                            <i class="fas fa-calendar-day fa-2x"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card bg-info text-white">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between">
+                            <div>
+                                @{
+                                    int upcomingAppointments = 0;
+                                    try { upcomingAppointments = doctorData?.UpcomingAppointments ?? 0; } catch { }
+                                }
+                                <h4>@upcomingAppointments</h4>
+                                <p class="mb-0">Upcoming This Week</p>
+                            </div>
+                            <i class="fas fa-clock fa-2x"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <h5><i class="fas fa-calendar-alt me-2"></i>Today's Schedule</h5>
+            </div>
+            <div class="card-body">
+                <div class="list-group">
+                    <!-- Today's appointments will be listed here -->
+                    <div class="list-group-item">
+                        <div class="d-flex w-100 justify-content-between">
+                            <h6 class="mb-1">No appointments scheduled for today</h6>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+    else if (Model.UserRole == "Customer")
+    {
+        var customerData = Model.DashboardData as dynamic;
+        <div class="row mb-4">
+            <div class="col-md-6">
+                <div class="card bg-success text-white">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between">
+                            <div>
+                                @{
+                                    int totalPets = 0;
+                                    try { totalPets = customerData?.TotalPets ?? 0; } catch { }
+                                }
+                                <h4>@totalPets</h4>
+                                <p class="mb-0">My Pets</p>
+                            </div>
+                            <i class="fas fa-paw fa-2x"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card bg-primary text-white">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between">
+                            <div>
+                                @{
+                                    int upcomingAppointments = 0;
+                                    try { upcomingAppointments = customerData?.UpcomingAppointments ?? 0; } catch { }
+                                }
+                                <h4>@upcomingAppointments</h4>
+                                <p class="mb-0">Upcoming Appointments</p>
+                            </div>
+                            <i class="fas fa-calendar-check fa-2x"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-8">
+                <div class="card">
+                    <div class="card-header">
+                        <h5><i class="fas fa-history me-2"></i>Recent Appointments</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="list-group">
+                            <div class="list-group-item">
+                                <div class="d-flex w-100 justify-content-between">
+                                    <h6 class="mb-1">No recent appointments</h6>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card">
+                    <div class="card-header">
+                        <h5><i class="fas fa-plus me-2"></i>Quick Actions</h5>
+                    </div>
+                    <div class="card-body">
+                        <a href="/Pets/Create" class="btn btn-success mb-2 d-block">
+                            <i class="fas fa-plus me-2"></i>Add Pet
+                        </a>
+                        <a href="/Appointments/Create" class="btn btn-primary mb-2 d-block">
+                            <i class="fas fa-calendar-plus me-2"></i>Book Appointment
+                        </a>
+                        <a href="/Pets" class="btn btn-info d-block">
+                            <i class="fas fa-paw me-2"></i>View My Pets
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+    else
+    {
+        <!-- Default view for staff -->
+        <div class="text-center">
+            <h1 class="display-4">Welcome to VetClinic Management System</h1>
+            <p class="lead">Comprehensive Pet Care Management Solution</p>
+            
+            <div class="row mt-5">
+                <div class="col-md-4">
+                    <div class="card h-100">
+                        <div class="card-body text-center">
+                            <i class="fas fa-calendar fa-3x text-primary mb-3"></i>
+                            <h5 class="card-title">Appointments</h5>
+                            <p class="card-text">Manage appointments and schedules</p>
+                            <a href="/Appointments" class="btn btn-primary">View Appointments</a>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-md-4">
+                    <div class="card h-100">
+                        <div class="card-body text-center">
+                            <i class="fas fa-paw fa-3x text-success mb-3"></i>
+                            <h5 class="card-title">Pets</h5>
+                            <p class="card-text">View and manage pet information</p>
+                            <a href="/Pets" class="btn btn-success">View Pets</a>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-md-4">
+                    <div class="card h-100">
+                        <div class="card-body text-center">
+                            <i class="fas fa-users fa-3x text-info mb-3"></i>
+                            <h5 class="card-title">Users</h5>
+                            <p class="card-text">Manage user accounts</p>
+                            <a href="/Users" class="btn btn-info">View Users</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+} 

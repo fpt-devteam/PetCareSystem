@@ -14,33 +14,39 @@ namespace VetClinic.Repository.Data
             return Convert.ToBase64String(hashedBytes);
         }
 
+        private static async Task DeleteAllData(VetClinicDbContext context)
+        {
+            context.Reminders.RemoveRange(context.Reminders);
+            context.Feedback.RemoveRange(context.Feedback);
+
+            context.MedicalRecords.RemoveRange(context.MedicalRecords);
+            context.Invoices.RemoveRange(context.Invoices);
+
+            context.Vaccinations.RemoveRange(context.Vaccinations);
+
+            context.Appointments.RemoveRange(context.Appointments);
+
+            context.Pets.RemoveRange(context.Pets);
+
+            context.Services.RemoveRange(context.Services);
+
+            context.Users.RemoveRange(context.Users);
+
+            await context.SaveChangesAsync();
+        }
+
         public static async Task SeedAsync(VetClinicDbContext context)
         {
             // Ensure database is created
             await context.Database.EnsureCreatedAsync();
 
+            await DeleteAllData(context);
+
             // Check if data already exists
-            if (context.Users.Any())
-            {
-                return;
-                // context.Reminders.RemoveRange(context.Reminders);
-                // context.Feedback.RemoveRange(context.Feedback);
-
-                // context.MedicalRecords.RemoveRange(context.MedicalRecords);
-                // context.Invoices.RemoveRange(context.Invoices);
-
-                // context.Vaccinations.RemoveRange(context.Vaccinations);
-
-                // context.Appointments.RemoveRange(context.Appointments);
-
-                // context.Pets.RemoveRange(context.Pets);
-
-                // context.Services.RemoveRange(context.Services);
-
-                // context.Users.RemoveRange(context.Users);
-
-                // await context.SaveChangesAsync();
-            }
+            // if (context.Users.Any())
+            // {
+            //     return;
+            // }
 
             // Seed Users
             var users = new List<User>
