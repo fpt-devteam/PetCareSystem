@@ -54,7 +54,13 @@ namespace VetClinic.Service.Services
 
         public async Task<bool> DeletePetAsync(int id)
         {
-            return await _petRepository.DeleteAsync(id);
+            var pet = await _petRepository.GetByIdAsync(id);
+            if (pet == null)
+                return false;
+
+            pet.IsActive = false;
+            await _petRepository.UpdateAsync(pet);
+            return true;
         }
 
         public async Task<bool> PetExistsAsync(int id)

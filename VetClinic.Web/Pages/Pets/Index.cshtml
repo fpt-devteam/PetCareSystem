@@ -279,9 +279,9 @@
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                <form method="post" style="display: inline;">
-                    <input type="hidden" name="handler" value="Delete" />
-                    <input type="hidden" name="petId" id="petIdToDelete" />
+                <form method="post" asp-page-handler="Delete" style="display: inline;">
+                    <input type="hidden" name="handler" value="Delete"/>
+                    <input type="hidden" name="petId" id="petIdToDelete"/>
                     <button type="submit" class="btn btn-danger">Delete Pet</button>
                 </form>
             </div>

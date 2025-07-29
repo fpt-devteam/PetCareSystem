@@ -120,13 +120,6 @@ namespace VetClinic.Web.Pages.Pets
                     return RedirectToPage();
                 }
 
-                // Only Admin and Manager can delete pets
-                if (userRole != "Admin" && userRole != "Manager")
-                {
-                    TempData["ErrorMessage"] = "You are not authorized to delete pets.";
-                    return RedirectToPage();
-                }
-
                 var success = await _petService.DeletePetAsync(petId);
                 if (success)
                 {
