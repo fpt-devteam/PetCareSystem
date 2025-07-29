@@ -42,6 +42,8 @@ namespace VetClinic.Web.Pages.Account
 
         public async Task<IActionResult> OnPostAsync(string? returnUrl = null)
         {
+            System.Console.WriteLine("Login attempt with email: " + Input.Email
+                + " and password: " + Input.Password);
             ReturnUrl = returnUrl;
 
             if (!ModelState.IsValid)
@@ -49,7 +51,7 @@ namespace VetClinic.Web.Pages.Account
                 return Page();
             }
 
-                        try
+            try
             {
                 var user = await _authService.LoginAsync(Input.Email, Input.Password);
                 if (user != null)
@@ -62,10 +64,10 @@ namespace VetClinic.Web.Pages.Account
                     HttpContext.Session.SetString("IsAuthenticated", "true");
 
                     TempData["SuccessMessage"] = $"Welcome back, {user.FullName}!";
-                    
+
                     if (!string.IsNullOrEmpty(returnUrl) && Url.IsLocalUrl(returnUrl))
                         return Redirect(returnUrl);
-                    
+
                     return RedirectToPage("/Index");
                 }
                 else
