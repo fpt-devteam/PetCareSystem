@@ -88,6 +88,16 @@
                             </div>
                         }
 
+                        <!-- Show Cancelled Toggle -->
+                        <div class="col-md-2">
+                            <div class="form-check mt-4">
+                                <input asp-for="HideCancelled" class="form-check-input" type="checkbox" />
+                                <label asp-for="HideCancelled" class="form-check-label">
+                                    Hide Cancelled
+                                </label>
+                            </div>
+                        </div>
+
                         <!-- Submit Button -->
                         <div class="col-md-1 d-flex align-items-end">
                             <button type="submit" class="btn btn-outline-primary w-100">
@@ -239,14 +249,6 @@
 
                                                     @if (ViewSessionHelper.IsInAnyRole(ViewContext.HttpContext.Session, "Admin", "Manager") || ViewSessionHelper.IsInRole(ViewContext.HttpContext.Session, "Staff"))
                                                     {
-                                                        <!-- Edit -->
-                                                        @if (appointment.Status != "Completed" && appointment.Status != "Cancelled")
-                                                        {
-                                                            <a asp-page="./Edit" asp-route-id="@appointment.Id" class="btn btn-outline-warning" title="Edit">
-                                                                <i class="fas fa-edit"></i>
-                                                            </a>
-                                                        }
-
                                                         <!-- Status Actions -->
                                                         @if (appointment.Status == "Scheduled")
                                                         {
@@ -268,26 +270,49 @@
                                                         }
                                                     }
 
-                                                    @if (ViewSessionHelper.IsInRole(ViewContext.HttpContext.Session, "Customer"))
-                                                    {
-                                                        <!-- Customer can only cancel upcoming appointments -->
-                                                        @if (appointment.Status == "Scheduled" && appointment.AppointmentTime > DateTime.Now.AddHours(24))
-                                                        {
-                                                            <button type="button" class="btn btn-outline-danger" onclick="cancelAppointment(@appointment.Id)" title="Cancel">
-                                                                <i class="fas fa-times"></i>
-                                                            </button>
-                                                        }
+                                                    @{
+                                                        var isCustomer = ViewSessionHelper.IsInRole(ViewContext.HttpContext.Session, "Customer");
+                                                        var currentUserId = ViewContext.HttpContext.Session.GetInt32("UserId");
+                                                        var isOwner = appointment.Pet?.OwnerId == currentUserId;
+                                                        var canEdit = ViewSessionHelper.IsInAnyRole(ViewContext.HttpContext.Session, "Admin", "Manager", "Staff") || 
+                                                                     (isCustomer && isOwner);
+                                                        var canCancelCustomer = isCustomer && appointment.Status == "Scheduled" && appointment.AppointmentTime > DateTime.Now.AddHours(24);
+                                                        var canCancelStaff = ViewSessionHelper.IsInAnyRole(ViewContext.HttpContext.Session, "Admin", "Manager", "Staff") && appointment.Status != "Completed" && appointment.Status != "Cancelled";
                                                     }
 
-                                                    @if (ViewSessionHelper.IsInAnyRole(ViewContext.HttpContext.Session, "Admin", "Manager"))
+
+
+                                                    @if (canEdit)
                                                     {
-                                                        <!-- Cancel/Delete -->
-                                                        @if (appointment.Status != "Completed")
+                                                        <!-- Edit button for staff and customers (for their own pets) -->
+                                                        @if (appointment.Status != "Completed" && appointment.Status != "Cancelled")
                                                         {
-                                                            <button type="button" class="btn btn-outline-danger" onclick="cancelAppointment(@appointment.Id)" title="Cancel">
-                                                                <i class="fas fa-times"></i>
+                                                            <a asp-page="./Edit" asp-route-id="@appointment.Id" class="btn btn-outline-primary" title="Edit Appointment">
+                                                                <i class="fas fa-edit"></i>
+                                                            </a>
+                                                        }
+
+                                                        <!-- Cancel button logic -->
+                                                        @if (canCancelCustomer)
+                                                        {
+                                                            <!-- Customer can only cancel upcoming appointments (24+ hours ahead) -->
+                                                            <button type="button" class="btn btn-outline-danger" onclick="cancelAppointment(@appointment.Id)" title="Cancel" data-appointment-id="@appointment.Id">
+                                                                <i class="fas fa-times"></i> Cancel
                                                             </button>
                                                         }
+                                                        else if (canCancelStaff)
+                                                        {
+                                                            <!-- Staff/Admin/Manager can cancel any non-completed appointment -->
+                                                            <button type="button" class="btn btn-outline-danger" onclick="cancelAppointment(@appointment.Id)" title="Cancel" data-appointment-id="@appointment.Id">
+                                                                <i class="fas fa-times"></i> Cancel
+                                                            </button>
+                                                        }
+                                                        else
+                                                        {
+                                                        }
+                                                    }
+                                                    else
+                                                    {
                                                     }
                                                 </div>
                                             </td>
@@ -339,8 +364,63 @@
     <input name="handler" value="Cancel" type="hidden" />
 </form>
 
+<!-- Anti-forgery token for AJAX requests -->
+@Html.AntiForgeryToken()
+
 @section Scripts {
+    <!-- SignalR -->
+    <script src="~/lib/microsoft-signalr/signalr.min.js"></script>
+    
     <script>
+        // SignalR connection
+        const connection = new signalR.HubConnectionBuilder()
+            .withUrl("/appointmentHub")
+            .build();
+
+        // Start SignalR connection
+        connection.start().then(function () {
+            console.log("SignalR Connected");
+            
+            // Join user-specific group
+            const userId = '@ViewContext.HttpContext.Session.GetInt32("UserId")';
+            if (userId && userId !== '0') {
+                connection.invoke("JoinUserGroup", userId.toString());
+                console.log(`Joined user group: User_${userId}`);
+            }
+            
+            // Join admin/staff group if user has permission
+            const userRole = '@ViewContext.HttpContext.Session.GetString("UserRole")';
+            if (userRole === 'Admin' || userRole === 'Manager' || userRole === 'Staff') {
+                connection.invoke("JoinUserGroup", "AdminStaff");
+                console.log("Joined AdminStaff group");
+            }
+            
+        }).catch(function (err) {
+            console.error("SignalR Connection Error:", err.toString());
+        });
+
+        // Listen for appointment cancellation notifications
+        connection.on("AppointmentCancelled", function (data) {
+            console.log("Received AppointmentCancelled notification:", data);
+            
+            // Update the appointment row in real-time
+            updateAppointmentRowAfterCancel(data.appointmentId);
+            
+            // Show notification
+            showAlert('info', `Real-time update: ${data.message}`);
+        });
+
+        // Listen for appointment status change notifications
+        connection.on("AppointmentStatusChanged", function (data) {
+            console.log("Received AppointmentStatusChanged notification:", data);
+            
+            // Update the appointment status in real-time
+            updateAppointmentStatusInRow(data.appointmentId, data.status);
+            
+            // Show notification
+            showAlert('info', `Real-time update: ${data.message}`);
+        });
+
         function updateStatus(appointmentId, newStatus) {
             if (confirm(`Are you sure you want to mark this appointment as ${newStatus.toLowerCase()}?`)) {
                 document.getElementById('statusAppointmentId').value = appointmentId;
@@ -350,9 +430,166 @@
         }
 
         function cancelAppointment(appointmentId) {
+            console.log(`Canceling appointment with ID: ${appointmentId}`);
             if (confirm('Are you sure you want to cancel this appointment? This action cannot be undone.')) {
-                document.getElementById('cancelAppointmentId').value = appointmentId;
-                document.getElementById('cancelForm').submit();
+                console.log('User confirmed cancellation, sending AJAX request...');
+                
+                // Disable the button to prevent double-clicks
+                const button = document.querySelector(`button[onclick*="cancelAppointment(${appointmentId})"]`);
+                if (button) {
+                    button.disabled = true;
+                    button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Cancelling...';
+                }
+                
+                // Send AJAX request
+                const antiForgeryToken = document.querySelector('input[name="__RequestVerificationToken"]')?.value;
+                console.log('Anti-forgery token:', antiForgeryToken);
+                
+                fetch(window.location.pathname + '?handler=Cancel', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                        'X-Requested-With': 'XMLHttpRequest'
+                    },
+                    body: new URLSearchParams({
+                        'appointmentId': appointmentId,
+                        '__RequestVerificationToken': antiForgeryToken || ''
+                    })
+                })
+                .then(response => {
+                    console.log('AJAX Response received:', response.status, response.statusText);
+                    console.log('Response headers:', response.headers);
+                    console.log('Response URL:', response.url);
+                    
+                    // Try to get response as text first to see what we're getting
+                    return response.text().then(text => {
+                        console.log('Raw response text:', text);
+                        
+                        try {
+                            // Try to parse as JSON
+                            return JSON.parse(text);
+                        } catch (e) {
+                            console.error('Failed to parse JSON:', e);
+                            console.error('Response was:', text.substring(0, 500) + '...');
+                            throw new Error('Server returned HTML instead of JSON');
+                        }
+                    });
+                })
+                .then(data => {
+                    console.log('AJAX Response data:', data);
+                    if (data.success) {
+                        console.log('Cancel request successful');
+                        // Update the appointment row without page reload
+                        updateAppointmentRowAfterCancel(appointmentId);
+                        
+                        // Show success message
+                        showAlert('success', data.message || 'Appointment has been cancelled successfully.');
+                    } else {
+                        console.error('Cancel request failed:', data.message);
+                        showAlert('error', data.message || 'Failed to cancel appointment. Please try again.');
+                        
+                        // Re-enable button on failure
+                        if (button) {
+                            button.disabled = false;
+                            button.innerHTML = '<i class="fas fa-times"></i> Cancel';
+                        }
+                    }
+                })
+                .catch(error => {
+                    console.error('AJAX Error:', error);
+                    showAlert('error', 'An error occurred while cancelling the appointment.');
+                    
+                    // Re-enable button on error
+                    if (button) {
+                        button.disabled = false;
+                        button.innerHTML = '<i class="fas fa-times"></i> Cancel';
+                    }
+                });
+            } else {
+                console.log('User cancelled the cancellation');
+            }
+        }
+        
+        function updateAppointmentRowAfterCancel(appointmentId) {
+            console.log(`Updating appointment row ${appointmentId} to show cancelled status`);
+            
+            // Find the appointment row
+            const button = document.querySelector(`button[onclick*="cancelAppointment(${appointmentId})"]`);
+            const row = button?.closest('tr');
+            
+            if (row) {
+                // Update status badge
+                const statusCell = row.querySelector('.badge');
+                if (statusCell) {
+                    statusCell.className = 'badge bg-secondary';
+                    statusCell.textContent = 'Cancelled';
+                }
+                
+                // Remove cancel button and replace with cancelled text
+                const actionCell = row.querySelector('.btn-group');
+                if (actionCell) {
+                    const cancelButton = actionCell.querySelector(`button[onclick*="cancelAppointment(${appointmentId})"]`);
+                    if (cancelButton) {
+                        cancelButton.remove();
+                    }
+                }
+                
+                console.log('Appointment row updated successfully');
+            }
+        }
+        
+        function updateAppointmentStatusInRow(appointmentId, newStatus) {
+            console.log(`Updating appointment ${appointmentId} status to ${newStatus}`);
+            
+            // Find all rows and update the one with matching appointment ID
+            const rows = document.querySelectorAll('tbody tr');
+            rows.forEach(row => {
+                const viewButton = row.querySelector(`a[href*="Details?id=${appointmentId}"]`);
+                if (viewButton) {
+                    const statusBadge = row.querySelector('.badge');
+                    if (statusBadge) {
+                        // Update status class and text
+                        const statusClass = {
+                            'Scheduled': 'bg-primary',
+                            'Confirmed': 'bg-success',
+                            'InProgress': 'bg-warning',
+                            'Completed': 'bg-info',
+                            'Cancelled': 'bg-secondary',
+                            'NoShow': 'bg-danger'
+                        }[newStatus] || 'bg-secondary';
+                        
+                        statusBadge.className = `badge ${statusClass}`;
+                        statusBadge.textContent = newStatus;
+                        console.log(`Updated status badge for appointment ${appointmentId}`);
+                    }
+                }
+            });
+        }
+        
+        function showAlert(type, message) {
+            const alertClass = type === 'success' ? 'alert-success' : 'alert-danger';
+            const icon = type === 'success' ? 'fas fa-check-circle' : 'fas fa-exclamation-triangle';
+            
+            const alertHtml = `
+                <div class="alert ${alertClass} alert-dismissible fade show" role="alert">
+                    <i class="${icon}"></i> ${message}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            `;
+            
+            // Insert alert at the top of the container
+            const container = document.querySelector('.container-fluid');
+            if (container) {
+                container.insertAdjacentHTML('afterbegin', alertHtml);
+                
+                // Auto-dismiss after 5 seconds
+                setTimeout(() => {
+                    const alert = container.querySelector('.alert');
+                    if (alert) {
+                        const bsAlert = new bootstrap.Alert(alert);
+                        bsAlert.close();
+                    }
+                }, 5000);
             }
         }
 

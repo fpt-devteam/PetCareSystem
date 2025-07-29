@@ -1,0 +1,226 @@
+@page
+@model VetClinic.Web.Pages.Appointments.EditModel
+@{
+    ViewData["Title"] = "Edit Appointment";
+    var currentRole = ViewContext.HttpContext.Session.GetString("UserRole");
+    var isCustomer = currentRole == "Customer";
+}
+
+<!-- DEBUG: Current Role Info -->
+<div class="alert alert-info">
+    <strong>DEBUG:</strong> Current Role = @currentRole | Is Customer = @isCustomer
+</div>
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-8 offset-md-2">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">
+                        <i class="fas fa-edit me-2"></i>Edit Appointment
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <form method="post">
+                        <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+                        
+                        <input type="hidden" asp-for="Input.Id" />
+
+                        @if (!isCustomer)
+                        {
+                            <!-- Pet Selection - Only for Staff/Admin -->
+                            <div class="mb-3">
+                                <label asp-for="Input.PetId" class="form-label">Pet</label>
+                                <select asp-for="Input.PetId" asp-items="Model.PetSelectList" class="form-select">
+                                    <option value="">Select a pet...</option>
+                                </select>
+                                <span asp-validation-for="Input.PetId" class="text-danger"></span>
+                            </div>
+
+                            <!-- Doctor Selection - Only for Staff/Admin -->
+                            <div class="mb-3">
+                                <label asp-for="Input.DoctorId" class="form-label">Doctor</label>
+                                <select asp-for="Input.DoctorId" asp-items="Model.DoctorSelectList" class="form-select">
+                                    <option value="">Select a doctor...</option>
+                                </select>
+                                <span asp-validation-for="Input.DoctorId" class="text-danger"></span>
+                            </div>
+
+                            <!-- Service Selection - Only for Staff/Admin -->
+                            <div class="mb-3">
+                                <label asp-for="Input.ServiceId" class="form-label">Service</label>
+                                <select asp-for="Input.ServiceId" asp-items="Model.ServiceSelectList" class="form-select">
+                                    <option value="">Select a service...</option>
+                                </select>
+                                <span asp-validation-for="Input.ServiceId" class="text-danger"></span>
+                            </div>
+                        }
+                        else
+                        {
+                            <!-- Hidden fields for Customer role - preserve values but don't show UI -->
+                            <input type="hidden" asp-for="Input.PetId" />
+                            <input type="hidden" asp-for="Input.DoctorId" />
+                            <input type="hidden" asp-for="Input.ServiceId" />
+                            <input type="hidden" asp-for="Input.Status" />
+                            
+                            <!-- Customer Info - Just for display context -->
+                            <div class="alert alert-info">
+                                <h6><i class="fas fa-info-circle me-2"></i>Appointment Information</h6>
+                                <div class="row">
+                                    <div class="col-md-3">
+                                        <strong>Pet:</strong><br>
+                                        <span class="text-muted">@(Model.PetSelectList?.FirstOrDefault(x => x.Value == Model.Input.PetId.ToString())?.Text ?? "N/A")</span>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <strong>Doctor:</strong><br>
+                                        <span class="text-muted">@(Model.DoctorSelectList?.FirstOrDefault(x => x.Value == Model.Input.DoctorId.ToString())?.Text ?? "N/A")</span>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <strong>Service:</strong><br>
+                                        <span class="text-muted">@(Model.ServiceSelectList?.FirstOrDefault(x => x.Value == Model.Input.ServiceId.ToString())?.Text ?? "N/A")</span>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <strong>Status:</strong><br>
+                                        <span class="badge bg-primary">@Model.Input.Status</span>
+                                    </div>
+                                </div>
+                                <hr class="my-2">
+                                <small class="text-muted">
+                                    <i class="fas fa-lock me-1"></i>
+                                    As a customer, you can only reschedule the appointment time. Other details cannot be modified.
+                                </small>
+                            </div>
+                        }
+
+                        <!-- Appointment Time - The ONLY editable field for customers -->
+                        <div class="mb-4 @(isCustomer ? "border border-success rounded p-4 bg-light shadow-sm" : "")">
+                            <label asp-for="Input.AppointmentTime" class="form-label @(isCustomer ? "text-success fw-bold fs-5" : "")">
+                                @if (isCustomer)
+                                {
+                                    <i class="fas fa-calendar-alt text-success me-2"></i>
+                                    <text>Reschedule Your Appointment</text>
+                                }
+                                else
+                                {
+                                    <text>Appointment Time</text>
+                                }
+                            </label>
+                            @if (isCustomer)
+                            {
+                                <div class="mb-2">
+                                    <small class="text-success">
+                                        <i class="fas fa-info-circle me-1"></i>
+                                        Select a new date and time for your appointment
+                                    </small>
+                                </div>
+                                <input asp-for="Input.AppointmentTime" type="datetime-local" 
+                                       class="form-control border-success fs-6" 
+                                       style="height:50px;font-weight:bold;" />
+                            }
+                            else
+                            {
+                                <input asp-for="Input.AppointmentTime" type="datetime-local" class="form-control" />
+                            }
+                            <span asp-validation-for="Input.AppointmentTime" class="text-danger"></span>
+                        </div>
+
+                        @if (!isCustomer)
+                        {
+                            <!-- Status - Only for Staff/Admin -->
+                            <div class="mb-3">
+                                <label asp-for="Input.Status" class="form-label">Status</label>
+                                <select asp-for="Input.Status" asp-items="Model.StatusSelectList" class="form-select">
+                                    <option value="">Select status...</option>
+                                </select>
+                                <span asp-validation-for="Input.Status" class="text-danger"></span>
+                            </div>
+
+                            <!-- Notes - Only for Staff/Admin -->
+                            <div class="mb-3">
+                                <label asp-for="Input.Notes" class="form-label">Notes</label>
+                                <textarea asp-for="Input.Notes" class="form-control" rows="3" 
+                                          placeholder="Add notes about this appointment..."></textarea>
+                                <span asp-validation-for="Input.Notes" class="text-danger"></span>
+                            </div>
+                        }
+                        else
+                        {
+                            <!-- Hidden Notes field for Customer -->
+                            <input type="hidden" asp-for="Input.Notes" />
+                        }
+
+                        <div class="d-flex justify-content-between">
+                            <a asp-page="./Index" class="btn btn-secondary">
+                                <i class="fas fa-arrow-left me-2"></i>Back to Appointments
+                            </a>
+                            <button type="submit" class="btn @(isCustomer ? "btn-success" : "btn-primary")">
+                                <i class="fas @(isCustomer ? "fa-calendar-check" : "fa-save") me-2"></i>
+                                @(isCustomer ? "Reschedule Appointment" : "Save Changes")
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    
+    <style>
+        /* Custom styles for disabled fields */
+        .form-control:disabled,
+        .form-select:disabled {
+            background-color: #f8f9fa !important;
+            border-color: #dee2e6 !important;
+            color: #6c757d !important;
+            opacity: 0.8 !important;
+            cursor: not-allowed !important;
+        }
+        
+        .form-control:disabled::placeholder {
+            color: #adb5bd !important;
+        }
+        
+        /* Style for disabled labels */
+        .disabled-field-label {
+            color: #6c757d;
+            font-weight: normal;
+        }
+        
+        /* Custom disabled appearance for better visual feedback */
+        .disabled-field {
+            background: linear-gradient(45deg, transparent 40%, rgba(0,0,0,0.05) 50%, transparent 60%);
+            background-size: 10px 10px;
+        }
+    </style>
+    
+    <script>
+        $(document).ready(function() {
+            // Set minimum date/time to current time
+            var now = new Date();
+            now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+            var minDateTime = now.toISOString().slice(0, 16);
+            
+            $('#Input_AppointmentTime').attr('min', minDateTime);
+            
+            // Add visual feedback for disabled fields
+            $('input:disabled, textarea:disabled, select:disabled').addClass('disabled-field');
+            $('input:disabled, textarea:disabled, select:disabled').prev('label').addClass('disabled-field-label');
+            
+            // Add confirmation for customers
+            @if (isCustomer)
+            {
+                <text>
+                $('form').on('submit', function(e) {
+                    var currentTime = $('#Input_AppointmentTime').val();
+                    if (!confirm('Are you sure you want to reschedule your appointment to ' + currentTime + '?')) {
+                        e.preventDefault();
+                    }
+                });
+                </text>
+            }
+        });
+    </script>
+}

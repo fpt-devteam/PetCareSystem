@@ -19,6 +19,7 @@ namespace VetClinic.Repository.Data
         public DbSet<Feedback> Feedback { get; set; }
         public DbSet<Invoice> Invoices { get; set; }
         public DbSet<Reminder> Reminders { get; set; }
+        public DbSet<BlockedSlot> BlockedSlots { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -34,6 +35,7 @@ namespace VetClinic.Repository.Data
             modelBuilder.ApplyConfiguration(new FeedbackConfiguration());
             modelBuilder.ApplyConfiguration(new InvoiceConfiguration());
             modelBuilder.ApplyConfiguration(new ReminderConfiguration());
+            modelBuilder.ApplyConfiguration(new BlockedSlotConfiguration());
         }
     }
 }

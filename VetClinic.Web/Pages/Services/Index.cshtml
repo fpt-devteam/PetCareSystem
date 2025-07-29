@@ -25,11 +25,17 @@
     <div class="row mb-4">
         <div class="col-12">
             <div class="d-flex justify-content-between align-items-center">
-                <h2><i class="fas fa-briefcase-medical text-primary"></i> Services</h2>
+                <h2><i class="fas fa-briefcase-medical text-primary"></i> Our Services & Expert Doctors</h2>
                 @if (ViewSessionHelper.IsInAnyRole(ViewContext.HttpContext.Session, "Admin", "Manager"))
                 {
                     <a asp-page="./Create" class="btn btn-primary">
                         <i class="fas fa-plus"></i> Add New Service
+                    </a>
+                }
+                @if (!SessionHelper.IsAuthenticated(ViewContext.HttpContext.Session))
+                {
+                    <a asp-page="/Account/Register" class="btn btn-success">
+                        <i class="fas fa-user-plus"></i> Register to Book Appointment
                     </a>
                 }
             </div>
@@ -263,6 +269,92 @@
                             <i class="fas fa-plus"></i> Add First Service
                         </a>
                     }
+                </div>
+            </div>
+        }
+    </div>
+</div>
+
+<!-- Our Expert Doctors Section -->
+<div class="container-fluid mt-5">
+    <div class="row mb-4">
+        <div class="col-12">
+            <h3><i class="fas fa-user-md text-success"></i> Meet Our Expert Doctors</h3>
+            <p class="text-muted">Our experienced veterinarians are here to provide the best care for your pets.</p>
+        </div>
+    </div>
+
+    <!-- Doctors Grid -->
+    <div class="row">
+        @if (Model.Doctors.Any())
+        {
+            @foreach (var doctor in Model.Doctors)
+            {
+                <div class="col-lg-4 col-md-6 mb-4">
+                    <div class="card h-100">
+                        <div class="card-header bg-success text-white">
+                            <div class="d-flex align-items-center">
+                                <div class="me-3">
+                                    <i class="fas fa-user-md fa-2x"></i>
+                                </div>
+                                <div>
+                                    <h6 class="mb-0">Dr. @doctor.FullName</h6>
+                                    <small>Veterinarian</small>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <!-- Contact Information -->
+                            <div class="mb-3">
+                                <div class="d-flex align-items-center mb-2">
+                                    <i class="fas fa-envelope text-muted me-2"></i>
+                                    <small>@doctor.Email</small>
+                                </div>
+                                @if (!string.IsNullOrEmpty(doctor.PhoneNumber))
+                                {
+                                    <div class="d-flex align-items-center mb-2">
+                                        <i class="fas fa-phone text-muted me-2"></i>
+                                        <small>@doctor.PhoneNumber</small>
+                                    </div>
+                                }
+                            </div>
+
+                            <!-- Experience Info -->
+                            <div class="mb-3">
+                                <small class="text-muted">
+                                    <i class="fas fa-calendar-check me-1"></i>
+                                    Joined @doctor.CreatedDate.ToString("MMM yyyy")
+                                </small>
+                            </div>
+
+                            <!-- Action Buttons -->
+                            <div class="text-center">
+                                @if (SessionHelper.IsAuthenticated(ViewContext.HttpContext.Session) && 
+                                     SessionHelper.GetUserRole(ViewContext.HttpContext.Session) == "Customer")
+                                {
+                                    <a asp-page="/Appointments/Book" asp-route-doctorId="@doctor.Id" class="btn btn-outline-success btn-sm">
+                                        <i class="fas fa-calendar-plus"></i> Book with Dr. @doctor.FullName.Split(' ').Last()
+                                    </a>
+                                }
+                                else if (!SessionHelper.IsAuthenticated(ViewContext.HttpContext.Session))
+                                {
+                                    <a asp-page="/Account/Register" class="btn btn-outline-primary btn-sm">
+                                        <i class="fas fa-user-plus"></i> Register to Book
+                                    </a>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        }
+        else
+        {
+            <div class="col-12">
+                <div class="text-center py-5">
+                    <i class="fas fa-user-md fa-3x text-muted mb-3"></i>
+                    <h5 class="text-muted">No doctors available</h5>
+                    <p class="text-muted">Our medical team information will be available soon.</p>
                 </div>
             </div>
         }

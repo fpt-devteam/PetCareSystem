@@ -57,11 +57,27 @@
                                     <i class="fas fa-calendar-alt me-1"></i>Appointments
                                 </a>
                             </li>
+                            @if (userRole == "Staff" || userRole == "Admin" || userRole == "Manager")
+                            {
+                                <li class="nav-item">
+                                    <a class="nav-link text-dark" asp-area="" asp-page="/Staff/Agenda">
+                                        <i class="fas fa-calendar-day me-1"></i>Daily Agenda
+                                    </a>
+                                </li>
+                            }
                             @if (userRole == "Doctor" || userRole == "Manager")
                             {
                                 <li class="nav-item">
                                     <a class="nav-link text-dark" asp-area="" asp-page="/MedicalRecords/Index">
                                         <i class="fas fa-file-medical me-1"></i>Medical Records
+                                    </a>
+                                </li>
+                            }
+                            @if (userRole == "Doctor")
+                            {
+                                <li class="nav-item">
+                                    <a class="nav-link text-dark" asp-area="" asp-page="/Doctors/BlockSlots">
+                                        <i class="fas fa-calendar-times me-1"></i>Block Time Slots
                                     </a>
                                 </li>
                             }

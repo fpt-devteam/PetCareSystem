@@ -1,11 +1,16 @@
 using VetClinic.Repository;
 using VetClinic.Service;
 using VetClinic.Repository.Data;
+using VetClinic.Web.Hubs;
+using VetClinic.Web.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddRazorPages();
+
+// Add SignalR
+builder.Services.AddSignalR();
 
 // Add session support
 builder.Services.AddDistributedMemoryCache();
@@ -19,6 +24,9 @@ builder.Services.AddSession(options =>
 // Add 3-layer architecture services
 builder.Services.AddRepository(builder.Configuration);
 builder.Services.AddServices();
+
+// Add SignalR notification service
+builder.Services.AddScoped<IAppointmentNotificationService, AppointmentNotificationService>();
 
 var app = builder.Build();
 
@@ -48,5 +56,6 @@ app.UseRouting();
 app.UseSession();
 
 app.MapRazorPages();
+app.MapHub<AppointmentHub>("/appointmentHub");
 
 app.Run();
