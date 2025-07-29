@@ -9,6 +9,7 @@
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/VetClinic.Web.styles.css" asp-append-version="true" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
+    @await RenderSectionAsync("Styles", required: false)
 </head>
 <body>
     <header>
@@ -23,11 +24,22 @@
                 </button>
                 <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
                     <ul class="navbar-nav flex-grow-1">
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-page="/Index">
-                                <i class="fas fa-tachometer-alt me-1"></i>Dashboard
-                            </a>
-                        </li>
+                        @if (SessionHelper.IsAuthenticated(ViewContext.HttpContext.Session))
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-area="" asp-page="/Dashboard">
+                                    <i class="fas fa-tachometer-alt me-1"></i>Dashboard
+                                </a>
+                            </li>
+                        }
+                        else
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-area="" asp-page="/Index">
+                                    <i class="fas fa-home me-1"></i>Home
+                                </a>
+                            </li>
+                        }
                         @if (SessionHelper.IsAuthenticated(ViewContext.HttpContext.Session))
                         {
                             var userRole = SessionHelper.GetUserRole(ViewContext.HttpContext.Session);
@@ -96,6 +108,16 @@
                                 </li>
                             }
                         }
+                        <li class="nav-item">
+                            <a class="nav-link text-dark" asp-area="" asp-page="/Services">
+                                <i class="fas fa-stethoscope me-1"></i>Services & Doctor
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-dark" asp-area="" asp-page="/Appointments/Book">
+                                <i class="fas fa-calendar-plus me-1"></i>Book Appointment
+                            </a>
+                        </li>
                         <li class="nav-item">
                             <a class="nav-link text-dark" asp-area="" asp-page="/Privacy">Privacy</a>
                         </li>
