@@ -33,6 +33,18 @@ namespace VetClinic.Repository.DAO
                 .ToListAsync();
         }
 
+        public async Task<IEnumerable<Appointment>> GetAllAppointmentsByDoctorAsync(int doctorId)
+        {
+            return await _dbSet
+                .Where(a => a.DoctorId == doctorId)
+                .Include(a => a.Pet)
+                .ThenInclude(p => p.Owner)
+                .Include(a => a.Doctor)
+                .Include(a => a.Service)
+                .OrderByDescending(a => a.AppointmentTime)
+                .ToListAsync();
+        }
+
         public async Task<IEnumerable<Appointment>> GetAppointmentsByPetAsync(int petId)
         {
             return await _dbSet

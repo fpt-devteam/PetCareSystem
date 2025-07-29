@@ -330,7 +330,7 @@
         @if (Model.ReportType == "overview" || Model.ReportType == "financial")
         {
             <text>
-                            const monthlyRevenueCtx = document.getElementById('monthlyRevenueChart').getContext('2d');
+                                        const monthlyRevenueCtx = document.getElementById('monthlyRevenueChart').getContext('2d');
             const monthlyRevenueChart = new Chart(monthlyRevenueCtx, {
                 type: 'line',
                 data: {
@@ -362,7 +362,7 @@
         @if (Model.ReportType == "overview" || Model.ReportType == "appointments")
         {
             <text>
-                            const appointmentStatusCtx = document.getElementById('appointmentStatusChart').getContext('2d');
+                                        const appointmentStatusCtx = document.getElementById('appointmentStatusChart').getContext('2d');
             const appointmentStatusChart = new Chart(appointmentStatusCtx, {
                 type: 'pie',
                 data: {
@@ -373,7 +373,7 @@
                 @Model.AppointmentStatus.Scheduled,
                 @Model.AppointmentStatus.Completed,
                 @Model.AppointmentStatus.Cancelled
-                                        ],
+                                                    ],
                         backgroundColor: [
                             'rgba(54, 162, 235, 0.8)',
                             'rgba(75, 192, 192, 0.8)',
@@ -396,7 +396,7 @@
         @if (Model.ReportType == "overview" || Model.ReportType == "pets")
         {
             <text>
-                            const petSpeciesCtx = document.getElementById('petSpeciesChart').getContext('2d');
+                                        const petSpeciesCtx = document.getElementById('petSpeciesChart').getContext('2d');
             const petSpeciesChart = new Chart(petSpeciesCtx, {
                 type: 'doughnut',
                 data: {
@@ -428,7 +428,7 @@
         @if (Model.ReportType == "overview" || Model.ReportType == "pets")
         {
             <text>
-                            const topServicesCtx = document.getElementById('topServicesChart').getContext('2d');
+                                        const topServicesCtx = document.getElementById('topServicesChart').getContext('2d');
             const topServicesChart = new Chart(topServicesCtx, {
                 type: 'bar',
                 data: {
@@ -457,7 +457,7 @@
         @if (Model.DoctorPerformance != null)
         {
             <text>
-                            const doctorPerformanceCtx = document.getElementById('doctorPerformanceChart').getContext('2d');
+                                        const doctorPerformanceCtx = document.getElementById('doctorPerformanceChart').getContext('2d');
             const doctorPerformanceChart = new Chart(doctorPerformanceCtx, {
                 type: 'bar',
                 data: {
@@ -470,7 +470,7 @@
                 @Model.DoctorPerformance.CancelledAppointments,
                 @Model.DoctorPerformance.Revenue,
                 @Model.DoctorPerformance.AverageRating
-                                        ],
+                                                    ],
                         backgroundColor: [
                             'rgba(75, 192, 192, 0.8)',
                             'rgba(54, 162, 235, 0.8)',
@@ -498,7 +498,7 @@
         @if (Model.PetHealthTimeline != null)
         {
             <text>
-                            const petHealthCtx = document.getElementById('petHealthChart').getContext('2d');
+                                        const petHealthCtx = document.getElementById('petHealthChart').getContext('2d');
             const petHealthChart = new Chart(petHealthCtx, {
                 type: 'line',
                 data: {
@@ -668,7 +668,7 @@
             </text>
         }
 
-                    const encodedUri = encodeURI(csvContent);
+                            const encodedUri = encodeURI(csvContent);
             const link = document.createElement("a");
             link.setAttribute("href", encodedUri);
             link.setAttribute("download", "VetClinic_Reports.csv");

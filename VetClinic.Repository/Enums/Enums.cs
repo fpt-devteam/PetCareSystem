@@ -12,10 +12,10 @@ namespace VetClinic.Repository.Enums
     public enum AppointmentStatus
     {
         Scheduled = 1,
-        InProgress = 2,
-        Completed = 3,
-        Cancelled = 4,
-        NoShow = 5
+        Confirmed = 2,
+        InProgress = 3, 
+        Completed = 4,
+        Cancelled = 5
     }
 
     public enum VaccinationStatus

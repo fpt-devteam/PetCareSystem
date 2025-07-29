@@ -51,7 +51,20 @@ namespace VetClinic.Repository.Repositories
             if (string.IsNullOrWhiteSpace(pet.Species))
                 throw new ArgumentException("Pet species is required");
 
-            return await _petDAO.UpdateAsync(pet);
+            // Update only the properties that should be updated
+            existingPet.Name = pet.Name;
+            existingPet.Species = pet.Species;
+            existingPet.Breed = pet.Breed;
+            existingPet.BirthDate = pet.BirthDate;
+            existingPet.Gender = pet.Gender;
+            existingPet.Weight = pet.Weight;
+            existingPet.Color = pet.Color;
+            existingPet.MicrochipId = pet.MicrochipId;
+            existingPet.MedicalNotes = pet.MedicalNotes;
+            existingPet.IsActive = pet.IsActive;
+            existingPet.PhotoUrl = pet.PhotoUrl;
+
+            return await _petDAO.UpdateAsync(existingPet);
         }
 
         public async Task<bool> DeleteAsync(int id)

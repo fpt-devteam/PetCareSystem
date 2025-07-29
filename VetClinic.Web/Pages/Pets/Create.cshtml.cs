@@ -51,12 +51,20 @@ namespace VetClinic.Web.Pages.Pets
                 return Page();
             }
 
+            // Get current user ID for authorization
+            var userId = SessionHelper.GetUserId(HttpContext.Session);
+            if (!userId.HasValue)
+            {
+                ModelState.AddModelError("", "Unable to verify user session. Please log in again.");
+                return Page();
+            }
+
             try
             {
                 // Create the pet entity from the form model
                 var pet = new Pet
                 {
-                    OwnerId = Pet.OwnerId,
+                    OwnerId = userId.Value,
                     Name = Pet.Name,
                     Species = Pet.Species,
                     Breed = Pet.Breed,
@@ -69,14 +77,6 @@ namespace VetClinic.Web.Pages.Pets
                     IsActive = Pet.IsActive,
                     CreatedDate = DateTime.UtcNow
                 };
-
-                // Get current user ID for authorization
-                var userId = SessionHelper.GetUserId(HttpContext.Session);
-                if (!userId.HasValue)
-                {
-                    ModelState.AddModelError("", "Unable to verify user session. Please log in again.");
-                    return Page();
-                }
 
                 // Create the pet through the service
                 await _petService.CreatePetAsync(pet, userId.Value);

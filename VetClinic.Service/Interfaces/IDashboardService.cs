@@ -1,3 +1,7 @@
+using VetClinic.Repository.Entities;
+using VetClinic.Service.Models;
+
+
 namespace VetClinic.Service.Interfaces
 {
     public interface IDashboardService
@@ -34,9 +38,9 @@ namespace VetClinic.Service.Interfaces
         Task<object> GetPetHealthTimelineAsync(int petId, DateTime? startDate = null, DateTime? endDate = null);
 
         // Additional methods for chart data
-        Task<object> GetMonthlyRevenueAsync(DateTime? startDate = null, DateTime? endDate = null);
-        Task<object> GetAppointmentStatusAsync(DateTime? startDate = null, DateTime? endDate = null);
-        Task<object> GetPetSpeciesDistributionAsync();
-        Task<object> GetTopServicesAsync(DateTime? startDate = null, DateTime? endDate = null);
+        Task<List<TopServiceData>> GetTopServicesAsync(DateTime? startDate = null, DateTime? endDate = null);
+        Task<List<PetSpeciesData>> GetPetSpeciesDistributionAsync();
+        Task<AppointmentStatusData> GetAppointmentStatusAsync(DateTime? startDate = null, DateTime? endDate = null);
+        Task<List<MonthlyRevenueData>> GetMonthlyRevenueAsync(DateTime? startDate = null, DateTime? endDate = null);
     }
 }

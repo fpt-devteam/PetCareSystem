@@ -13,6 +13,7 @@ namespace VetClinic.Repository.Repositories
 
         // Appointment-specific methods
         Task<IEnumerable<Appointment>> GetAppointmentsByDoctorAsync(int doctorId, DateTime date);
+        Task<IEnumerable<Appointment>> GetAllAppointmentsByDoctorAsync(int doctorId);
         Task<IEnumerable<Appointment>> GetAppointmentsByPetAsync(int petId);
         Task<IEnumerable<Appointment>> GetAppointmentsForDateAsync(DateTime date);
         Task<IEnumerable<Appointment>> GetDailyAgendaAsync(DateTime date);

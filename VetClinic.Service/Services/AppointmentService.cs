@@ -61,6 +61,11 @@ namespace VetClinic.Service.Services
             return await _appointmentRepository.GetAppointmentsByDoctorAsync(doctorId, date);
         }
 
+        public async Task<IEnumerable<Appointment>> GetAllAppointmentsByDoctorAsync(int doctorId)
+        {
+            return await _appointmentRepository.GetAllAppointmentsByDoctorAsync(doctorId);
+        }
+
         public async Task<IEnumerable<Appointment>> GetAppointmentsByPetAsync(int petId)
         {
             return await _appointmentRepository.GetAppointmentsByPetAsync(petId);

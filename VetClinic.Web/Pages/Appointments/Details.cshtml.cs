@@ -69,21 +69,29 @@ namespace VetClinic.Web.Pages.Appointments
         {
             try
             {
-                // Check permissions - only staff can update status
-                if (!ViewSessionHelper.IsInAnyRole(HttpContext.Session, "Admin", "Manager", "Staff"))
+                // Check permissions - staff and doctors can update status
+                if (!ViewSessionHelper.IsInAnyRole(HttpContext.Session, "Admin", "Manager", "Staff", "Doctor"))
                 {
                     TempData["ErrorMessage"] = "You don't have permission to update appointment status.";
                     return RedirectToPage("./Details", new { id = appointmentId });
                 }
 
                 var currentUserId = HttpContext.Session.GetInt32("UserId") ?? 0;
+                var userRole = HttpContext.Session.GetString("UserRole");
                 
-                // Get appointment to get pet owner info
+                // Get appointment to check permissions and get pet owner info
                 var appointment = await _appointmentService.GetAppointmentWithDetailsAsync(appointmentId);
                 if (appointment == null)
                 {
                     TempData["ErrorMessage"] = "Appointment not found.";
                     return RedirectToPage("./Index");
+                }
+
+                // Additional check: Doctor can only update their own appointments
+                if (userRole == "Doctor" && appointment.DoctorId != currentUserId)
+                {
+                    TempData["ErrorMessage"] = "You can only update status for your own appointments.";
+                    return RedirectToPage("./Details", new { id = appointmentId });
                 }
 
                 var success = await _appointmentService.UpdateAppointmentStatusAsync(appointmentId, newStatus, currentUserId);
