@@ -63,15 +63,15 @@ namespace VetClinic.Web.Pages.Services
                 return RedirectToPage("/Account/Login");
             }
 
+            // Only admins can edit services - consistent with Edit page
+            if (!SessionHelper.IsInRole(HttpContext.Session, "Admin"))
+            {
+                TempData["ErrorMessage"] = "You are not authorized to modify services. Admin access required.";
+                return RedirectToPage();
+            }
+
             try
             {
-                var userRole = SessionHelper.GetUserRole(HttpContext.Session);
-                if (userRole != "Admin" && userRole != "Manager")
-                {
-                    TempData["ErrorMessage"] = "You are not authorized to modify services.";
-                    return RedirectToPage();
-                }
-
                 var userId = SessionHelper.GetUserId(HttpContext.Session);
                 if (!userId.HasValue)
                 {
@@ -79,7 +79,7 @@ namespace VetClinic.Web.Pages.Services
                     return RedirectToPage();
                 }
 
-                // Get the current service
+                // Check if service exists - consistent with Edit page
                 var service = await _serviceService.GetServiceByIdAsync(serviceId);
                 if (service == null)
                 {
@@ -92,11 +92,11 @@ namespace VetClinic.Web.Pages.Services
                 await _serviceService.UpdateServiceAsync(service, userId.Value);
 
                 var action = isActive ? "activated" : "deactivated";
-                TempData["SuccessMessage"] = $"Service has been {action} successfully.";
+                TempData["SuccessMessage"] = $"Service '{service.Name}' has been {action} successfully.";
             }
             catch (Exception ex)
             {
-                TempData["ErrorMessage"] = "Error updating service status.";
+                TempData["ErrorMessage"] = "Error updating service status. Please try again.";
                 Console.WriteLine($"Error toggling service status: {ex.Message}");
             }
 
@@ -113,9 +113,9 @@ namespace VetClinic.Web.Pages.Services
             try
             {
                 var userRole = SessionHelper.GetUserRole(HttpContext.Session);
-                if (userRole != "Admin" && userRole != "Manager")
+                if (userRole != "Admin")
                 {
-                    TempData["ErrorMessage"] = "You are not authorized to delete services.";
+                    TempData["ErrorMessage"] = "You are not authorized to delete services. Admin access required.";
                     return RedirectToPage();
                 }
 
@@ -127,11 +127,11 @@ namespace VetClinic.Web.Pages.Services
                 }
 
                 await _serviceService.DeleteServiceAsync(serviceId, userId.Value);
-                TempData["SuccessMessage"] = "Service has been deleted successfully.";
+                TempData["SuccessMessage"] = "Service has been deactivated successfully.";
             }
             catch (Exception ex)
             {
-                TempData["ErrorMessage"] = "Error deleting service. Make sure it's not being used in any appointments.";
+                TempData["ErrorMessage"] = "Error deactivating service. Please try again.";
                 Console.WriteLine($"Error deleting service: {ex.Message}");
             }
 
@@ -199,8 +199,8 @@ namespace VetClinic.Web.Pages.Services
             {
                 var userRole = SessionHelper.GetUserRole(HttpContext.Session);
 
-                // Only load stats for admin/manager roles
-                if (userRole == "Admin" || userRole == "Manager")
+                // Only load stats for admin role
+                if (userRole == "Admin")
                 {
                     var allServices = await _serviceService.GetAllServicesAsync();
                     var serviceList = allServices.ToList();
