@@ -26,8 +26,8 @@ namespace VetClinic.Web.Pages.Services
                 return RedirectToPage("/Account/Login");
             }
 
-            // Only admins and managers can create services
-            if (!SessionHelper.IsInAnyRole(HttpContext.Session, new[] { "Admin", "Manager" }))
+            // Only admins can create services
+            if (!SessionHelper.IsInRole(HttpContext.Session, "Admin"))
             {
                 return RedirectToPage("/Index");
             }
@@ -42,8 +42,8 @@ namespace VetClinic.Web.Pages.Services
                 return RedirectToPage("/Account/Login");
             }
 
-            // Only admins and managers can create services
-            if (!SessionHelper.IsInAnyRole(HttpContext.Session, new[] { "Admin", "Manager" }))
+            // Only admins can create services
+            if (!SessionHelper.IsInRole(HttpContext.Session, "Admin"))
             {
                 return RedirectToPage("/Index");
             }

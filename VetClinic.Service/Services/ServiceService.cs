@@ -49,16 +49,19 @@ namespace VetClinic.Service.Services
 
         public async Task<bool> DeleteServiceAsync(int id, int userId)
         {
-            // Check if service has active appointments
+            // Soft delete: Set isActive to false instead of hard delete
             var service = await _serviceRepository.GetByIdAsync(id);
             if (service == null) return false;
 
-            // TODO: Add actual check for active appointments when that repository method is available
-            // For now, prevent deletion of active services
-            if (service.IsActive)
-                throw new InvalidOperationException("Cannot delete an active service. Please deactivate it first.");
+            // Check if service is already inactive (soft deleted)
+            if (!service.IsActive)
+                throw new InvalidOperationException("Service is already deactivated.");
 
-            return await _serviceRepository.DeleteAsync(id);
+            // Perform soft delete by setting IsActive to false
+            service.IsActive = false;
+            await _serviceRepository.UpdateAsync(service);
+
+            return true;
         }
 
         public async Task<bool> ServiceExistsAsync(int id)

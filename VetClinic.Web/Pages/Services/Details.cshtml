@@ -1,0 +1,290 @@
+@page
+@model VetClinic.Web.Pages.Services.DetailsModel
+@{
+    ViewData["Title"] = "Service Details";
+}
+
+<div class="container">
+    <!-- Success/Error Messages -->
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="fas fa-check-circle"></i> @TempData["SuccessMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="fas fa-exclamation-triangle"></i> @TempData["ErrorMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    <!-- Page Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h2><i class="fas fa-briefcase-medical text-primary me-2"></i>@Model.Service.Name</h2>
+                    <nav aria-label="breadcrumb">
+                        <ol class="breadcrumb">
+                            <li class="breadcrumb-item"><a href="/">Dashboard</a></li>
+                            <li class="breadcrumb-item"><a href="/Services">Services</a></li>
+                            <li class="breadcrumb-item active">@Model.Service.Name</li>
+                        </ol>
+                    </nav>
+                </div>
+                <div>
+                    @if (Model.Service.IsActive)
+                    {
+                        <span class="badge bg-success fs-6"><i class="fas fa-check-circle me-1"></i>Active</span>
+                    }
+                    else
+                    {
+                        <span class="badge bg-secondary fs-6"><i class="fas fa-pause-circle me-1"></i>Inactive</span>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-8">
+            <!-- Service Information Card -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="fas fa-info-circle me-2"></i>Service Information</h5>
+                </div>
+                <div class="card-body">
+                    <!-- Description -->
+                    <div class="row mb-4">
+                        <div class="col-12">
+                            <h6 class="text-muted mb-2">Description</h6>
+                            @if (!string.IsNullOrEmpty(Model.Service.Description))
+                            {
+                                <p class="lead">@Model.Service.Description</p>
+                            }
+                            else
+                            {
+                                <p class="text-muted fst-italic">No description available for this service.</p>
+                            }
+                        </div>
+                    </div>
+
+                    <!-- Service Details Grid -->
+                    <div class="row">
+                        <div class="col-md-4 mb-3">
+                            <div class="text-center">
+                                <i class="fas fa-dollar-sign fa-2x text-success mb-2"></i>
+                                <h4 class="text-success">$@Model.Service.Price.ToString("F2")</h4>
+                                <small class="text-muted">Service Price</small>
+                            </div>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <div class="text-center">
+                                <i class="fas fa-clock fa-2x text-primary mb-2"></i>
+                                <h4 class="text-primary">@Model.Service.DurationMinutes min</h4>
+                                <small class="text-muted">
+                                    @if (Model.Service.DurationMinutes >= 60)
+                                    {
+                                        var hours = Model.Service.DurationMinutes / 60;
+                                        var minutes = Model.Service.DurationMinutes % 60;
+                                        if (minutes > 0)
+                                        {
+                                            <text>(@hours.ToString("F1")h @minutes.ToString()m)</text>
+                                        }
+                                        else
+                                        {
+                                            <text>(@hours hour@(hours > 1 ? "s" : ""))</text>
+                                        }
+                                    }
+                                    else
+                                    {
+                                        <text>Duration</text>
+                                    }
+                                </small>
+                            </div>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <div class="text-center">
+                                <i class="fas fa-calendar-plus fa-2x text-info mb-2"></i>
+                                <h6 class="text-info">@Model.Service.CreatedDate.ToString("MMM dd, yyyy")</h6>
+                                <small class="text-muted">Date Added</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Pricing Category Card -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h6 class="mb-0"><i class="fas fa-tags me-2"></i>Service Category</h6>
+                </div>
+                <div class="card-body">
+                    <div class="text-center">
+                        @if (Model.Service.Price <= 50)
+                        {
+                            <div class="badge bg-success fs-5 p-3">
+                                <i class="fas fa-leaf me-2"></i>Budget Friendly
+                            </div>
+                            <p class="mt-2 text-muted">Affordable everyday care for your pet</p>
+                        }
+                        else if (Model.Service.Price <= 100)
+                        {
+                            <div class="badge bg-primary fs-5 p-3">
+                                <i class="fas fa-star me-2"></i>Standard Care
+                            </div>
+                            <p class="mt-2 text-muted">Quality care at standard pricing</p>
+                        }
+                        else
+                        {
+                            <div class="badge bg-warning fs-5 p-3">
+                                <i class="fas fa-crown me-2"></i>Premium Service
+                            </div>
+                            <p class="mt-2 text-muted">Specialized care with premium features</p>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <!-- Action Panel -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h6 class="mb-0"><i class="fas fa-tools me-2"></i>Actions</h6>
+                </div>
+                <div class="card-body">
+                    <!-- Role-based Actions -->
+                    @switch (Model.UserRole)
+                    {
+                        case "Customer":
+                            @if (Model.Service.IsActive)
+                            {
+                                <a asp-page="/Appointments/Book" asp-route-serviceId="@Model.Service.Id"
+                                    class="btn btn-primary w-100 mb-2">
+                                    <i class="fas fa-calendar-plus me-2"></i>Book Appointment
+                                </a>
+                                <p class="small text-muted text-center">Schedule this service for your pet</p>
+                            }
+                            else
+                            {
+                                <div class="alert alert-warning text-center">
+                                    <i class="fas fa-exclamation-triangle me-2"></i>
+                                    Service currently unavailable for booking
+                                </div>
+                            }
+                            break;
+
+                        case "Guest":
+                            <a asp-page="/Account/Register" class="btn btn-success w-100 mb-2">
+                                <i class="fas fa-user-plus me-2"></i>Register to Book
+                            </a>
+                            <a asp-page="/Account/Login" class="btn btn-outline-primary w-100 mb-2">
+                                <i class="fas fa-sign-in-alt me-2"></i>Login
+                            </a>
+                            <p class="small text-muted text-center">Create an account to book appointments</p>
+                            break;
+
+                        case "Admin":
+                            <a asp-page="./Edit" asp-route-id="@Model.Service.Id" class="btn btn-warning w-100 mb-2">
+                                <i class="fas fa-edit me-2"></i>Edit Service
+                            </a>
+
+                            @if (Model.Service.IsActive)
+                            {
+                                <button type="button" class="btn btn-outline-secondary w-100 mb-2"
+                                    onclick="toggleStatus(@Model.Service.Id, false)">
+                                    <i class="fas fa-pause me-2"></i>Deactivate Service
+                                </button>
+                            }
+                            else
+                            {
+                                <button type="button" class="btn btn-outline-success w-100 mb-2"
+                                    onclick="toggleStatus(@Model.Service.Id, true)">
+                                    <i class="fas fa-play me-2"></i>Activate Service
+                                </button>
+                            }
+                            break;
+                    }
+
+                    <!-- Common Actions -->
+                    <hr>
+                    <a href="/Services" class="btn btn-outline-secondary w-100">
+                        <i class="fas fa-arrow-left me-2"></i>Back to Services
+                    </a>
+                </div>
+            </div>
+
+            <!-- Service Statistics (Admin only) -->
+            @if (Model.CanEdit)
+            {
+                <div class="card">
+                    <div class="card-header">
+                        <h6 class="mb-0"><i class="fas fa-chart-bar me-2"></i>Service Statistics</h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="row text-center">
+                            <div class="col-6">
+                                <h5 class="text-primary">@Model.Service.Id</h5>
+                                <small class="text-muted">Service ID</small>
+                            </div>
+                            <div class="col-6">
+                                <h5 class="text-info">@((DateTime.Now - Model.Service.CreatedDate).Days)</h5>
+                                <small class="text-muted">Days Active</small>
+                            </div>
+                        </div>
+                        <hr>
+                        <div class="text-center">
+                            <small class="text-muted">
+                                <i class="fas fa-calendar me-1"></i>
+                                Created: @Model.Service.CreatedDate.ToString("dddd, MMMM dd, yyyy 'at' h:mm tt")
+                            </small>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+<!-- Hidden Forms for Status Updates -->
+@if (Model.CanEdit)
+{
+    <form id="toggleStatusForm" method="post" style="display: none;">
+        <input name="serviceId" id="toggleServiceId" type="hidden" />
+        <input name="isActive" id="toggleIsActive" type="hidden" />
+        <input name="handler" value="ToggleStatus" type="hidden" />
+    </form>
+}
+
+@section Scripts {
+    <script>
+        @if (Model.CanEdit)
+            {
+                <text>
+                    function toggleStatus(serviceId, isActive) {
+                                                                                                                                const action = isActive ? 'activate' : 'deactivate';
+                    if (confirm(`Are you sure you want to ${action} this service?`)) {
+                        document.getElementById('toggleServiceId').value = serviceId;
+                    document.getElementById('toggleIsActive').value = isActive;
+                    document.getElementById('toggleStatusForm').submit();
+                                                                                                                                }
+                                                                                                                            }
+                </text>
+        }
+
+            // Auto-dismiss alerts after 5 seconds
+            setTimeout(function () {
+                var alerts = document.querySelectorAll('.alert');
+                alerts.forEach(function (alert) {
+                    if (alert.classList.contains('alert-success') || alert.classList.contains('alert-danger')) {
+                        var bsAlert = new bootstrap.Alert(alert);
+                        bsAlert.close();
+                    }
+                });
+            }, 5000);
+    </script>
+}
