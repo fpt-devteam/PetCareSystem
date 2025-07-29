@@ -1,0 +1,134 @@
+@page "{id:int}"
+@model VetClinic.Web.Pages.Users.EditModel
+@{
+    ViewData["Title"] = "Edit User";
+}
+
+<div class="container-fluid">
+    <!-- Success/Error Messages -->
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="fas fa-check-circle"></i> @TempData["SuccessMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="fas fa-exclamation-triangle"></i> @TempData["ErrorMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    <!-- Page Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <h2><i class="fas fa-user-edit text-primary me-2"></i>Edit User</h2>
+                <div>
+                    <a href="/Users" class="btn btn-secondary me-2">
+                        <i class="fas fa-list me-1"></i>Back to List
+                    </a>
+                    <a href="/Users/Details/@Model.UserDetails?.Id" class="btn btn-primary">
+                        <i class="fas fa-eye me-1"></i>View Details
+                    </a>
+                </div>
+            </div>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="/">Dashboard</a></li>
+                    <li class="breadcrumb-item"><a href="/Users">Users</a></li>
+                    <li class="breadcrumb-item active">Edit User</li>
+                </ol>
+            </nav>
+        </div>
+    </div>
+
+    <!-- Edit User Form -->
+    <div class="row">
+        <div class="col-lg-8 mx-auto">
+            <div class="card shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0"><i class="fas fa-user-edit me-2"></i>Edit User Information</h5>
+                </div>
+                <div class="card-body">
+                    <form method="post">
+                        <input type="hidden" asp-for="UserDetails.Id" />
+                        <input type="hidden" asp-for="UserDetails.CreatedDate" />
+                        <input type="hidden" asp-for="UserDetails.LastLoginDate" />
+                        <input type="hidden" asp-for="UserDetails.PasswordHash" />
+                        
+                        <div class="mb-3">
+                            <label asp-for="UserDetails.FullName" class="form-label">Full Name <span class="text-danger">*</span></label>
+                            <input asp-for="UserDetails.FullName" class="form-control" />
+                            <span asp-validation-for="UserDetails.FullName" class="text-danger"></span>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label asp-for="UserDetails.Email" class="form-label">Email Address <span class="text-danger">*</span></label>
+                            <input asp-for="UserDetails.Email" class="form-control" type="email" />
+                            <span asp-validation-for="UserDetails.Email" class="text-danger"></span>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label asp-for="UserDetails.PhoneNumber" class="form-label">Phone Number</label>
+                            <input asp-for="UserDetails.PhoneNumber" class="form-control" type="tel" />
+                            <span asp-validation-for="UserDetails.PhoneNumber" class="text-danger"></span>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label asp-for="UserDetails.Role" class="form-label">Role <span class="text-danger">*</span></label>
+                            <select asp-for="UserDetails.Role" class="form-select">
+                                <option value="">-- Select Role --</option>
+                                <option value="Customer">Customer</option>
+                                <option value="Doctor">Doctor</option>
+                                <option value="Staff">Staff</option>
+                                @if (ViewSessionHelper.IsInRole(ViewContext.HttpContext.Session, "Admin"))
+                                {
+                                    <option value="Manager">Manager</option>
+                                    <option value="Admin">Admin</option>
+                                }
+                            </select>
+                            <span asp-validation-for="UserDetails.Role" class="text-danger"></span>
+                        </div>
+                        
+                        <div class="mb-4">
+                            <label asp-for="UserDetails.IsActive" class="form-label">Status</label>
+                            <div class="form-check form-switch">
+                                <input asp-for="UserDetails.IsActive" class="form-check-input" type="checkbox" />
+                                <label class="form-check-label" for="UserDetails_IsActive">
+                                    Active Account
+                                </label>
+                            </div>
+                            <small class="form-text text-muted">
+                                Inactive users cannot log in to the system.
+                            </small>
+                        </div>
+                        
+                        <div class="mb-3 form-check">
+                            <input type="checkbox" class="form-check-input" id="resetPassword" name="ResetPassword" />
+                            <label class="form-check-label" for="resetPassword">Reset User's Password</label>
+                            <small class="form-text text-muted d-block">
+                                If checked, a new password will be generated and emailed to the user.
+                            </small>
+                        </div>
+                        
+                        <div class="border-top pt-3 d-flex gap-2">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save me-1"></i>Save Changes
+                            </button>
+                            <a href="/Users" class="btn btn-outline-secondary">
+                                <i class="fas fa-times me-1"></i>Cancel
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

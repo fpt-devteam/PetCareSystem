@@ -244,8 +244,8 @@
                                                                 <i class="fas fa-edit"></i>
                                                             </a>
                                                             <button type="button" class="btn btn-sm btn-outline-danger" 
-                                                                    onclick="deleteUser(@user.Id, '@user.FullName')" title="Delete User">
-                                                                <i class="fas fa-trash"></i>
+                                                                    onclick="deactivateUser(@user.Id, '@user.FullName')" title="Deactivate User">
+                                                                <i class="fas fa-user-slash"></i>
                                                             </button>
                                                         }
                                                         else
@@ -294,19 +294,18 @@
 
 @if (ViewSessionHelper.IsInAnyRole(ViewContext.HttpContext.Session, "Admin", "Manager"))
 {
-    <!-- Delete User Form -->
-    <form id="deleteForm" method="post" style="display: none;">
-        <input name="userId" id="deleteUserId" type="hidden" />
-        <input name="handler" value="Delete" type="hidden" />
+    <!-- Deactivate User Form -->
+    <form id="deactivateForm" method="post" asp-page-handler="Deactivate" style="display: none;">
+        <input name="userId" id="deactivateUserId" type="hidden" />
     </form>
 }
 
 @section Scripts {
     <script>
-        function deleteUser(userId, userName) {
-            if (confirm(`Are you sure you want to delete user "${userName}"? This action cannot be undone.`)) {
-                document.getElementById('deleteUserId').value = userId;
-                document.getElementById('deleteForm').submit();
+        function deactivateUser(userId, userName) {
+            if (confirm(`Are you sure you want to deactivate user "${userName}"? They will no longer be able to log in.`)) {
+                document.getElementById('deactivateUserId').value = userId;
+                document.getElementById('deactivateForm').submit();
             }
         }
 

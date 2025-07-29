@@ -64,6 +64,50 @@ namespace VetClinic.Service.Services
             return await _userRepository.CreateAsync(user);
         }
 
+        public async Task<User> RegisterWithRoleAsync(string fullName, string email, string password, string role, string? phoneNumber = null, string? address = null)
+        {
+            // Validation
+            if (string.IsNullOrWhiteSpace(fullName))
+                throw new ArgumentException("Full name is required");
+
+            if (string.IsNullOrWhiteSpace(email))
+                throw new ArgumentException("Email is required");
+
+            if (string.IsNullOrWhiteSpace(password))
+                throw new ArgumentException("Password is required");
+
+            if (password.Length < 6)
+                throw new ArgumentException("Password must be at least 6 characters long");
+
+            if (string.IsNullOrWhiteSpace(role))
+                throw new ArgumentException("Role is required");
+
+            // Validate role
+            var validRoles = new[] { "Customer", "Staff", "Doctor", "Manager", "Admin" };
+            if (!validRoles.Contains(role))
+                throw new ArgumentException("Invalid role specified");
+
+            if (!await IsEmailUniqueAsync(email))
+                throw new ArgumentException("Email already exists");
+
+            // Hash password
+            var passwordHash = HashPassword(password);
+
+            var user = new User
+            {
+                FullName = fullName,
+                Email = email,
+                PasswordHash = passwordHash,
+                PhoneNumber = phoneNumber,
+                Address = address,
+                Role = role,
+                IsActive = true,
+                CreatedDate = DateTime.Now
+            };
+
+            return await _userRepository.CreateAsync(user);
+        }
+
         public async Task<bool> IsEmailUniqueAsync(string email)
         {
             var existingUser = await _userRepository.GetByEmailAsync(email);

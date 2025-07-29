@@ -1,5 +1,6 @@
 @page
 @model VetClinic.Web.Pages.Users.CreateModel
+@using VetClinic.Web.Helpers
 @{
     ViewData["Title"] = "Create User";
 }
@@ -41,10 +42,37 @@
                             </div>
                         </div>
 
-                        <div class="mb-3">
-                            <label asp-for="Input.Password" class="form-label">Password</label>
-                            <input asp-for="Input.Password" class="form-control" type="password" />
-                            <span asp-validation-for="Input.Password" class="text-danger"></span>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label asp-for="Input.Password" class="form-label">Password</label>
+                                <input asp-for="Input.Password" class="form-control" type="password" />
+                                <span asp-validation-for="Input.Password" class="text-danger"></span>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label asp-for="Input.Role" class="form-label">Role</label>
+                                <select asp-for="Input.Role" asp-items="Model.RoleSelectList" class="form-select">
+                                    <option value="">-- Select Role --</option>
+                                </select>
+                                <span asp-validation-for="Input.Role" class="text-danger"></span>
+                                <div class="form-text">
+                                    <i class="fas fa-info-circle me-1"></i>
+                                    @{
+                                        var currentUserRole = ViewSessionHelper.GetUserRole(ViewContext.HttpContext.Session);
+                                    }
+                                    @if (currentUserRole == "Staff")
+                                    {
+                                        <text>As Staff, you can only create Customer accounts.</text>
+                                    }
+                                    else if (currentUserRole == "Manager")
+                                    {
+                                        <text>As Manager, you can create Customer, Staff, and Doctor accounts.</text>
+                                    }
+                                    else if (currentUserRole == "Admin")
+                                    {
+                                        <text>As Admin, you can create accounts with any role.</text>
+                                    }
+                                </div>
+                            </div>
                         </div>
 
                         <div class="d-flex justify-content-between">

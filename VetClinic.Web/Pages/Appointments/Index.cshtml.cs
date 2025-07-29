@@ -223,10 +223,12 @@ namespace VetClinic.Web.Pages.Appointments
             }
             else if (userRole == "Doctor")
             {
-                // Doctors see their assigned appointments (for today and future)
-                var doctorAppointments = await _appointmentService.GetAppointmentsByDoctorAsync(userId.Value, DateTime.Today);
-                Appointments = doctorAppointments;
-                Console.WriteLine($"Doctor appointments loaded: {Appointments.Count()} total");
+                // Doctors see only confirmed appointments and those with advanced status (not scheduled/pending)
+                var doctorAppointments = await _appointmentService.GetAllAppointmentsByDoctorAsync(userId.Value);
+                // Filter to show only confirmed appointments or those in progress/completed
+                var allowedStatuses = new[] { "Confirmed", "InProgress", "Completed", "NoShow" };
+                Appointments = doctorAppointments.Where(a => allowedStatuses.Contains(a.Status));
+                Console.WriteLine($"Doctor appointments loaded: {Appointments.Count()} total (filtered for confirmed+ status)");
             }
             else
             {
@@ -322,11 +324,15 @@ namespace VetClinic.Web.Pages.Appointments
                 }
                 else if (userRole == "Doctor")
                 {
-                    var doctorAppointments = await _appointmentService.GetAppointmentsByDoctorAsync(userId.Value, today);
-                    TodayCount = doctorAppointments.Count(a => a.AppointmentTime.Date == today);
-                    UpcomingCount = doctorAppointments.Count(a => a.AppointmentTime.Date > today);
-                    PendingCount = doctorAppointments.Count(a => a.Status == "Pending");
-                    CompletedCount = doctorAppointments.Count(a => a.Status == "Completed");
+                    var doctorAppointments = await _appointmentService.GetAllAppointmentsByDoctorAsync(userId.Value);
+                    // Filter for confirmed and advanced status appointments only
+                    var allowedStatuses = new[] { "Confirmed", "InProgress", "Completed", "NoShow" };
+                    var filteredAppointments = doctorAppointments.Where(a => allowedStatuses.Contains(a.Status));
+                    
+                    TodayCount = filteredAppointments.Count(a => a.AppointmentTime.Date == today);
+                    UpcomingCount = filteredAppointments.Count(a => a.AppointmentTime.Date > today);
+                    PendingCount = filteredAppointments.Count(a => a.Status == "Confirmed"); // Confirmed appointments waiting to start
+                    CompletedCount = filteredAppointments.Count(a => a.Status == "Completed" && a.AppointmentTime.Date == today);
                 }
                 else
                 {

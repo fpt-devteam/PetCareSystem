@@ -25,6 +25,9 @@ namespace VetClinic.Repository.Data
             context.Vaccinations.RemoveRange(context.Vaccinations);
 
             context.Appointments.RemoveRange(context.Appointments);
+            
+            // Delete blocked slots before deleting users (doctors)
+            context.BlockedSlots.RemoveRange(context.BlockedSlots);
 
             context.Pets.RemoveRange(context.Pets);
 

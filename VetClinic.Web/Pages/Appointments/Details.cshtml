@@ -14,12 +14,6 @@
                     <a asp-page="./Index" class="btn btn-secondary">
                         <i class="fas fa-arrow-left me-2"></i>Back to List
                     </a>
-                    @if (Model.CanEdit)
-                    {
-                        <a asp-page="./Edit" asp-route-id="@Model.Appointment.Id" class="btn btn-primary">
-                            <i class="fas fa-edit me-2"></i>Edit
-                        </a>
-                    }
                 </div>
             </div>
 
@@ -45,8 +39,73 @@
                                     "NoShow" => "bg-danger",
                                     _ => "bg-secondary"
                                 };
+                                
+                                var currentUserRole = ViewContext.HttpContext.Session.GetString("UserRole");
+                                var currentLoginUserId = ViewContext.HttpContext.Session.GetInt32("UserId");
+                                var isDoctorForAppointment = currentUserRole == "Doctor" && currentLoginUserId == Model.Appointment.DoctorId;
+                                var isStaffOrHigher = ViewSessionHelper.IsInAnyRole(ViewContext.HttpContext.Session, "Admin", "Manager", "Staff");
+                                
+                                string nextStatus = "";
+                                string nextIcon = "";
+                                string nextButtonClass = "";
+                                bool canMoveNext = false;
+                                
+                                if (Model.Appointment.Status == "Scheduled" && isStaffOrHigher)
+                                {
+                                    nextStatus = "Confirmed";
+                                    nextIcon = "fas fa-check";
+                                    nextButtonClass = "btn-success";
+                                    canMoveNext = true;
+                                }
+                                else if (Model.Appointment.Status == "Confirmed" && Model.Appointment.AppointmentTime.Date == DateTime.Today && (isStaffOrHigher || isDoctorForAppointment))
+                                {
+                                    nextStatus = "InProgress";
+                                    nextIcon = "fas fa-play";
+                                    nextButtonClass = "btn-warning";
+                                    canMoveNext = true;
+                                }
+                                else if (Model.Appointment.Status == "InProgress" && (isStaffOrHigher || isDoctorForAppointment))
+                                {
+                                    nextStatus = "Completed";
+                                    nextIcon = "fas fa-check-circle";
+                                    nextButtonClass = "btn-info";
+                                    canMoveNext = true;
+                                }
                             }
-                            <span class="badge @statusClass fs-6">@Model.Appointment.Status</span>
+                            
+                            <div class="d-flex align-items-center justify-content-end" style="gap: 8px;">
+                                <span class="badge @statusClass fs-6">@Model.Appointment.Status</span>
+                                
+                                <!-- Debug info -->
+                                <small style="font-size: 9px; color: #ddd;">
+                                    Ngày hẹn: @Model.Appointment.AppointmentTime.Date.ToString("yyyy-MM-dd") |
+                                    Ngày hiện tại: @DateTime.Today.ToString("yyyy-MM-dd") |
+                                    Là ngày hôm nay: @(Model.Appointment.AppointmentTime.Date == DateTime.Today) |
+                                    Role: @currentUserRole | Staff+: @isStaffOrHigher
+                                </small>
+                                
+                                <!-- Hiển thị nút Next cho các trạng thái Confirmed và InProgress -->
+                                @if (Model.Appointment.Status == "Confirmed")
+                                {
+                                    <form method="post" asp-page-handler="UpdateStatus" style="margin:0; padding:0;">
+                                        <input type="hidden" name="appointmentId" value="@Model.Appointment.Id" />
+                                        <input type="hidden" name="newStatus" value="InProgress" />
+                                        <button type="submit" class="btn btn-warning btn-sm" title="Start Appointment">
+                                            <i class="fas fa-play"></i>
+                                        </button>
+                                       </form>
+                                }
+                                @if (Model.Appointment.Status == "InProgress")
+                                {
+                                    <form method="post" asp-page-handler="UpdateStatus" style="margin:0; padding:0;">
+                                        <input type="hidden" name="appointmentId" value="@Model.Appointment.Id" />
+                                        <input type="hidden" name="newStatus" value="Completed" />
+                                        <button type="submit" class="btn btn-info btn-sm" title="Complete Appointment">
+                                            <i class="fas fa-check-circle"></i>
+                                        </button>
+                                    </form>
+                                }
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -215,7 +274,7 @@
             </div>
 
             <!-- Action Buttons -->
-            @if (ViewSessionHelper.IsInAnyRole(ViewContext.HttpContext.Session, "Admin", "Manager", "Staff"))
+            @if (ViewSessionHelper.IsInAnyRole(ViewContext.HttpContext.Session, "Admin", "Manager", "Staff", "Doctor"))
             {
                 <div class="card mt-4">
                     <div class="card-header">
@@ -223,7 +282,14 @@
                     </div>
                     <div class="card-body">
                         <div class="row">
-                            @if (Model.Appointment.Status == "Scheduled")
+                            @{
+                                var userRole = ViewContext.HttpContext.Session.GetString("UserRole");
+                                var currentUserId = ViewContext.HttpContext.Session.GetInt32("UserId");
+                                var isDoctorForThisAppointment = userRole == "Doctor" && currentUserId == Model.Appointment.DoctorId;
+                                var isStaffOrAbove = ViewSessionHelper.IsInAnyRole(ViewContext.HttpContext.Session, "Admin", "Manager", "Staff");
+                            }
+                            
+                            @if (Model.Appointment.Status == "Scheduled" && isStaffOrAbove)
                             {
                                 <div class="col-md-3">
                                     <button type="button" class="btn btn-success w-100" onclick="updateStatus(@Model.Appointment.Id, 'Confirmed')">
@@ -231,7 +297,7 @@
                                     </button>
                                 </div>
                             }
-                            @if (Model.Appointment.Status == "Confirmed" && Model.Appointment.AppointmentTime.Date == DateTime.Today)
+                            @if (Model.Appointment.Status == "Confirmed" && Model.Appointment.AppointmentTime.Date == DateTime.Today && (isStaffOrAbove || isDoctorForThisAppointment))
                             {
                                 <div class="col-md-3">
                                     <button type="button" class="btn btn-warning w-100" onclick="updateStatus(@Model.Appointment.Id, 'InProgress')">
@@ -239,7 +305,7 @@
                                     </button>
                                 </div>
                             }
-                            @if (Model.Appointment.Status == "InProgress")
+                            @if (Model.Appointment.Status == "InProgress" && (isStaffOrAbove || isDoctorForThisAppointment))
                             {
                                 <div class="col-md-3">
                                     <button type="button" class="btn btn-info w-100" onclick="updateStatus(@Model.Appointment.Id, 'Completed')">
@@ -247,7 +313,7 @@
                                     </button>
                                 </div>
                             }
-                            @if (Model.Appointment.Status != "Completed" && Model.Appointment.Status != "Cancelled")
+                            @if (Model.Appointment.Status != "Completed" && Model.Appointment.Status != "Cancelled" && isStaffOrAbove)
                             {
                                 <div class="col-md-3">
                                     <button type="button" class="btn btn-danger w-100" onclick="cancelAppointment(@Model.Appointment.Id)">

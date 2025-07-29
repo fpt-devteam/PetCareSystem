@@ -34,7 +34,7 @@ namespace VetClinic.Web.Pages.Users
             }
 
             // Only admins and managers can view users list
-            if (!SessionHelper.IsInAnyRole(HttpContext.Session, new[] { "Admin", "Manager" }))
+            if (!ViewSessionHelper.IsInAnyRole(HttpContext.Session, "Admin", "Manager"))
             {
                 return RedirectToPage("/Index");
             }
@@ -54,43 +54,52 @@ namespace VetClinic.Web.Pages.Users
             }
         }
 
-        public async Task<IActionResult> OnPostDeleteAsync(int userId)
+        public async Task<IActionResult> OnPostDeactivateAsync(int userId)
         {
             if (!SessionHelper.IsAuthenticated(HttpContext.Session))
             {
                 return RedirectToPage("/Account/Login");
             }
 
-            // Only admins can delete users
-            if (!SessionHelper.IsInRole(HttpContext.Session, "Admin"))
+            // Only admins can deactivate users
+            if (!ViewSessionHelper.IsInRole(HttpContext.Session, "Admin"))
             {
-                TempData["ErrorMessage"] = "You are not authorized to delete users.";
+                TempData["ErrorMessage"] = "You are not authorized to deactivate users.";
                 return RedirectToPage();
             }
 
-            var currentUserId = SessionHelper.GetUserId(HttpContext.Session);
+            var currentUserId = ViewSessionHelper.GetUserId(HttpContext.Session);
             if (currentUserId == userId)
             {
-                TempData["ErrorMessage"] = "You cannot delete your own account.";
+                TempData["ErrorMessage"] = "You cannot deactivate your own account.";
                 return RedirectToPage();
             }
 
             try
             {
-                var success = await _userService.DeleteUserAsync(userId);
-                if (success)
+                var user = await _userService.GetUserByIdAsync(userId);
+                if (user != null)
                 {
-                    TempData["SuccessMessage"] = "User has been deleted successfully.";
+                    user.IsActive = false;
+                    var updatedUser = await _userService.UpdateUserAsync(user);
+                    if (updatedUser != null)
+                    {
+                        TempData["SuccessMessage"] = "User has been deactivated successfully.";
+                    }
+                    else
+                    {
+                        TempData["ErrorMessage"] = "User could not be deactivated.";
+                    }
                 }
                 else
                 {
-                    TempData["ErrorMessage"] = "User not found or could not be deleted.";
+                    TempData["ErrorMessage"] = "User not found.";
                 }
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Error deleting user: {ex.Message}");
-                TempData["ErrorMessage"] = "Error deleting user. Please try again.";
+                Console.WriteLine($"Error deactivating user: {ex.Message}");
+                TempData["ErrorMessage"] = "Error deactivating user. Please try again.";
             }
 
             return RedirectToPage();
